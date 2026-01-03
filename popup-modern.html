@@ -6,8 +6,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      width: 400px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f1419;
       color: #e4e7eb;
       overflow: hidden;
@@ -16,67 +16,49 @@
     /* Header */
     .header {
       background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-      padding: 20px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      position: relative;
+      gap: 12px;
     }
 
     .logo {
-      width: 56px;
-      height: 48px;
+      width: 40px;
+      height: 36px;
       background: rgba(255,255,255,0.15);
-      border-radius: 12px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 20px;
-      letter-spacing: -1.5px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 16px;
     }
 
     .title { flex: 1; }
+    .title h1 { font-size: 14px; font-weight: 700; }
+    .title .plan { font-size: 11px; opacity: 0.85; margin-top: 1px; }
 
-    .title h1 {
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-
-    .title .plan {
-      font-size: 13px;
-      opacity: 0.85;
-      margin-top: 2px;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+    .header-actions { display: flex; gap: 6px; }
 
     .icon-btn {
       background: rgba(255,255,255,0.15);
       border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
-    .icon-btn:hover {
-      background: rgba(255,255,255,0.25);
-      transform: translateY(-1px);
-    }
+    .icon-btn:hover { background: rgba(255,255,255,0.25); }
 
-    .icon-btn.settings:hover svg { transform: rotate(30deg); }
-    .icon-btn svg { transition: transform 0.3s; }
+    /* Settings gear - continuous spin on hover */
+    .icon-btn.settings svg { transition: none; }
+    .icon-btn.settings:hover svg { animation: spin 1s linear infinite; }
     .icon-btn.spinning svg { animation: spin 1s linear infinite; }
 
     @keyframes spin {
@@ -85,51 +67,38 @@
     }
 
     /* Content */
-    .content {
-      padding: 20px;
-      max-height: calc(600px - 88px);
-      overflow-y: auto;
-    }
+    .content { padding: 16px; }
 
-    .content::-webkit-scrollbar { width: 6px; }
-    .content::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-    .content::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.3); border-radius: 3px; }
-    .content::-webkit-scrollbar-thumb:hover { background: rgba(245,158,11,0.5); }
-
-    /* Circles Container */
+    /* Circles */
     .circles-container {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 18px;
-      gap: 16px;
+      margin-bottom: 14px;
+      gap: 12px;
     }
 
-    .circle-card {
-      flex: 1;
-      text-align: center;
-    }
+    .circle-card { flex: 1; text-align: center; }
 
     .circle-wrapper {
       position: relative;
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 10px;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 8px;
     }
 
     .circle-svg { transform: rotate(-90deg); }
-    .circle-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 10; }
+    .circle-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
 
     .circle-progress {
       fill: none;
-      stroke-width: 10;
+      stroke-width: 8;
       stroke-linecap: round;
       transition: stroke-dashoffset 0.5s ease;
-      stroke: url(#gradientGreen);
     }
 
-    .circle-progress.low { stroke: url(#gradientGreen); }
-    .circle-progress.medium { stroke: url(#gradientYellow); }
-    .circle-progress.high { stroke: url(#gradientRed); }
+    .circle-progress.low { stroke: #22c55e; }
+    .circle-progress.medium { stroke: #f59e0b; }
+    .circle-progress.high { stroke: #ef4444; }
 
     .circle-text {
       position: absolute;
@@ -139,269 +108,146 @@
       text-align: center;
     }
 
-    .circle-percent {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 3px;
-    }
-
+    .circle-percent { font-size: 22px; font-weight: 800; line-height: 1; }
     .circle-percent.low { color: #22c55e; }
     .circle-percent.medium { color: #f59e0b; }
     .circle-percent.high { color: #ef4444; }
 
     .circle-label {
-      font-size: 10px;
+      font-size: 9px;
       color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       font-weight: 600;
-    }
-
-    .reset-time {
-      font-size: 11px;
-      color: #64748b;
       margin-top: 2px;
     }
 
+    .reset-time { font-size: 10px; color: #64748b; }
     .reset-time span { color: #f59e0b; font-weight: 600; }
 
     /* Info Card */
     .info-card {
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 10px;
+      padding: 10px;
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
-    }
-
-    .info-row:not(:last-child) {
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .info-label { font-size: 11px; color: #94a3b8; }
-    .info-value { font-size: 12px; font-weight: 600; color: #e4e7eb; }
-
-    .last-update {
-      text-align: center;
+      padding: 4px 0;
       font-size: 11px;
-      color: #475569;
-      margin-top: 16px;
     }
 
-    /* Auth Method Selector */
-    .auth-selector {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      background: rgba(255,255,255,0.03);
-      padding: 6px;
-      border-radius: 12px;
-    }
+    .info-label { color: #94a3b8; }
+    .info-value { font-weight: 600; color: #e4e7eb; }
 
-    .auth-tab {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: transparent;
-      color: #94a3b8;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .auth-tab:hover {
-      background: rgba(255,255,255,0.05);
-      color: #e4e7eb;
-    }
-
-    .auth-tab.active {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      color: white;
-    }
-
-    .auth-tab svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Setup Views */
-    .setup {
-      padding: 24px 20px;
-    }
-
+    /* Setup */
+    .setup { padding: 16px; }
     .setup h2 {
-      font-size: 18px;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #f59e0b, #fbbf24);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .setup p {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 16px;
-      line-height: 1.5;
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #f59e0b;
     }
 
     .setup label {
-      font-size: 12px;
+      font-size: 11px;
       color: #94a3b8;
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       font-weight: 600;
     }
 
     .setup input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px 12px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border-radius: 8px;
       color: #f1f5f9;
-      font-size: 13px;
-      margin-bottom: 14px;
-      transition: all 0.2s;
+      font-size: 12px;
+      margin-bottom: 10px;
     }
-
-    .setup input:hover { border-color: rgba(255,255,255,0.15); }
 
     .setup input:focus {
       outline: none;
       border-color: #f59e0b;
-      background: rgba(255,255,255,0.08);
-      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
     }
 
     .btn-primary {
       width: 100%;
-      padding: 13px;
+      padding: 10px;
       background: linear-gradient(135deg, #d97706, #f59e0b);
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: white;
       font-weight: 700;
       cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+      font-size: 13px;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
-    }
+    .btn-primary:hover { opacity: 0.9; }
 
     .btn-secondary {
       width: 100%;
-      padding: 11px;
+      padding: 8px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border-radius: 8px;
       color: #94a3b8;
-      font-size: 13px;
+      font-size: 11px;
       cursor: pointer;
-      margin-top: 10px;
-      transition: all 0.2s;
+      margin-top: 8px;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.08);
-      color: #e4e7eb;
-    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); }
 
-    .btn-claude {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: 700;
+    .file-hint {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 10px;
+      color: #fbbf24;
+      margin-bottom: 10px;
       cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
 
-    .btn-claude:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
-    }
+    .file-hint:hover { background: rgba(245,158,11,0.15); }
 
-    /* Session Status */
-    .session-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      border-radius: 10px;
-      margin-bottom: 14px;
-    }
-
-    .session-status.disconnected {
+    /* Error */
+    .error {
       background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.3);
-    }
-
-    .session-status .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #22c55e;
-      animation: pulse 2s infinite;
-    }
-
-    .session-status.disconnected .dot {
-      background: #ef4444;
-      animation: none;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .session-status span {
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      color: #ef4444;
       font-size: 13px;
-      color: #22c55e;
+      margin: 16px;
+    }
+
+    .error button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      border-radius: 6px;
+      color: #ef4444;
+      font-size: 12px;
+      cursor: pointer;
       font-weight: 600;
     }
 
-    .session-status.disconnected span { color: #ef4444; }
-
-    /* Settings Modal */
+    /* Modal - COMPACT */
     .modal-backdrop {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
       z-index: 1000;
-      animation: fadeIn 0.2s;
     }
 
     .modal-backdrop.show {
@@ -410,214 +256,85 @@
       justify-content: center;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
     .modal {
-      background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      border-radius: 20px;
-      padding: 28px;
-      width: 380px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(245, 158, 11, 0.1);
-      animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: #1a1f2e;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      width: 300px;
+      max-height: 280px;
     }
 
-    @keyframes slideIn {
-      from { transform: translateY(-30px) scale(0.95); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     .modal h2 {
-      font-size: 20px;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #f59e0b, #fbbf24);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 700;
-      display: inline-block;
+      font-size: 15px;
+      color: #f59e0b;
+      margin: 0;
     }
 
     .modal-close {
-      float: right;
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      border: none;
       color: #94a3b8;
-      font-size: 20px;
+      font-size: 18px;
       cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      line-height: 1;
-      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
     }
 
-    .modal-close:hover {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-      transform: rotate(90deg);
+    .modal-close:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+    .modal label {
+      font-size: 11px;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
     }
 
-    .modal-input {
+    .modal input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 8px 10px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border-radius: 6px;
       color: #f1f5f9;
-      font-size: 13px;
-      margin-bottom: 14px;
-      transition: all 0.2s;
-    }
-
-    .modal-input:hover { border-color: rgba(255,255,255,0.15); }
-
-    .modal-input:focus {
-      outline: none;
-      border-color: #f59e0b;
-      background: rgba(255,255,255,0.08);
-      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-    }
-
-    /* Error */
-    .error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      color: #ef4444;
-      font-size: 14px;
-      margin: 20px;
-    }
-
-    .error button {
-      margin-top: 12px;
-      padding: 10px 20px;
-      background: rgba(239,68,68,0.2);
-      border: 1px solid rgba(239,68,68,0.4);
-      border-radius: 8px;
-      color: #ef4444;
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .error button:hover { background: rgba(239,68,68,0.3); }
-
-    .file-hint {
-      background: rgba(245,158,11,0.1);
-      border: 1px solid rgba(245,158,11,0.2);
-      border-radius: 8px;
-      padding: 10px;
       font-size: 11px;
-      color: #fbbf24;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
+      margin-bottom: 10px;
     }
 
-    .file-hint:hover { background: rgba(245,158,11,0.15); }
+    .modal input:focus { outline: none; border-color: #f59e0b; }
 
-    /* Auth mode indicator */
-    .auth-mode-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
-    .auth-mode-badge.token {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-    }
-
-    .auth-mode-badge.session {
-      background: rgba(124, 58, 237, 0.2);
-      color: #a855f7;
-    }
-
-    /* Divider */
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 16px 0;
-      color: #64748b;
-      font-size: 11px;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-    }
-
-    .divider span {
-      padding: 0 12px;
-    }
-
-    /* Login prompt view */
-    .login-prompt {
-      text-align: center;
-      padding: 24px;
-    }
-
-    .login-prompt svg {
-      width: 64px;
-      height: 64px;
-      color: #7c3aed;
-      margin-bottom: 16px;
-    }
-
-    .login-prompt h3 {
-      font-size: 16px;
+    .modal .file-hint {
+      font-size: 9px;
+      padding: 6px;
       margin-bottom: 8px;
-      color: #e4e7eb;
     }
 
-    .login-prompt p {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 20px;
-      line-height: 1.5;
+    .modal .btn-primary {
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .modal-footer {
+      font-size: 9px;
+      color: #64748b;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- SVG Gradients -->
-  <svg width="0" height="0">
-    <defs>
-      <linearGradient id="gradientGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#22c55e"/>
-        <stop offset="100%" stop-color="#4ade80"/>
-      </linearGradient>
-      <linearGradient id="gradientYellow" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#f59e0b"/>
-        <stop offset="100%" stop-color="#fbbf24"/>
-      </linearGradient>
-      <linearGradient id="gradientRed" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#ef4444"/>
-        <stop offset="100%" stop-color="#f87171"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
   <!-- Header -->
   <div class="header">
     <div class="logo">CC</div>
@@ -627,13 +344,13 @@
     </div>
     <div class="header-actions">
       <button class="icon-btn settings" id="settingsBtn" title="Settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/>
-          <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
       <button class="icon-btn" id="refreshBtn" title="Refresh">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M23 4v6h-6M1 20v-6h6"/>
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
@@ -645,95 +362,32 @@
   <div class="content" id="content">
     <!-- Setup View -->
     <div class="setup" id="setupView" style="display:none;">
-      <h2>Setup</h2>
-      <p>Choose how you want to authenticate with Claude</p>
+      <h2>Configuration</h2>
 
-      <!-- Auth Method Tabs -->
-      <div class="auth-selector">
-        <button class="auth-tab active" id="tabSession" data-mode="session">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
-          Claude Session
-        </button>
-        <button class="auth-tab" id="tabToken" data-mode="token">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <circle cx="12" cy="16" r="1"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          Token Auth
-        </button>
+      <div class="file-hint" id="openCredentials">
+        Click to copy .credentials.json path
       </div>
 
-      <!-- Session Auth Panel -->
-      <div id="sessionPanel">
-        <div class="session-status disconnected" id="sessionStatus">
-          <div class="dot"></div>
-          <span>Not connected to Claude</span>
-        </div>
+      <label>Refresh Token:</label>
+      <input type="password" id="refreshTokenInput" placeholder="sk-ant-ort01-...">
 
-        <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;line-height:1.5;">
-          Use your existing Claude.ai browser session. No token needed - just be logged in!
-        </p>
+      <button class="btn-primary" id="saveBtn">Save</button>
 
-        <button class="btn-claude" id="loginClaudeBtn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
-          </svg>
-          Open Claude Login
-        </button>
-
-        <p style="font-size:10px;color:#64748b;margin-top:12px;text-align:center;">
-          After logging in, return here and click refresh
-        </p>
-      </div>
-
-      <!-- Token Auth Panel -->
-      <div id="tokenPanel" style="display:none;">
-        <div class="file-hint" id="openCredentials" title="Copy path to clipboard">
-          Copy .credentials.json path
-        </div>
-
-        <label>Refresh Token:</label>
-        <input type="password" id="refreshTokenInput" placeholder="sk-ant-ort01-...">
-
-        <button class="btn-primary" id="saveBtn">Save Configuration</button>
-
-        <p style="font-size:10px;margin-top:12px;line-height:1.4;color:#64748b;text-align:center;">
-          Access token will be generated automatically
-        </p>
-      </div>
-    </div>
-
-    <!-- Login Prompt View (for session mode when not logged in) -->
-    <div class="login-prompt" id="loginPromptView" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 16v-4M12 8h.01"/>
-      </svg>
-      <h3>Session Expired</h3>
-      <p>Please log in to Claude.ai to continue monitoring your usage</p>
-      <button class="btn-claude" id="loginPromptBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
-        </svg>
-        Open Claude Login
-      </button>
-      <button class="btn-secondary" id="switchToTokenBtn">Switch to Token Auth</button>
+      <p style="font-size:9px;margin-top:10px;color:#64748b;text-align:center;">
+        Find your token in ~/.claude/.credentials.json
+      </p>
     </div>
 
     <!-- Usage View -->
     <div id="usageView" style="display:none;">
-      <!-- Circles -->
       <div class="circles-container">
         <!-- 5-Hour Circle -->
         <div class="circle-card">
           <div class="circle-wrapper">
-            <svg class="circle-svg" width="120" height="120">
-              <circle class="circle-bg" cx="60" cy="60" r="52"/>
-              <circle class="circle-progress low" id="circle5h" cx="60" cy="60" r="52"
-                      stroke-dasharray="326.73" stroke-dashoffset="0"/>
+            <svg class="circle-svg" width="100" height="100">
+              <circle class="circle-bg" cx="50" cy="50" r="42"/>
+              <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42"
+                      stroke-dasharray="263.89" stroke-dashoffset="0"/>
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent5h">--%</div>
@@ -746,10 +400,10 @@
         <!-- 7-Day Circle -->
         <div class="circle-card">
           <div class="circle-wrapper">
-            <svg class="circle-svg" width="120" height="120">
-              <circle class="circle-bg" cx="60" cy="60" r="52"/>
-              <circle class="circle-progress low" id="circle7d" cx="60" cy="60" r="52"
-                      stroke-dasharray="326.73" stroke-dashoffset="0"/>
+            <svg class="circle-svg" width="100" height="100">
+              <circle class="circle-bg" cx="50" cy="50" r="42"/>
+              <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42"
+                      stroke-dasharray="263.89" stroke-dashoffset="0"/>
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent7d">--%</div>
@@ -760,12 +414,7 @@
         </div>
       </div>
 
-      <!-- Info Card -->
       <div class="info-card">
-        <div class="info-row">
-          <span class="info-label">Auth Method</span>
-          <span class="info-value" id="authModeDisplay">Token</span>
-        </div>
         <div class="info-row">
           <span class="info-label">Last Updated</span>
           <span class="info-value" id="lastUpdate">--</span>
@@ -783,61 +432,21 @@
   <!-- Settings Modal -->
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-        <h2 style="margin: 0;">Settings</h2>
+      <div class="modal-header">
+        <h2>Settings</h2>
         <button class="modal-close" id="modalClose">x</button>
       </div>
 
-      <!-- Auth Method in Modal -->
-      <label style="display:block;margin-bottom:10px;color:#94a3b8;font-size:12px;font-weight:600;">
-        Authentication Method:
-      </label>
-      <div class="auth-selector" style="margin-bottom:20px;">
-        <button class="auth-tab" id="modalTabSession" data-mode="session">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          </svg>
-          Session
-        </button>
-        <button class="auth-tab" id="modalTabToken" data-mode="token">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2"/>
-          </svg>
-          Token
-        </button>
+      <div class="file-hint" id="openCredentialsModal">
+        Copy .credentials.json path
       </div>
 
-      <!-- Token Settings (only visible in token mode) -->
-      <div id="modalTokenSettings">
-        <div class="file-hint" id="openCredentialsModal" title="Copy path">
-          Open .credentials.json
-        </div>
+      <label>Refresh Token:</label>
+      <input type="password" id="modalRefreshToken" placeholder="sk-ant-ort01-...">
 
-        <label style="display:block;margin-bottom:6px;color:#94a3b8;font-size:12px;font-weight:600;">
-          Refresh Token:
-        </label>
-        <input type="password" id="modalRefreshToken" placeholder="sk-ant-ort01-..." class="modal-input">
-      </div>
+      <button class="btn-primary" id="modalSave">Save</button>
 
-      <!-- Session Settings -->
-      <div id="modalSessionSettings" style="display:none;">
-        <div class="session-status" id="modalSessionStatus">
-          <div class="dot"></div>
-          <span>Connected</span>
-        </div>
-        <button class="btn-claude" id="modalLoginBtn" style="margin-top:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
-          </svg>
-          Open Claude
-        </button>
-      </div>
-
-      <button class="btn-primary" id="modalSave" style="margin-top:16px;">Save</button>
-
-      <p style="font-size:10px;color:#64748b;margin-top:14px;line-height:1.4;text-align:center;">
-        v3.0 - Session & Token Auth
-      </p>
+      <div class="modal-footer">v3.0</div>
     </div>
   </div>
 

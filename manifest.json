@@ -1,19 +1,17 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage Monitor",
-  "version": "3.0",
-  "description": "Monitor your Claude Code & Claude.ai usage with real-time progress circles. Supports both token auth and direct Claude session.",
+  "version": "3.1",
+  "description": "Monitor your Claude Code usage with real-time progress circles and alerts.",
   "permissions": [
     "storage",
     "alarms",
     "notifications",
-    "clipboardWrite",
-    "cookies"
+    "clipboardWrite"
   ],
   "host_permissions": [
     "https://api.anthropic.com/*",
-    "https://console.anthropic.com/*",
-    "https://claude.ai/*"
+    "https://console.anthropic.com/*"
   ],
   "action": {
     "default_popup": "popup-modern.html",
