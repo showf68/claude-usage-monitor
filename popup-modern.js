@@ -1,7 +1,8 @@
-// Claude Usage Monitor - Popup Script v3.1
+// Claude Usage Monitor - Popup Script v3.2
 
 const circumference = 2 * Math.PI * 42; // radius = 42
 let lastError = null;
+let parsedTokens = null;
 
 function getColorClass(used) {
   if (used < 50) return 'low';
@@ -103,11 +104,92 @@ function updateUI(data) {
   }
 }
 
+// Parse JSON input and extract tokens
+function parseCredentials(jsonText) {
+  if (!jsonText || !jsonText.trim()) {
+    return { error: 'Please paste your .credentials.json content' };
+  }
+
+  try {
+    const data = JSON.parse(jsonText.trim());
+
+    // Try to find tokens in various structures
+    let accessToken = null;
+    let refreshToken = null;
+    let subscriptionType = null;
+
+    // Check claudeAiOauth structure
+    if (data.claudeAiOauth) {
+      accessToken = data.claudeAiOauth.accessToken;
+      refreshToken = data.claudeAiOauth.refreshToken;
+      subscriptionType = data.claudeAiOauth.subscriptionType;
+    }
+
+    // Check direct properties
+    if (!accessToken && data.accessToken) accessToken = data.accessToken;
+    if (!refreshToken && data.refreshToken) refreshToken = data.refreshToken;
+
+    // Check oauth structure
+    if (data.oauth) {
+      if (!accessToken && data.oauth.accessToken) accessToken = data.oauth.accessToken;
+      if (!refreshToken && data.oauth.refreshToken) refreshToken = data.oauth.refreshToken;
+    }
+
+    // Validate we found at least one token
+    if (!accessToken && !refreshToken) {
+      return { error: 'No tokens found. Make sure to paste the entire .credentials.json content.' };
+    }
+
+    // Validate token formats
+    if (accessToken && !accessToken.startsWith('sk-ant-oat')) {
+      return { error: 'Invalid accessToken format. Should start with sk-ant-oat' };
+    }
+    if (refreshToken && !refreshToken.startsWith('sk-ant-ort')) {
+      return { error: 'Invalid refreshToken format. Should start with sk-ant-ort' };
+    }
+
+    return {
+      accessToken,
+      refreshToken,
+      subscriptionType,
+      success: true
+    };
+  } catch (e) {
+    return { error: 'Invalid JSON format: ' + e.message };
+  }
+}
+
+// Show parse result
+function showParseResult(resultElemId, parseResult) {
+  const resultElem = document.getElementById(resultElemId);
+  if (!resultElem) return;
+
+  if (parseResult.error) {
+    resultElem.className = 'parse-result error';
+    resultElem.innerHTML = `❌ ${parseResult.error}`;
+    parsedTokens = null;
+  } else {
+    resultElem.className = 'parse-result success';
+    let html = '✅ Tokens found:<br>';
+    if (parseResult.accessToken) {
+      html += `<div class="token-info">Access: ${parseResult.accessToken.substring(0, 20)}...</div>`;
+    }
+    if (parseResult.refreshToken) {
+      html += `<div class="token-info">Refresh: ${parseResult.refreshToken.substring(0, 20)}...</div>`;
+    }
+    if (parseResult.subscriptionType) {
+      html += `<div class="token-info">Plan: ${parseResult.subscriptionType}</div>`;
+    }
+    resultElem.innerHTML = html;
+    parsedTokens = parseResult;
+  }
+}
+
 // Initialize
 async function init() {
-  const result = await chrome.storage.local.get(['refreshToken', 'usage', 'lastUpdate', 'lastError']);
+  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError']);
 
-  if (!result.refreshToken) {
+  if (!result.refreshToken && !result.accessToken && !result.token) {
     showView('setupView');
     return;
   }
@@ -164,13 +246,8 @@ function refresh() {
 // Modal
 function openModal() {
   document.getElementById('modalBackdrop').classList.add('show');
-  // Pre-fill with existing token if available
-  chrome.storage.local.get(['refreshToken'], (result) => {
-    if (result.refreshToken) {
-      const input = document.getElementById('modalRefreshToken');
-      if (input) input.value = result.refreshToken;
-    }
-  });
+  document.getElementById('modalParseResult').innerHTML = '';
+  document.getElementById('modalJsonInput').value = '';
 }
 
 function closeModal() {
@@ -181,34 +258,46 @@ function closeModal() {
 function copyCredentialsPath() {
   const path = '%USERPROFILE%\\.claude\\.credentials.json';
   navigator.clipboard.writeText(path).then(() => {
-    alert('Path copied!\n\n' + path + '\n\nPaste in Windows Explorer (Win+R)');
+    alert('Path copied!\n\n' + path + '\n\nPaste in Windows Explorer (Win+R)\nthen open the file and copy its entire content.');
   });
 }
 
-// Save token
-function saveToken(inputId) {
-  const input = document.getElementById(inputId);
-  const token = input?.value.trim();
+// Save tokens
+function saveTokens(jsonInputId, parseResultId) {
+  const input = document.getElementById(jsonInputId);
+  const jsonText = input?.value.trim();
 
-  if (!token) {
-    alert('Please enter your Refresh Token');
+  if (!jsonText) {
+    showParseResult(parseResultId, { error: 'Please paste your .credentials.json content' });
     return;
   }
 
-  if (!token.startsWith('sk-ant-ort01-')) {
-    alert('Invalid token format!\n\nToken must start with: sk-ant-ort01-\n\nCheck your .credentials.json file.');
+  const parseResult = parseCredentials(jsonText);
+  showParseResult(parseResultId, parseResult);
+
+  if (!parseResult.success) {
     return;
   }
 
   // Clear any previous errors
   chrome.storage.local.remove(['lastError']);
 
+  // Prepare token data
+  const tokenData = {};
+  if (parseResult.accessToken) {
+    tokenData.token = parseResult.accessToken;
+    tokenData.accessToken = parseResult.accessToken;
+  }
+  if (parseResult.refreshToken) {
+    tokenData.refreshToken = parseResult.refreshToken;
+  }
+
   chrome.runtime.sendMessage({
     action: 'setTokens',
-    refreshToken: token
+    ...tokenData
   }, (response) => {
     if (chrome.runtime.lastError) {
-      alert('Error: ' + chrome.runtime.lastError.message);
+      showParseResult(parseResultId, { error: 'Extension error: ' + chrome.runtime.lastError.message });
       return;
     }
 
@@ -221,9 +310,9 @@ function saveToken(inputId) {
         showError(response.error);
       }
     } else if (response?.error) {
-      alert('Error: ' + response.error);
+      showParseResult(parseResultId, { error: response.error });
     } else {
-      alert('Unknown error saving token');
+      showParseResult(parseResultId, { error: 'Unknown error saving tokens' });
     }
   });
 }
@@ -231,8 +320,24 @@ function saveToken(inputId) {
 // Reconfigure - clear token and show setup
 function reconfigure() {
   chrome.storage.local.remove(['refreshToken', 'accessToken', 'token', 'usage', 'lastError'], () => {
+    document.getElementById('jsonInput').value = '';
+    document.getElementById('parseResult').innerHTML = '';
     showView('setupView');
   });
+}
+
+// Handle input change to parse JSON on the fly
+function handleJsonInput(inputId, resultId) {
+  const input = document.getElementById(inputId);
+  const value = input?.value.trim();
+
+  if (!value) {
+    document.getElementById(resultId).innerHTML = '';
+    return;
+  }
+
+  const parseResult = parseCredentials(value);
+  showParseResult(resultId, parseResult);
 }
 
 // Event listeners
@@ -250,8 +355,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('openCredentials')?.addEventListener('click', copyCredentialsPath);
   document.getElementById('openCredentialsModal')?.addEventListener('click', copyCredentialsPath);
 
-  document.getElementById('saveBtn')?.addEventListener('click', () => saveToken('refreshTokenInput'));
-  document.getElementById('modalSave')?.addEventListener('click', () => saveToken('modalRefreshToken'));
+  // Save buttons
+  document.getElementById('saveBtn')?.addEventListener('click', () => saveTokens('jsonInput', 'parseResult'));
+  document.getElementById('modalSave')?.addEventListener('click', () => saveTokens('modalJsonInput', 'modalParseResult'));
+
+  // Live parsing on input
+  document.getElementById('jsonInput')?.addEventListener('input', () => handleJsonInput('jsonInput', 'parseResult'));
+  document.getElementById('modalJsonInput')?.addEventListener('input', () => handleJsonInput('modalJsonInput', 'modalParseResult'));
 
   init();
 });

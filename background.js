@@ -1,106 +1,104 @@
-// Claude Usage Monitor - Background Service Worker v3.1
+// Claude Usage Monitor - Background Service Worker v3.2
 
 const API_URL = 'https://api.anthropic.com/api/oauth/usage';
-const CLIENT_ID = 'claude-code';
 
+// Claude.ai OAuth token refresh endpoints
 const TOKEN_ENDPOINTS = [
-  'https://console.anthropic.com/v1/oauth/token',
-  'https://api.anthropic.com/v1/oauth/token',
-  'https://api.anthropic.com/oauth/token'
+  'https://claude.ai/api/auth/refresh_token',
+  'https://api.claude.ai/v1/auth/token',
+  'https://console.anthropic.com/v1/oauth/token'
 ];
 
-// Refresh access token
+// Refresh access token using Claude.ai OAuth
 async function refreshAccessToken() {
   try {
     const result = await chrome.storage.local.get(['refreshToken']);
     const refreshToken = result.refreshToken;
 
     if (!refreshToken) {
-      console.log('No refresh token configured');
       return { error: 'No refresh token configured. Please add your token in Settings.' };
     }
 
-    if (!refreshToken.startsWith('sk-ant-ort01-')) {
-      return { error: 'Invalid token format. Token must start with sk-ant-ort01-' };
+    // Validate token format
+    if (!refreshToken.startsWith('sk-ant-o')) {
+      return { error: 'Invalid token format. Token must start with sk-ant-oat01- (access) or sk-ant-ort01- (refresh)' };
     }
 
-    console.log('Refreshing access token...');
+    // If it's an access token, try to use it directly first
+    if (refreshToken.startsWith('sk-ant-oat01-')) {
+      console.log('Token appears to be an access token, using directly');
+      await chrome.storage.local.set({
+        token: refreshToken,
+        accessToken: refreshToken
+      });
+      return { token: refreshToken };
+    }
+
+    console.log('Attempting to refresh token...');
     let lastErrorMsg = '';
 
-    for (const endpoint of TOKEN_ENDPOINTS) {
-      // Try JSON format
-      try {
-        console.log('Trying endpoint:', endpoint);
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken,
-            client_id: CLIENT_ID
-          })
-        });
+    // Try Claude.ai refresh endpoint first (POST with token in body)
+    try {
+      const response = await fetch('https://claude.ai/api/auth/refresh_token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        credentials: 'include'
+      });
 
-        if (response.ok) {
-          const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access_token) {
           await chrome.storage.local.set({
             token: data.access_token,
             accessToken: data.access_token,
             refreshToken: data.refresh_token || refreshToken
           });
           await chrome.storage.local.remove(['lastError']);
-          console.log('Token refreshed via', endpoint);
+          console.log('Token refreshed via claude.ai');
           return { token: data.access_token };
-        } else {
-          const errorText = await response.text();
-          lastErrorMsg = `${endpoint}: HTTP ${response.status} - ${errorText.substring(0, 100)}`;
-          console.log('Endpoint failed:', lastErrorMsg);
         }
-      } catch (e) {
-        lastErrorMsg = `${endpoint}: ${e.message}`;
-        console.log('Endpoint error:', lastErrorMsg);
       }
-
-      // Try form-urlencoded
-      try {
-        const params = new URLSearchParams();
-        params.append('grant_type', 'refresh_token');
-        params.append('refresh_token', refreshToken);
-        params.append('client_id', CLIENT_ID);
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString()
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          await chrome.storage.local.set({
-            token: data.access_token,
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token || refreshToken
-          });
-          await chrome.storage.local.remove(['lastError']);
-          console.log('Token refreshed via', endpoint, '(form)');
-          return { token: data.access_token };
-        } else {
-          const errorText = await response.text();
-          lastErrorMsg = `${endpoint} (form): HTTP ${response.status} - ${errorText.substring(0, 100)}`;
-        }
-      } catch (e) {
-        lastErrorMsg = `${endpoint} (form): ${e.message}`;
-      }
+      lastErrorMsg = `claude.ai/api/auth/refresh_token: ${response.status}`;
+    } catch (e) {
+      lastErrorMsg = `claude.ai refresh: ${e.message}`;
     }
 
-    const errorMsg = `Token refresh failed. Last error: ${lastErrorMsg}`;
+    // Try with bearer auth header
+    try {
+      const response = await fetch(API_URL, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`,
+          'anthropic-beta': 'oauth-2025-04-20'
+        }
+      });
+
+      if (response.ok) {
+        // The refresh token works as access token directly
+        console.log('Refresh token works as access token');
+        await chrome.storage.local.set({
+          token: refreshToken,
+          accessToken: refreshToken
+        });
+        await chrome.storage.local.remove(['lastError']);
+        return { token: refreshToken };
+      }
+      lastErrorMsg = `Direct API: ${response.status}`;
+    } catch (e) {
+      lastErrorMsg = `Direct API: ${e.message}`;
+    }
+
+    const errorMsg = `Token refresh failed. ${lastErrorMsg}. Try using your ACCESS token instead (starts with sk-ant-oat01-)`;
     await chrome.storage.local.set({ lastError: errorMsg });
-    console.error(errorMsg);
     return { error: errorMsg };
   } catch (error) {
     const errorMsg = `Token refresh exception: ${error.message}`;
     await chrome.storage.local.set({ lastError: errorMsg });
-    console.error(errorMsg);
     return { error: errorMsg };
   }
 }
@@ -110,7 +108,7 @@ async function fetchUsage() {
   let result = await chrome.storage.local.get(['token', 'accessToken', 'refreshToken']);
   let token = result.token || result.accessToken;
 
-  // Get new token if needed
+  // If no access token but have refresh token, try to get one
   if (!token && result.refreshToken) {
     const refreshResult = await refreshAccessToken();
     if (refreshResult.error) {
@@ -122,7 +120,7 @@ async function fetchUsage() {
 
   if (!token) {
     updateBadge('CFG', '#f59e0b');
-    return { error: 'No token available. Please configure your refresh token in Settings.' };
+    return { error: 'No token available. Please configure your token in Settings.' };
   }
 
   try {
@@ -141,14 +139,24 @@ async function fetchUsage() {
       console.log('Usage API error:', response.status, errorText);
 
       if (response.status === 403 || response.status === 401) {
-        console.log('Token expired, refreshing...');
-        const refreshResult = await refreshAccessToken();
-        if (refreshResult.error) {
-          updateBadge('ERR', '#ef4444');
-          return { error: `Auth failed: ${refreshResult.error}` };
+        // Token might be expired, try refresh
+        console.log('Token might be expired, trying refresh...');
+
+        // Clear current token and try refresh
+        await chrome.storage.local.remove(['token', 'accessToken']);
+
+        if (result.refreshToken) {
+          const refreshResult = await refreshAccessToken();
+          if (!refreshResult.error) {
+            return fetchUsage(); // Retry
+          }
+          return { error: `Auth failed (${response.status}): ${refreshResult.error}` };
         }
-        // Retry with new token
-        return fetchUsage();
+
+        const errorMsg = `Token expired (${response.status}). Please update your token in Settings.`;
+        await chrome.storage.local.set({ lastError: errorMsg });
+        updateBadge('ERR', '#ef4444');
+        return { error: errorMsg };
       }
 
       const errorMsg = `API Error ${response.status}: ${errorText.substring(0, 150)}`;
@@ -262,23 +270,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === 'setTokens') {
     const tokenData = {};
-    if (message.token || message.accessToken) {
-      tokenData.token = message.token || message.accessToken;
-      tokenData.accessToken = message.token || message.accessToken;
-    }
-    if (message.refreshToken) {
-      tokenData.refreshToken = message.refreshToken;
+
+    // Check for access token
+    if (message.accessToken || message.token) {
+      const accessToken = message.accessToken || message.token;
+      if (accessToken.startsWith('sk-ant-oat')) {
+        tokenData.token = accessToken;
+        tokenData.accessToken = accessToken;
+        console.log('Saving access token');
+      }
     }
 
-    // Validate token format before saving
-    if (tokenData.refreshToken && !tokenData.refreshToken.startsWith('sk-ant-ort01-')) {
-      sendResponse({ success: false, error: 'Invalid token format. Must start with sk-ant-ort01-' });
+    // Check for refresh token
+    if (message.refreshToken) {
+      if (message.refreshToken.startsWith('sk-ant-ort')) {
+        tokenData.refreshToken = message.refreshToken;
+        console.log('Saving refresh token');
+      }
+    }
+
+    if (Object.keys(tokenData).length === 0) {
+      sendResponse({ success: false, error: 'No valid tokens provided. Tokens must start with sk-ant-oat or sk-ant-ort' });
       return true;
     }
 
-    chrome.storage.local.set(tokenData).then(() => {
-      // Clear old access tokens to force refresh
-      chrome.storage.local.remove(['token', 'accessToken', 'lastError']).then(() => {
+    // Clear old tokens and errors
+    chrome.storage.local.remove(['token', 'accessToken', 'refreshToken', 'lastError', 'usage']).then(() => {
+      chrome.storage.local.set(tokenData).then(() => {
         fetchUsage().then(data => {
           if (data.error) {
             sendResponse({ success: true, error: data.error });
