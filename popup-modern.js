@@ -1,6 +1,7 @@
-// Claude Usage Monitor - Popup Script v3.0
+// Claude Usage Monitor - Popup Script v3.1
 
 const circumference = 2 * Math.PI * 42; // radius = 42
+let lastError = null;
 
 function getColorClass(used) {
   if (used < 50) return 'low';
@@ -57,9 +58,28 @@ function showView(viewName) {
   });
 }
 
+function showError(errorMsg) {
+  lastError = errorMsg;
+  const errorElem = document.getElementById('errorMessage');
+  if (errorElem) {
+    errorElem.textContent = errorMsg || 'Unknown error';
+  }
+  showView('errorView');
+}
+
 function updateUI(data) {
-  if (!data || !data.five_hour) {
-    showView('errorView');
+  if (!data) {
+    showError('No data received from API');
+    return;
+  }
+
+  if (data.error) {
+    showError(data.error);
+    return;
+  }
+
+  if (!data.five_hour) {
+    showError('Invalid API response: missing five_hour data');
     return;
   }
 
@@ -85,10 +105,15 @@ function updateUI(data) {
 
 // Initialize
 async function init() {
-  const result = await chrome.storage.local.get(['refreshToken', 'usage', 'lastUpdate']);
+  const result = await chrome.storage.local.get(['refreshToken', 'usage', 'lastUpdate', 'lastError']);
 
   if (!result.refreshToken) {
     showView('setupView');
+    return;
+  }
+
+  if (result.lastError) {
+    showError(result.lastError);
     return;
   }
 
@@ -109,14 +134,29 @@ function refresh() {
   const btn = document.getElementById('refreshBtn');
   btn?.classList.add('spinning');
 
-  chrome.runtime.sendMessage({ action: 'refresh' }, (data) => {
+  chrome.runtime.sendMessage({ action: 'refresh' }, (response) => {
     btn?.classList.remove('spinning');
 
-    if (data && data.five_hour) {
-      updateUI(data);
+    if (chrome.runtime.lastError) {
+      showError('Extension error: ' + chrome.runtime.lastError.message);
+      return;
+    }
+
+    if (!response) {
+      showError('No response from background script');
+      return;
+    }
+
+    if (response.error) {
+      showError(response.error);
+      return;
+    }
+
+    if (response.five_hour) {
+      updateUI(response);
       document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
-    } else if (!data) {
-      showView('errorView');
+    } else {
+      showError('Invalid response format');
     }
   });
 }
@@ -124,6 +164,13 @@ function refresh() {
 // Modal
 function openModal() {
   document.getElementById('modalBackdrop').classList.add('show');
+  // Pre-fill with existing token if available
+  chrome.storage.local.get(['refreshToken'], (result) => {
+    if (result.refreshToken) {
+      const input = document.getElementById('modalRefreshToken');
+      if (input) input.value = result.refreshToken;
+    }
+  });
 }
 
 function closeModal() {
@@ -148,16 +195,43 @@ function saveToken(inputId) {
     return;
   }
 
+  if (!token.startsWith('sk-ant-ort01-')) {
+    alert('Invalid token format!\n\nToken must start with: sk-ant-ort01-\n\nCheck your .credentials.json file.');
+    return;
+  }
+
+  // Clear any previous errors
+  chrome.storage.local.remove(['lastError']);
+
   chrome.runtime.sendMessage({
     action: 'setTokens',
     refreshToken: token
   }, (response) => {
+    if (chrome.runtime.lastError) {
+      alert('Error: ' + chrome.runtime.lastError.message);
+      return;
+    }
+
     if (response?.success) {
       closeModal();
-      refresh();
+      if (response.data) {
+        updateUI(response.data);
+        document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
+      } else if (response.error) {
+        showError(response.error);
+      }
+    } else if (response?.error) {
+      alert('Error: ' + response.error);
     } else {
-      alert('Error saving. Check token format.');
+      alert('Unknown error saving token');
     }
+  });
+}
+
+// Reconfigure - clear token and show setup
+function reconfigure() {
+  chrome.storage.local.remove(['refreshToken', 'accessToken', 'token', 'usage', 'lastError'], () => {
+    showView('setupView');
   });
 }
 
@@ -167,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsBtn')?.addEventListener('click', openModal);
   document.getElementById('modalClose')?.addEventListener('click', closeModal);
   document.getElementById('retryBtn')?.addEventListener('click', refresh);
+  document.getElementById('reconfigureBtn')?.addEventListener('click', reconfigure);
 
   document.getElementById('modalBackdrop')?.addEventListener('click', (e) => {
     if (e.target.id === 'modalBackdrop') closeModal();

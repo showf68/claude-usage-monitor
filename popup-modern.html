@@ -6,11 +6,11 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      width: 340px;
+      width: 360px;
+      min-height: 300px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f1419;
       color: #e4e7eb;
-      overflow: hidden;
     }
 
     /* Header */
@@ -55,9 +55,6 @@
     }
 
     .icon-btn:hover { background: rgba(255,255,255,0.25); }
-
-    /* Settings gear - continuous spin on hover */
-    .icon-btn.settings svg { transition: none; }
     .icon-btn.settings:hover svg { animation: spin 1s linear infinite; }
     .icon-btn.spinning svg { animation: spin 1s linear infinite; }
 
@@ -178,7 +175,7 @@
 
     .btn-primary {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       background: linear-gradient(135deg, #d97706, #f59e0b);
       border: none;
       border-radius: 8px;
@@ -190,48 +187,56 @@
 
     .btn-primary:hover { opacity: 0.9; }
 
-    .btn-secondary {
-      width: 100%;
-      padding: 8px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #94a3b8;
-      font-size: 11px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    .btn-secondary:hover { background: rgba(255,255,255,0.08); }
-
     .file-hint {
       background: rgba(245,158,11,0.1);
       border: 1px solid rgba(245,158,11,0.2);
       border-radius: 6px;
-      padding: 8px;
-      font-size: 10px;
+      padding: 10px;
+      font-size: 11px;
       color: #fbbf24;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       cursor: pointer;
+      text-align: center;
     }
 
     .file-hint:hover { background: rgba(245,158,11,0.15); }
 
     /* Error */
-    .error {
+    .error-container {
+      padding: 16px;
+    }
+
+    .error-box {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: 10px;
-      padding: 14px;
+      padding: 16px;
       text-align: center;
-      color: #ef4444;
-      font-size: 13px;
-      margin: 16px;
     }
 
-    .error button {
-      margin-top: 10px;
-      padding: 8px 16px;
+    .error-title {
+      color: #ef4444;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .error-message {
+      color: #f87171;
+      font-size: 11px;
+      margin-bottom: 12px;
+      word-break: break-all;
+      background: rgba(0,0,0,0.2);
+      padding: 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      text-align: left;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .error-box button {
+      padding: 10px 20px;
       background: rgba(239,68,68,0.2);
       border: 1px solid rgba(239,68,68,0.4);
       border-radius: 6px;
@@ -239,15 +244,19 @@
       font-size: 12px;
       cursor: pointer;
       font-weight: 600;
+      margin: 4px;
     }
 
-    /* Modal - COMPACT */
+    .error-box button:hover { background: rgba(239,68,68,0.3); }
+
+    /* Modal */
     .modal-backdrop {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       z-index: 1000;
+      padding: 20px;
     }
 
     .modal-backdrop.show {
@@ -259,21 +268,20 @@
     .modal {
       background: #1a1f2e;
       border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      width: 300px;
-      max-height: 280px;
+      border-radius: 16px;
+      padding: 20px;
+      width: 320px;
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .modal h2 {
-      font-size: 15px;
+      font-size: 18px;
       color: #f59e0b;
       margin: 0;
     }
@@ -282,11 +290,11 @@
       background: rgba(255,255,255,0.05);
       border: none;
       color: #94a3b8;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -295,42 +303,60 @@
     .modal-close:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
 
     .modal label {
-      font-size: 11px;
+      font-size: 12px;
       color: #94a3b8;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       font-weight: 600;
     }
 
     .modal input {
       width: 100%;
-      padding: 8px 10px;
+      padding: 12px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 6px;
+      border-radius: 8px;
       color: #f1f5f9;
-      font-size: 11px;
-      margin-bottom: 10px;
+      font-size: 12px;
+      margin-bottom: 12px;
     }
 
     .modal input:focus { outline: none; border-color: #f59e0b; }
 
     .modal .file-hint {
-      font-size: 9px;
-      padding: 6px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .modal .btn-primary {
-      padding: 8px;
-      font-size: 12px;
+      margin-top: 4px;
     }
 
     .modal-footer {
-      font-size: 9px;
+      font-size: 10px;
       color: #64748b;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 12px;
+    }
+
+    /* Debug info */
+    .debug-info {
+      margin-top: 12px;
+      padding: 10px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      font-size: 10px;
+      color: #93c5fd;
+    }
+
+    .debug-info code {
+      display: block;
+      background: rgba(0,0,0,0.2);
+      padding: 6px;
+      border-radius: 4px;
+      margin-top: 6px;
+      word-break: break-all;
+      font-family: monospace;
     }
   </style>
 </head>
@@ -369,19 +395,20 @@
       </div>
 
       <label>Refresh Token:</label>
-      <input type="password" id="refreshTokenInput" placeholder="sk-ant-ort01-...">
+      <input type="text" id="refreshTokenInput" placeholder="sk-ant-ort01-...">
 
-      <button class="btn-primary" id="saveBtn">Save</button>
+      <button class="btn-primary" id="saveBtn">Save & Connect</button>
 
-      <p style="font-size:9px;margin-top:10px;color:#64748b;text-align:center;">
-        Find your token in ~/.claude/.credentials.json
-      </p>
+      <div class="debug-info">
+        Token must start with: <code>sk-ant-ort01-</code>
+        Find it in: <code>%USERPROFILE%\.claude\.credentials.json</code>
+        Look for: <code>"refreshToken": "sk-ant-ort01-..."</code>
+      </div>
     </div>
 
     <!-- Usage View -->
     <div id="usageView" style="display:none;">
       <div class="circles-container">
-        <!-- 5-Hour Circle -->
         <div class="circle-card">
           <div class="circle-wrapper">
             <svg class="circle-svg" width="100" height="100">
@@ -397,7 +424,6 @@
           <div class="reset-time"><span id="reset5h">--</span></div>
         </div>
 
-        <!-- 7-Day Circle -->
         <div class="circle-card">
           <div class="circle-wrapper">
             <svg class="circle-svg" width="100" height="100">
@@ -423,9 +449,13 @@
     </div>
 
     <!-- Error View -->
-    <div class="error" id="errorView" style="display:none;">
-      Connection Error
-      <button id="retryBtn">Retry</button>
+    <div class="error-container" id="errorView" style="display:none;">
+      <div class="error-box">
+        <div class="error-title">Connection Error</div>
+        <div class="error-message" id="errorMessage">Unknown error</div>
+        <button id="retryBtn">Retry</button>
+        <button id="reconfigureBtn">Reconfigure</button>
+      </div>
     </div>
   </div>
 
@@ -434,19 +464,19 @@
     <div class="modal">
       <div class="modal-header">
         <h2>Settings</h2>
-        <button class="modal-close" id="modalClose">x</button>
+        <button class="modal-close" id="modalClose">&times;</button>
       </div>
 
       <div class="file-hint" id="openCredentialsModal">
-        Copy .credentials.json path
+        Click to copy .credentials.json path
       </div>
 
       <label>Refresh Token:</label>
-      <input type="password" id="modalRefreshToken" placeholder="sk-ant-ort01-...">
+      <input type="text" id="modalRefreshToken" placeholder="sk-ant-ort01-...">
 
-      <button class="btn-primary" id="modalSave">Save</button>
+      <button class="btn-primary" id="modalSave">Save & Connect</button>
 
-      <div class="modal-footer">v3.0</div>
+      <div class="modal-footer">v3.1 - Token must start with sk-ant-ort01-</div>
     </div>
   </div>
 
