@@ -2,16 +2,14 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-3.0-orange)
+![Version](https://img.shields.io/badge/version-3.2-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-**A sleek Chrome extension to monitor your Claude Code and Claude.ai usage in real-time**
+**Monitor your Claude Code usage with beautiful circular progress indicators**
 
-[Installation](#-installation) • [Features](#-features) • [Authentication](#-authentication-methods) • [FAQ](#-faq)
-
-<img src="https://img.shields.io/badge/Made%20for-Claude%20Developers-purple?style=for-the-badge" alt="Made for Claude Developers">
+[Quick Start](#-quick-start) • [Installation](#-installation) • [Features](#-features) • [Troubleshooting](#-troubleshooting)
 
 </div>
 
@@ -19,162 +17,154 @@
 
 ## Overview
 
-Claude Usage Monitor is a Chrome extension that displays your Claude API usage with beautiful circular progress indicators. Monitor your 5-hour and 7-day rate limits at a glance, receive alerts before hitting your quota, and never be caught off guard.
+Claude Usage Monitor is a Chrome extension that displays your Claude API usage in real-time. Track your 5-hour and 7-day rate limits at a glance, receive alerts before hitting your quota, and never be caught off guard.
+
+**Perfect for Claude Code and Claude Max users.**
+
+## Quick Start
+
+1. **Download** the [latest release ZIP](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.2.zip)
+2. **Extract** the ZIP file
+3. **Open** `chrome://extensions/` and enable Developer Mode
+4. **Click** "Load unpacked" and select the extracted folder
+5. **Copy** your `.credentials.json` content and paste it in the extension
+
+That's it! The extension will automatically parse your tokens and start monitoring.
 
 ## Features
 
-- **Real-time Usage Tracking** - Monitor your 5-hour and 7-day usage quotas
-- **Circular Progress Indicators** - Beautiful, color-coded visual feedback
-- **Two Authentication Methods** - Use your Claude browser session OR API token
-- **Auto-refresh** - Updates every minute automatically
-- **Smart Alerts** - Browser notifications at 70%, 80%, 90%, and 95% usage
-- **Dark Theme** - Easy on the eyes, designed for developers
-- **Lightweight** - Minimal footprint, maximum utility
+| Feature | Description |
+|---------|-------------|
+| **Real-time Tracking** | Monitor 5-hour and 7-day usage quotas |
+| **Visual Progress** | Beautiful circular progress indicators |
+| **Color Coding** | Green (< 50%), Orange (50-80%), Red (> 80%) |
+| **Smart Alerts** | Notifications at 70%, 80%, 90%, 95% usage |
+| **Auto-refresh** | Updates every minute automatically |
+| **Easy Setup** | Just paste your credentials JSON |
+| **Dark Theme** | Modern UI designed for developers |
+| **Privacy First** | All data stays local, no external servers |
 
 ## Installation
 
-### Quick Install (Chrome Web Store)
+### Option 1: Download ZIP (Recommended)
 
-*Coming soon*
+1. Download [`claude-usage-monitor-v3.2.zip`](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.2.zip)
+2. Extract the ZIP to a folder
+3. Open Chrome and go to `chrome://extensions/`
+4. Enable **Developer Mode** (top-right toggle)
+5. Click **"Load unpacked"**
+6. Select the extracted folder
 
-### Manual Installation (Developer Mode)
+### Option 2: Clone Repository
 
-1. **Download the extension**
-   ```bash
-   git clone https://github.com/showf68/claude-usage-monitor.git
-   ```
-   Or [download as ZIP](https://github.com/showf68/claude-usage-monitor/archive/refs/heads/main.zip) and extract
+```bash
+git clone https://github.com/showf68/claude-usage-monitor.git
+cd claude-usage-monitor
+```
 
-2. **Open Chrome Extensions**
-   - Navigate to `chrome://extensions/`
-   - Or Menu → More Tools → Extensions
+Then load the folder in Chrome as described above.
 
-3. **Enable Developer Mode**
-   - Toggle the switch in the top-right corner
+## Configuration
 
-4. **Load the Extension**
-   - Click **"Load unpacked"**
-   - Select the extension folder
-   - The **CC** icon should appear in your toolbar
+### Step 1: Find Your Credentials
 
-## Authentication Methods
-
-Choose the method that works best for you:
-
-### Option 1: Claude Session (Easiest)
-
-Use your existing Claude.ai browser session - **no tokens required!**
-
-1. Click the extension icon
-2. Select **"Claude Session"** tab (default)
-3. Click **"Open Claude Login"**
-4. Log in to Claude.ai in the new tab
-5. Return to the extension and click refresh
-
-| Pros | Cons |
-|------|------|
-| No token management | Requires active Claude.ai login |
-| Instant setup | May need re-login periodically |
-| Uses existing auth | - |
-
-### Option 2: API Token (Most Reliable)
-
-Use your Claude Code refresh token for consistent, independent access.
-
-1. Click the extension icon
-2. Select **"Token Auth"** tab
-3. Click **"Copy .credentials.json path"**
-4. Open the file and copy the `refreshToken` value
-5. Paste it in the extension and save
-
-**Finding your credentials file:**
+Your Claude credentials are stored in:
 
 | Platform | Path |
 |----------|------|
-| Windows | `%USERPROFILE%\.claude\.credentials.json` |
-| macOS | `~/.claude/.credentials.json` |
-| Linux | `~/.claude/.credentials.json` |
+| **Windows** | `%USERPROFILE%\.claude\.credentials.json` |
+| **macOS** | `~/.claude/.credentials.json` |
+| **Linux** | `~/.claude/.credentials.json` |
 
-**Token format:** `sk-ant-ort01-...`
+### Step 2: Copy & Paste
 
-| Pros | Cons |
-|------|------|
-| Works independently | Requires initial setup |
-| More reliable | Token may need refresh |
-| Always available | - |
+1. Open the credentials file in any text editor
+2. **Select All** (Ctrl+A / Cmd+A)
+3. **Copy** (Ctrl+C / Cmd+C)
+4. Click the extension icon in Chrome
+5. **Paste** the entire JSON content
+6. Click **"Save & Connect"**
 
-## Usage Guide
+The extension automatically extracts the `accessToken` and `refreshToken` from your JSON.
 
-Once configured, the extension works automatically:
+### Credentials Format
 
-### Badge Indicators
+Your file should look like this:
+```json
+{
+  "claudeAiOauth": {
+    "accessToken": "sk-ant-oat01-...",
+    "refreshToken": "sk-ant-ort01-...",
+    "subscriptionType": "max"
+  }
+}
+```
 
-The toolbar badge shows your current 5-hour usage:
+## Usage
 
-| Badge | Color | Meaning |
-|-------|-------|---------|
-| `25` | 🟢 Green | 25% used - Plenty remaining |
-| `65` | 🟡 Orange | 65% used - Moderate usage |
-| `90` | 🔴 Red | 90% used - High usage |
-| `CFG` | Yellow | Configuration needed |
-| `LOGIN` | Blue | Claude login required |
-| `ERR` | Red | Connection error |
+### Toolbar Badge
+
+The badge shows your current 5-hour usage percentage:
+
+| Badge | Color | Status |
+|-------|-------|--------|
+| `25` | 🟢 Green | Low usage - plenty remaining |
+| `65` | 🟠 Orange | Moderate usage |
+| `90` | 🔴 Red | High usage - slow down! |
+| `CFG` | 🟡 Yellow | Configuration needed |
+| `ERR` | 🔴 Red | Connection error |
 
 ### Popup Interface
 
 Click the extension icon to see:
-
-- **5-Hour Usage** - Current usage with circular progress
+- **5-Hour Usage** - Current window with circular progress
 - **7-Day Usage** - Weekly quota tracking
-- **Time Until Reset** - Know when limits refresh
-- **Auth Method** - Current authentication type
+- **Reset Timer** - Time until limits refresh
+- **Last Update** - When data was last refreshed
 
 ### Notifications
 
 Receive browser alerts at critical thresholds:
+- **70%** - First warning
+- **80%** - Moderate warning
+- **90%** - High usage alert
+- **95%** - Critical alert
 
-| Threshold | Alert Type |
-|-----------|------------|
-| 70% | First warning |
-| 80% | Moderate warning |
-| 90% | High usage alert |
-| 95% | Critical alert |
-
-*Alerts reset automatically when usage drops below 50%*
+Alerts reset automatically when usage drops below 50%.
 
 ## Troubleshooting
 
-### Common Issues
-
 <details>
-<summary><b>"Session Expired" Message</b></summary>
-
-1. Open [claude.ai](https://claude.ai) in your browser
-2. Log in to your account
-3. Return to the extension and click refresh
-</details>
-
-<details>
-<summary><b>"Connection Error" or ERR Badge</b></summary>
+<summary><b>ERR Badge or "Connection Error"</b></summary>
 
 1. Check your internet connection
-2. Verify your token is still valid (if using token auth)
-3. Try switching authentication methods
+2. Verify your token hasn't expired
+3. Try reconfiguring with fresh credentials
 4. Reload the extension from `chrome://extensions/`
 </details>
 
 <details>
-<summary><b>Badge Shows "CFG"</b></summary>
+<summary><b>CFG Badge</b></summary>
 
+The extension needs configuration:
 1. Click the extension icon
-2. Complete the setup process
-3. Either log in to Claude or enter your refresh token
+2. Paste your `.credentials.json` content
+3. Click "Save & Connect"
+</details>
+
+<details>
+<summary><b>Token Expired</b></summary>
+
+Your access token may have expired. Get fresh credentials:
+1. Use Claude Code to refresh your token (any Claude Code command will refresh it)
+2. Copy the updated `.credentials.json` content
+3. Reconfigure the extension
 </details>
 
 <details>
 <summary><b>Extension Not Updating</b></summary>
 
-1. Click the refresh button manually
+1. Click the refresh button in the popup
 2. Check Chrome's extension permissions
 3. Ensure the extension has network access
 </details>
@@ -184,107 +174,74 @@ Receive browser alerts at critical thresholds:
 | Aspect | Details |
 |--------|---------|
 | **Data Collection** | None - all data stays local |
-| **Token Storage** | Secure Chrome storage API |
-| **External Servers** | None - only Anthropic APIs |
-| **Open Source** | Full code audit available |
+| **Token Storage** | Chrome's secure storage API |
+| **Network Calls** | Only to Anthropic's official APIs |
+| **Open Source** | Full code available for audit |
 
-## Technical Specifications
-
-```json
-{
-  "manifest_version": 3,
-  "permissions": ["storage", "alarms", "notifications", "cookies"],
-  "host_permissions": [
-    "https://api.anthropic.com/*",
-    "https://console.anthropic.com/*",
-    "https://claude.ai/*"
-  ]
-}
-```
-
-### File Structure
+## File Structure
 
 ```
 claude-usage-monitor/
-├── manifest.json        # Extension configuration
-├── background.js        # Service worker (API calls, auth)
-├── popup-modern.html    # Popup interface
-├── popup-modern.js      # Popup logic
-├── icon16.png          # Toolbar icon (16x16)
-├── icon48.png          # Extension icon (48x48)
-├── icon128.png         # Store icon (128x128)
-└── README.md           # This file
+├── manifest.json          # Extension configuration
+├── background.js          # Service worker (API, auth)
+├── popup-modern.html      # Popup interface
+├── popup-modern.js        # Popup logic
+├── icons/
+│   ├── icon16.png         # Toolbar icon
+│   ├── icon48.png         # Extension icon
+│   └── icon128.png        # Store icon
+├── dist/
+│   └── claude-usage-monitor-v3.2.zip  # Ready-to-use package
+├── LICENSE
+└── README.md
 ```
-
-## Contributing
-
-Contributions are welcome! Here's how:
-
-1. **Fork** the repository
-2. **Create** your feature branch
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. **Commit** your changes
-   ```bash
-   git commit -m 'Add some AmazingFeature'
-   ```
-4. **Push** to the branch
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-5. **Open** a Pull Request
 
 ## Changelog
 
-### v3.0 (Latest)
-- Added Claude Session authentication (no token required!)
-- Dual authentication support (Session + Token)
-- Improved UI with modern dark theme
-- Better error handling and status indicators
-- Session status detection
+### v3.2 (Latest)
+- **New:** Paste entire JSON credentials (auto-parsing)
+- **New:** Live validation as you type
+- **New:** Ready-to-use ZIP package in `/dist`
+- Reorganized file structure (icons in folder)
+- Compact settings modal (no scrolling)
+- Better error messages with debugging info
 
-### v2.1
+### v3.1
+- Improved error handling
+- Detailed debug messages
+- Reconfigure button in error view
+
+### v3.0
+- Modern dark theme UI
+- Dual authentication support
 - Circular progress indicators
-- Color-coded usage display
-- Auto-refresh every minute
 
-### v1.0
-- Initial release
+### v2.x
 - Basic usage monitoring
 - Token-based authentication
 
+## Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2024
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
-
-## Support
-
-- **Issues:** [GitHub Issues](https://github.com/showf68/claude-usage-monitor/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/showf68/claude-usage-monitor/discussions)
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-**Built with love for the Claude developer community**
+**Built for the Claude developer community**
 
-If this extension helps you, consider giving it a star!
+If this extension helps you, consider giving it a ⭐
+
+[Report Bug](https://github.com/showf68/claude-usage-monitor/issues) • [Request Feature](https://github.com/showf68/claude-usage-monitor/issues)
 
 </div>
