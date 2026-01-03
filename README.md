@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-3.3-orange)
+![Version](https://img.shields.io/badge/version-3.4-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -60,16 +60,12 @@ That's it! The extension will automatically parse your tokens and start monitori
 
 ### Option 1: Download ZIP (Recommended)
 
-1. Download from [Releases](https://github.com/showf68/claude-usage-monitor/releases/latest):
-   - **ZIP** (`claude-usage-monitor-v3.3.zip`) - Ready to load
-   - **CRX** (`claude-usage-monitor-v3.3.crx`) - Packaged extension
+1. Download [`claude-usage-monitor-v3.4.zip`](https://github.com/showf68/claude-usage-monitor/releases/latest)
 2. Extract the ZIP to a folder
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer Mode** (top-right toggle)
 5. Click **"Load unpacked"**
 6. Select the extracted folder
-
-> **Note:** CRX files cannot be installed directly in Chrome (security policy). Use the ZIP method above, or drag the CRX to `chrome://extensions/` with Developer Mode enabled.
 
 ### Option 2: Clone Repository
 
@@ -213,8 +209,7 @@ claude-usage-monitor/
 │   ├── zh/messages.json   # Chinese
 │   └── he/messages.json   # Hebrew
 ├── dist/                  # Packaged releases
-│   ├── claude-usage-monitor-v3.3.zip  # ZIP package
-│   └── claude-usage-monitor-v3.3.crx  # CRX package
+│   └── claude-usage-monitor-v3.4.zip  # ZIP package
 ├── docs/                  # Documentation
 │   ├── README.fr.md       # French
 │   ├── README.es.md       # Spanish
@@ -226,7 +221,11 @@ claude-usage-monitor/
 
 ## Changelog
 
-### v3.3 (Latest)
+### v3.4 (Latest)
+- **Fix:** ZIP package now works correctly on all systems
+- Removed CRX (not supported by Chrome policy)
+
+### v3.3
 - **New:** Multi-language support (EN, FR, ES, ZH, HE)
 - **New:** Auto-detect browser language
 - **New:** Language switcher in header
