@@ -17,3 +17,6 @@ dist/temp/
 
 # Logs
 *.log
+
+# Private keys
+*.pem

@@ -4,7 +4,7 @@
 
 **🌐 Language / Langue / Idioma / 语言 / שפה**
 
-[![English](https://img.shields.io/badge/English-blue?style=flat-square)](README.md)
+[![English](https://img.shields.io/badge/English-blue?style=flat-square)](../README.md)
 [![Français](https://img.shields.io/badge/Français-blue?style=flat-square)](README.fr.md)
 [![Español](https://img.shields.io/badge/Español-blue?style=flat-square)](README.es.md)
 [![中文](https://img.shields.io/badge/中文-orange?style=flat-square)](README.zh.md)

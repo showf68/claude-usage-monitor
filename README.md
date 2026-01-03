@@ -5,10 +5,10 @@
 **🌐 Language / Langue / Idioma / 语言 / שפה**
 
 [![English](https://img.shields.io/badge/English-blue?style=flat-square)](README.md)
-[![Français](https://img.shields.io/badge/Français-blue?style=flat-square)](README.fr.md)
-[![Español](https://img.shields.io/badge/Español-blue?style=flat-square)](README.es.md)
-[![中文](https://img.shields.io/badge/中文-blue?style=flat-square)](README.zh.md)
-[![עברית](https://img.shields.io/badge/עברית-blue?style=flat-square)](README.he.md)
+[![Français](https://img.shields.io/badge/Français-blue?style=flat-square)](docs/README.fr.md)
+[![Español](https://img.shields.io/badge/Español-blue?style=flat-square)](docs/README.es.md)
+[![中文](https://img.shields.io/badge/中文-blue?style=flat-square)](docs/README.zh.md)
+[![עברית](https://img.shields.io/badge/עברית-blue?style=flat-square)](docs/README.he.md)
 
 ---
 
@@ -60,12 +60,16 @@ That's it! The extension will automatically parse your tokens and start monitori
 
 ### Option 1: Download ZIP (Recommended)
 
-1. Download [`claude-usage-monitor-v3.3.zip`](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.3.zip)
+1. Download from [Releases](https://github.com/showf68/claude-usage-monitor/releases/latest):
+   - **ZIP** (`claude-usage-monitor-v3.3.zip`) - Ready to load
+   - **CRX** (`claude-usage-monitor-v3.3.crx`) - Packaged extension
 2. Extract the ZIP to a folder
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer Mode** (top-right toggle)
 5. Click **"Load unpacked"**
 6. Select the extracted folder
+
+> **Note:** CRX files cannot be installed directly in Chrome (security policy). Use the ZIP method above, or drag the CRX to `chrome://extensions/` with Developer Mode enabled.
 
 ### Option 2: Clone Repository
 
@@ -208,10 +212,16 @@ claude-usage-monitor/
 │   ├── es/messages.json   # Spanish
 │   ├── zh/messages.json   # Chinese
 │   └── he/messages.json   # Hebrew
-├── dist/
-│   └── claude-usage-monitor-v3.3.zip  # Ready-to-use package
+├── dist/                  # Packaged releases
+│   ├── claude-usage-monitor-v3.3.zip  # ZIP package
+│   └── claude-usage-monitor-v3.3.crx  # CRX package
+├── docs/                  # Documentation
+│   ├── README.fr.md       # French
+│   ├── README.es.md       # Spanish
+│   ├── README.zh.md       # Chinese
+│   └── README.he.md       # Hebrew
 ├── LICENSE
-└── README.md
+└── README.md              # English (main)
 ```
 
 ## Changelog
