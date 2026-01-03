@@ -21,6 +21,8 @@
 
 [Quick Start](#quick-start) • [Installation](#installation) • [Features](#features) • [Troubleshooting](#troubleshooting)
 
+![Screenshot](docs/images/screenshot.png)
+
 </div>
 
 ---
