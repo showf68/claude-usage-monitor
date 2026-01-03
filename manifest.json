@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage Monitor",
-  "version": "3.1",
+  "version": "3.2",
   "description": "Monitor your Claude Code usage with real-time progress circles and alerts.",
   "permissions": [
     "storage",
@@ -11,22 +11,23 @@
   ],
   "host_permissions": [
     "https://api.anthropic.com/*",
-    "https://console.anthropic.com/*"
+    "https://console.anthropic.com/*",
+    "https://claude.ai/*"
   ],
   "action": {
     "default_popup": "popup-modern.html",
     "default_icon": {
-      "16": "icon16.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "background": {
     "service_worker": "background.js"
   },
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }

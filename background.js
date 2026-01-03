@@ -233,7 +233,7 @@ async function checkAlerts(used) {
 
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'icon128.png',
+        iconUrl: 'icons/icon128.png',
         title: 'Claude Usage Alert',
         message: `You've used ${used}% of your quota!`,
         priority: 2
