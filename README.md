@@ -2,6 +2,16 @@
 
 <div align="center">
 
+**🌐 Language / Langue / Idioma / 语言 / שפה**
+
+[![English](https://img.shields.io/badge/English-blue?style=flat-square)](README.md)
+[![Français](https://img.shields.io/badge/Français-blue?style=flat-square)](README.fr.md)
+[![Español](https://img.shields.io/badge/Español-blue?style=flat-square)](README.es.md)
+[![中文](https://img.shields.io/badge/中文-blue?style=flat-square)](README.zh.md)
+[![עברית](https://img.shields.io/badge/עברית-blue?style=flat-square)](README.he.md)
+
+---
+
 ![Version](https://img.shields.io/badge/version-3.3-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
@@ -23,7 +33,7 @@ Claude Usage Monitor is a Chrome extension that displays your Claude API usage i
 
 ## Quick Start
 
-1. **Download** the [latest release ZIP](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.3.zip)
+1. **Download** the [latest release ZIP](https://github.com/showf68/claude-usage-monitor/releases/latest)
 2. **Extract** the ZIP file
 3. **Open** `chrome://extensions/` and enable Developer Mode
 4. **Click** "Load unpacked" and select the extracted folder
