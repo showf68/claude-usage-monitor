@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #f1f5f9;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -1px;
+    }
+
+    .title {
+      flex: 1;
+    }
+
+    .title h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .title .plan {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .refresh-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .refresh-btn.spinning svg {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .content {
+      padding: 16px;
+    }
+
+    .usage-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .usage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .usage-label {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .usage-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .usage-value.low { color: #22c55e; }
+    .usage-value.medium { color: #f59e0b; }
+    .usage-value.high { color: #ef4444; }
+
+    .progress {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-fill.low { background: linear-gradient(90deg, #22c55e, #4ade80); }
+    .progress-fill.medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .progress-fill.high { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .reset-time {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .reset-time span {
+      color: #f59e0b;
+    }
+
+    .setup {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .setup p {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .setup input {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #f1f5f9;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .setup input:focus {
+      outline: none;
+      border-color: #f59e0b;
+    }
+
+    .setup button {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .setup button:hover {
+      opacity: 0.9;
+    }
+
+    .last-update {
+      text-align: center;
+      font-size: 11px;
+      color: #475569;
+      padding-bottom: 12px;
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      color: #ef4444;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">CC</div>
+    <div class="title">
+      <h1>Claude Code Usage</h1>
+      <div class="plan" id="plan">--</div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" title="Actualiser">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="content" id="content">
+    <div class="setup" id="setup" style="display:none;">
+      <p>Configuration initiale (une seule fois)</p>
+      <p style="font-size:11px;color:#64748b;margin-bottom:8px;">Ouvrez ~/.claude/.credentials.json et collez:</p>
+
+      <label style="font-size:11px;color:#94a3b8;display:block;margin-top:12px;">Access Token:</label>
+      <input type="password" id="tokenInput" placeholder="sk-ant-oat01-..." style="margin-bottom:8px;">
+
+      <label style="font-size:11px;color:#94a3b8;display:block;">Refresh Token:</label>
+      <input type="password" id="refreshTokenInput" placeholder="sk-ant-ort01-..." style="margin-bottom:12px;">
+
+      <button id="saveBtn">💾 Sauvegarder (Auto-refresh activé)</button>
+
+      <p style="font-size:10px;color:#64748b;margin-top:12px;line-height:1.4;">
+        ℹ️ Une fois configuré, le token se rafraîchira automatiquement - plus besoin de revenir ici!
+      </p>
+    </div>
+
+    <div id="usageView" style="display:none;">
+      <!-- 5-Hour -->
+      <div class="usage-card">
+        <div class="usage-header">
+          <span class="usage-label">Limite 5 heures</span>
+          <span class="usage-value" id="usage5h">--%</span>
+        </div>
+        <div class="progress">
+          <div class="progress-fill" id="bar5h"></div>
+        </div>
+        <div class="reset-time">Reset dans <span id="reset5h">--</span></div>
+      </div>
+
+      <!-- 7-Day -->
+      <div class="usage-card">
+        <div class="usage-header">
+          <span class="usage-label">Limite 7 jours</span>
+          <span class="usage-value" id="usage7d">--%</span>
+        </div>
+        <div class="progress">
+          <div class="progress-fill" id="bar7d"></div>
+        </div>
+        <div class="reset-time">Reset dans <span id="reset7d">--</span></div>
+      </div>
+
+      <div class="last-update" id="lastUpdate">--</div>
+
+      <button id="updateTokenBtn" style="width:100%;padding:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;font-size:12px;cursor:pointer;margin-top:8px;">
+        🔄 Mettre à jour token
+      </button>
+    </div>
+
+    <div class="error" id="error" style="display:none;">
+      Erreur de connexion
+      <button id="retryBtn" style="width:100%;padding:8px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#ef4444;font-size:12px;cursor:pointer;margin-top:8px;">
+        ↻ Réessayer
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
