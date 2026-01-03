@@ -41,9 +41,9 @@ Claude Usage Monitor is a Chrome extension that displays your Claude API usage w
 
 1. **Download the extension**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/claude-usage-monitor.git
+   git clone https://github.com/showf68/claude-usage-monitor.git
    ```
-   Or [download as ZIP](https://github.com/YOUR_USERNAME/claude-usage-monitor/archive/refs/heads/main.zip) and extract
+   Or [download as ZIP](https://github.com/showf68/claude-usage-monitor/archive/refs/heads/main.zip) and extract
 
 2. **Open Chrome Extensions**
    - Navigate to `chrome://extensions/`
@@ -276,8 +276,8 @@ copies or substantial portions of the Software.
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/claude-usage-monitor/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/YOUR_USERNAME/claude-usage-monitor/discussions)
+- **Issues:** [GitHub Issues](https://github.com/showf68/claude-usage-monitor/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/showf68/claude-usage-monitor/discussions)
 
 ---
 
