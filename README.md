@@ -9,7 +9,7 @@
 
 **Monitor your Claude Code usage with beautiful circular progress indicators**
 
-[Quick Start](#-quick-start) • [Installation](#-installation) • [Features](#-features) • [Troubleshooting](#-troubleshooting)
+[Quick Start](#quick-start) • [Installation](#installation) • [Features](#features) • [Troubleshooting](#troubleshooting)
 
 </div>
 
