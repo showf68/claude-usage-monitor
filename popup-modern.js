@@ -1,8 +1,103 @@
-// Claude Usage Monitor - Popup Script v3.2
+// Claude Usage Monitor - Popup Script v3.3
+// Multi-language support with browser detection
 
 const circumference = 2 * Math.PI * 42; // radius = 42
 let lastError = null;
 let parsedTokens = null;
+let currentLang = 'en';
+let translations = {};
+
+// Available languages with display names
+const languages = {
+  en: { flag: 'EN', name: 'English' },
+  fr: { flag: 'FR', name: 'Francais' },
+  es: { flag: 'ES', name: 'Espanol' },
+  zh: { flag: 'ZH', name: '中文' },
+  he: { flag: 'HE', name: 'עברית' }
+};
+
+// Load translations from _locales folder
+async function loadTranslations(lang) {
+  try {
+    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Not found');
+    const messages = await response.json();
+
+    // Convert Chrome i18n format to simple key-value
+    translations = {};
+    for (const [key, value] of Object.entries(messages)) {
+      translations[key] = value.message;
+    }
+    return true;
+  } catch (e) {
+    console.warn(`Failed to load ${lang} translations:`, e);
+    return false;
+  }
+}
+
+// Apply translations to the page
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n');
+    if (translations[key]) {
+      elem.textContent = translations[key];
+    }
+  });
+
+  // Update language button
+  const langFlag = document.getElementById('currentLangFlag');
+  if (langFlag && languages[currentLang]) {
+    langFlag.textContent = languages[currentLang].flag;
+  }
+
+  // Update active state in dropdown
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.lang === currentLang);
+  });
+
+  // Set RTL for Hebrew
+  document.body.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+}
+
+// Get translation
+function t(key) {
+  return translations[key] || key;
+}
+
+// Change language
+async function changeLanguage(lang) {
+  if (!languages[lang]) return;
+
+  const loaded = await loadTranslations(lang);
+  if (loaded) {
+    currentLang = lang;
+    await chrome.storage.local.set({ language: lang });
+    applyTranslations();
+  }
+}
+
+// Detect browser language
+function detectBrowserLanguage() {
+  const browserLang = navigator.language.split('-')[0];
+  return languages[browserLang] ? browserLang : 'en';
+}
+
+// Initialize language
+async function initLanguage() {
+  const stored = await chrome.storage.local.get(['language']);
+  const lang = stored.language || detectBrowserLanguage();
+
+  const loaded = await loadTranslations(lang);
+  if (loaded) {
+    currentLang = lang;
+  } else {
+    // Fallback to English
+    await loadTranslations('en');
+    currentLang = 'en';
+  }
+  applyTranslations();
+}
 
 function getColorClass(used) {
   if (used < 50) return 'low';
@@ -107,7 +202,7 @@ function updateUI(data) {
 // Parse JSON input and extract tokens
 function parseCredentials(jsonText) {
   if (!jsonText || !jsonText.trim()) {
-    return { error: 'Please paste your .credentials.json content' };
+    return { error: t('pleaseEnter') };
   }
 
   try {
@@ -137,15 +232,15 @@ function parseCredentials(jsonText) {
 
     // Validate we found at least one token
     if (!accessToken && !refreshToken) {
-      return { error: 'No tokens found. Make sure to paste the entire .credentials.json content.' };
+      return { error: t('noTokens') };
     }
 
     // Validate token formats
     if (accessToken && !accessToken.startsWith('sk-ant-oat')) {
-      return { error: 'Invalid accessToken format. Should start with sk-ant-oat' };
+      return { error: t('invalidAccessToken') };
     }
     if (refreshToken && !refreshToken.startsWith('sk-ant-ort')) {
-      return { error: 'Invalid refreshToken format. Should start with sk-ant-ort' };
+      return { error: t('invalidRefreshToken') };
     }
 
     return {
@@ -155,7 +250,7 @@ function parseCredentials(jsonText) {
       success: true
     };
   } catch (e) {
-    return { error: 'Invalid JSON format: ' + e.message };
+    return { error: t('invalidJson') + ': ' + e.message };
   }
 }
 
@@ -170,15 +265,15 @@ function showParseResult(resultElemId, parseResult) {
     parsedTokens = null;
   } else {
     resultElem.className = 'parse-result success';
-    let html = '✅ Tokens found:<br>';
+    let html = `✅ ${t('tokensFound')}<br>`;
     if (parseResult.accessToken) {
-      html += `<div class="token-info">Access: ${parseResult.accessToken.substring(0, 20)}...</div>`;
+      html += `<div class="token-info">${t('accessToken')}: ${parseResult.accessToken.substring(0, 20)}...</div>`;
     }
     if (parseResult.refreshToken) {
-      html += `<div class="token-info">Refresh: ${parseResult.refreshToken.substring(0, 20)}...</div>`;
+      html += `<div class="token-info">${t('refreshToken')}: ${parseResult.refreshToken.substring(0, 20)}...</div>`;
     }
     if (parseResult.subscriptionType) {
-      html += `<div class="token-info">Plan: ${parseResult.subscriptionType}</div>`;
+      html += `<div class="token-info">${t('plan')}: ${parseResult.subscriptionType}</div>`;
     }
     resultElem.innerHTML = html;
     parsedTokens = parseResult;
@@ -187,6 +282,9 @@ function showParseResult(resultElemId, parseResult) {
 
 // Initialize
 async function init() {
+  // Load language first
+  await initLanguage();
+
   const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError']);
 
   if (!result.refreshToken && !result.accessToken && !result.token) {
@@ -258,7 +356,7 @@ function closeModal() {
 function copyCredentialsPath() {
   const path = '%USERPROFILE%\\.claude\\.credentials.json';
   navigator.clipboard.writeText(path).then(() => {
-    alert('Path copied!\n\n' + path + '\n\nPaste in Windows Explorer (Win+R)\nthen open the file and copy its entire content.');
+    alert(`${t('pathCopied')}\n\n${path}\n\n${t('pasteInExplorer')}\n${t('openAndCopy')}`);
   });
 }
 
@@ -268,7 +366,7 @@ function saveTokens(jsonInputId, parseResultId) {
   const jsonText = input?.value.trim();
 
   if (!jsonText) {
-    showParseResult(parseResultId, { error: 'Please paste your .credentials.json content' });
+    showParseResult(parseResultId, { error: t('pleaseEnter') });
     return;
   }
 
@@ -340,6 +438,12 @@ function handleJsonInput(inputId, resultId) {
   showParseResult(resultId, parseResult);
 }
 
+// Language dropdown toggle
+function toggleLangDropdown() {
+  const dropdown = document.getElementById('langDropdown');
+  dropdown.classList.toggle('show');
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refreshBtn')?.addEventListener('click', refresh);
@@ -362,6 +466,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Live parsing on input
   document.getElementById('jsonInput')?.addEventListener('input', () => handleJsonInput('jsonInput', 'parseResult'));
   document.getElementById('modalJsonInput')?.addEventListener('input', () => handleJsonInput('modalJsonInput', 'modalParseResult'));
+
+  // Language selector
+  document.getElementById('langBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleLangDropdown();
+  });
+
+  // Language options
+  document.querySelectorAll('.lang-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lang = option.dataset.lang;
+      changeLanguage(lang);
+      document.getElementById('langDropdown').classList.remove('show');
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', () => {
+    document.getElementById('langDropdown')?.classList.remove('show');
+  });
 
   init();
 });

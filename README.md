@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-3.2-orange)
+![Version](https://img.shields.io/badge/version-3.3-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -23,7 +23,7 @@ Claude Usage Monitor is a Chrome extension that displays your Claude API usage i
 
 ## Quick Start
 
-1. **Download** the [latest release ZIP](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.2.zip)
+1. **Download** the [latest release ZIP](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.3.zip)
 2. **Extract** the ZIP file
 3. **Open** `chrome://extensions/` and enable Developer Mode
 4. **Click** "Load unpacked" and select the extracted folder
@@ -40,6 +40,8 @@ That's it! The extension will automatically parse your tokens and start monitori
 | **Color Coding** | Green (< 50%), Orange (50-80%), Red (> 80%) |
 | **Smart Alerts** | Notifications at 70%, 80%, 90%, 95% usage |
 | **Auto-refresh** | Updates every minute automatically |
+| **Multi-language** | English, French, Spanish, Chinese, Hebrew |
+| **Auto-detect Language** | Detects browser language automatically |
 | **Easy Setup** | Just paste your credentials JSON |
 | **Dark Theme** | Modern UI designed for developers |
 | **Privacy First** | All data stays local, no external servers |
@@ -48,7 +50,7 @@ That's it! The extension will automatically parse your tokens and start monitori
 
 ### Option 1: Download ZIP (Recommended)
 
-1. Download [`claude-usage-monitor-v3.2.zip`](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.2.zip)
+1. Download [`claude-usage-monitor-v3.3.zip`](https://github.com/showf68/claude-usage-monitor/raw/main/dist/claude-usage-monitor-v3.3.zip)
 2. Extract the ZIP to a folder
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer Mode** (top-right toggle)
@@ -190,15 +192,28 @@ claude-usage-monitor/
 │   ├── icon16.png         # Toolbar icon
 │   ├── icon48.png         # Extension icon
 │   └── icon128.png        # Store icon
+├── _locales/              # Translations
+│   ├── en/messages.json   # English
+│   ├── fr/messages.json   # French
+│   ├── es/messages.json   # Spanish
+│   ├── zh/messages.json   # Chinese
+│   └── he/messages.json   # Hebrew
 ├── dist/
-│   └── claude-usage-monitor-v3.2.zip  # Ready-to-use package
+│   └── claude-usage-monitor-v3.3.zip  # Ready-to-use package
 ├── LICENSE
 └── README.md
 ```
 
 ## Changelog
 
-### v3.2 (Latest)
+### v3.3 (Latest)
+- **New:** Multi-language support (EN, FR, ES, ZH, HE)
+- **New:** Auto-detect browser language
+- **New:** Language switcher in header
+- **New:** RTL support for Hebrew
+- Translations stored in `_locales/` folder
+
+### v3.2
 - **New:** Paste entire JSON credentials (auto-parsing)
 - **New:** Live validation as you type
 - **New:** Ready-to-use ZIP package in `/dist`

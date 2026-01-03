@@ -64,6 +64,59 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Language Selector */
+    .lang-selector {
+      position: relative;
+    }
+
+    .lang-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      height: 32px;
+      transition: background 0.2s;
+    }
+
+    .lang-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .lang-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 4px;
+      background: #1a1f2e;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 100;
+      min-width: 120px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .lang-dropdown.show { display: block; }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #e4e7eb;
+      transition: background 0.2s;
+    }
+
+    .lang-option:hover { background: rgba(245, 158, 11, 0.2); }
+    .lang-option.active { background: rgba(245, 158, 11, 0.3); }
+
     /* Content */
     .content { padding: 16px; }
 
@@ -412,6 +465,19 @@
       <div class="plan" id="plan" style="display:none;"></div>
     </div>
     <div class="header-actions">
+      <div class="lang-selector">
+        <button class="lang-btn" id="langBtn" title="Language">
+          <span id="currentLangFlag">EN</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <div class="lang-option" data-lang="en">EN English</div>
+          <div class="lang-option" data-lang="fr">FR Francais</div>
+          <div class="lang-option" data-lang="es">ES Espanol</div>
+          <div class="lang-option" data-lang="zh">ZH Chinese</div>
+          <div class="lang-option" data-lang="he">HE Hebrew</div>
+        </div>
+      </div>
       <button class="icon-btn settings" id="settingsBtn" title="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/>
@@ -431,21 +497,21 @@
   <div class="content" id="content">
     <!-- Setup View -->
     <div class="setup" id="setupView" style="display:none;">
-      <h2>Configuration</h2>
+      <h2 data-i18n="configuration">Configuration</h2>
 
       <div class="file-hint" id="openCredentials">
-        📋 Click to copy .credentials.json path
+        <span data-i18n="copyPath">Click to copy .credentials.json path</span>
       </div>
 
-      <label>Paste your .credentials.json content:</label>
+      <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
       <textarea id="jsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-...","refreshToken":"sk-ant-ort01-..."}}'></textarea>
 
       <div id="parseResult"></div>
 
-      <button class="btn-primary" id="saveBtn">Save & Connect</button>
+      <button class="btn-primary" id="saveBtn" data-i18n="saveConnect">Save & Connect</button>
 
       <div class="debug-info">
-        Open the file and copy ALL its content (Ctrl+A, Ctrl+C)
+        <span data-i18n="debugHint">Open the file and copy ALL its content (Ctrl+A, Ctrl+C)</span>
         <code>%USERPROFILE%\.claude\.credentials.json</code>
       </div>
     </div>
@@ -462,7 +528,7 @@
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent5h">--%</div>
-              <div class="circle-label">5 Hours</div>
+              <div class="circle-label" data-i18n="hours5">5 Hours</div>
             </div>
           </div>
           <div class="reset-time"><span id="reset5h">--</span></div>
@@ -477,7 +543,7 @@
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent7d">--%</div>
-              <div class="circle-label">7 Days</div>
+              <div class="circle-label" data-i18n="days7">7 Days</div>
             </div>
           </div>
           <div class="reset-time"><span id="reset7d">--</span></div>
@@ -486,7 +552,7 @@
 
       <div class="info-card">
         <div class="info-row">
-          <span class="info-label">Last Updated</span>
+          <span class="info-label" data-i18n="lastUpdated">Last Updated</span>
           <span class="info-value" id="lastUpdate">--</span>
         </div>
       </div>
@@ -495,10 +561,10 @@
     <!-- Error View -->
     <div class="error-container" id="errorView" style="display:none;">
       <div class="error-box">
-        <div class="error-title">Connection Error</div>
+        <div class="error-title" data-i18n="connectionError">Connection Error</div>
         <div class="error-message" id="errorMessage">Unknown error</div>
-        <button id="retryBtn">Retry</button>
-        <button id="reconfigureBtn">Reconfigure</button>
+        <button id="retryBtn" data-i18n="retry">Retry</button>
+        <button id="reconfigureBtn" data-i18n="reconfigure">Reconfigure</button>
       </div>
     </div>
   </div>
@@ -507,22 +573,22 @@
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
       <div class="modal-header">
-        <h2>Settings</h2>
+        <h2 data-i18n="settings">Settings</h2>
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
 
       <div class="file-hint" id="openCredentialsModal">
-        📋 Click to copy .credentials.json path
+        <span data-i18n="copyPath">Click to copy .credentials.json path</span>
       </div>
 
-      <label>Paste your .credentials.json content:</label>
+      <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
       <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
 
       <div id="modalParseResult"></div>
 
-      <button class="btn-primary" id="modalSave">Save & Connect</button>
+      <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save & Connect</button>
 
-      <div class="modal-footer">v3.2 - Paste the entire JSON file content</div>
+      <div class="modal-footer">v3.3 - <span data-i18n="version">Paste the entire JSON file content</span></div>
     </div>
   </div>
 
