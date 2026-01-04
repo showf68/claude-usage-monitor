@@ -407,6 +407,97 @@
       margin-top: 8px;
     }
 
+    /* Auth Mode Tabs */
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .auth-tab:hover {
+      color: #e4e7eb;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .auth-tab.active {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: white;
+    }
+
+    .auth-tab svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .auth-content {
+      display: none;
+    }
+
+    .auth-content.active {
+      display: block;
+    }
+
+    .cookie-status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cookie-status.checking {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+    }
+
+    .cookie-status.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .cookie-status.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .cookie-status svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .cookie-hint {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
     /* Success indicator */
     .parse-result {
       margin-top: 6px;
@@ -614,18 +705,56 @@
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
 
-      <div class="file-hint" id="openCredentialsModal">
-        <span data-i18n="copyPath">Click to copy .credentials.json path</span>
+      <!-- Auth Mode Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabCookie" data-mode="cookie">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <span data-i18n="autoMode">Auto (Cookie)</span>
+        </button>
+        <button class="auth-tab" id="tabToken" data-mode="token">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span data-i18n="manualMode">Manual (Token)</span>
+        </button>
       </div>
 
-      <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
-      <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
+      <!-- Cookie Mode Content -->
+      <div class="auth-content active" id="cookieContent">
+        <div class="cookie-status checking" id="cookieStatus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <span data-i18n="checkingCookies">Checking claude.ai session...</span>
+        </div>
 
-      <div id="modalParseResult"></div>
+        <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect with Claude.ai Session</button>
 
-      <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save & Connect</button>
+        <div class="cookie-hint">
+          <span data-i18n="cookieHint">This mode automatically uses your claude.ai browser session. Make sure you're logged in to claude.ai in Chrome.</span>
+        </div>
+      </div>
 
-      <div class="modal-footer">v3.3 - <span data-i18n="version">Paste the entire JSON file content</span></div>
+      <!-- Token Mode Content -->
+      <div class="auth-content" id="tokenContent">
+        <div class="file-hint" id="openCredentialsModal">
+          <span data-i18n="copyPath">Click to copy .credentials.json path</span>
+        </div>
+
+        <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
+        <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
+
+        <div id="modalParseResult"></div>
+
+        <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save & Connect</button>
+      </div>
+
+      <div class="modal-footer">v4.0 - <span data-i18n="version">Paste the entire JSON file content</span></div>
     </div>
   </div>
 

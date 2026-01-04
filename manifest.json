@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "3.4",
+  "version": "4.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": [
     "storage",
     "alarms",
     "notifications",
-    "clipboardWrite"
+    "clipboardWrite",
+    "cookies"
   ],
   "host_permissions": [
     "https://api.anthropic.com/*",
