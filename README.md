@@ -281,13 +281,22 @@ claude-usage-monitor/
 
 ## Contributing
 
-Contributions welcome! Please:
+**This project is open to everyone!** We warmly welcome contributions from the community.
+
+Contributions are welcome! Here's how to participate:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing`)
 3. Commit your changes
 4. Push to the branch
 5. Open a Pull Request
+
+**Contribution ideas:**
+- New features
+- Bug fixes
+- UI improvements
+- New translations
+- Documentation
 
 ## License
 
