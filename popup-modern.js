@@ -2,7 +2,8 @@
 // Multi-language support with browser detection
 // Cookie and Token auth modes
 
-const circumference = 2 * Math.PI * 42; // radius = 42
+const circumference = 2 * Math.PI * 42; // radius = 42 for outer ring
+const circumferenceInner = 2 * Math.PI * 34; // radius = 34 for inner ring
 let lastError = null;
 let parsedTokens = null;
 let currentLang = 'en';
@@ -107,11 +108,32 @@ function getColorClass(used) {
   return 'high';
 }
 
-function updateCircularProgress(circleId, percentId, used) {
+function calculateTimeElapsedPercent(resetAt, windowDuration) {
+  if (!resetAt) return 0;
+  
+  const now = new Date();
+  const reset = new Date(resetAt);
+  const timeRemaining = reset - now;
+  
+  // If reset time has passed or is invalid, return 100%
+  if (timeRemaining < 0) return 100;
+  
+  // Calculate time elapsed as percentage
+  const timeElapsed = windowDuration - timeRemaining;
+  const timeElapsedPercent = (timeElapsed / windowDuration) * 100;
+  
+  // Clamp between 0 and 100
+  return Math.max(0, Math.min(100, timeElapsedPercent));
+}
+
+function updateCircularProgress(circleId, percentId, timeCircleId, used, resetAt, windowDurationMs) {
   const circle = document.getElementById(circleId);
   const percentElem = document.getElementById(percentId);
+  const timeCircle = document.getElementById(timeCircleId);
+  
   if (!circle || !percentElem) return;
 
+  // Update outer ring (usage)
   const offset = circumference - (used / 100) * circumference;
   circle.style.strokeDashoffset = offset;
 
@@ -119,6 +141,13 @@ function updateCircularProgress(circleId, percentId, used) {
   circle.className = `circle-progress ${colorClass}`;
   percentElem.className = `circle-percent ${colorClass}`;
   percentElem.textContent = `${Math.round(used)}%`;
+
+  // Update inner ring (time elapsed)
+  if (timeCircle && resetAt && windowDurationMs) {
+    const timeElapsedPercent = calculateTimeElapsedPercent(resetAt, windowDurationMs);
+    const timeOffset = circumferenceInner - (timeElapsedPercent / 100) * circumferenceInner;
+    timeCircle.style.strokeDashoffset = timeOffset;
+  }
 }
 
 function formatTimeRemaining(resetAt) {
@@ -198,15 +227,19 @@ function updateUI(data) {
 
   showView('usageView');
 
-  // 5-hour
+  // 5-hour window (5 hours = 5 * 60 * 60 * 1000 ms = 18,000,000 ms)
+  const FIVE_HOUR_WINDOW_MS = 5 * 60 * 60 * 1000;
   const used5h = data.five_hour.utilization || 0;
-  updateCircularProgress('circle5h', 'percent5h', used5h);
-  document.getElementById('reset5h').textContent = formatTimeRemaining(data.five_hour.resets_at);
+  const reset5h = data.five_hour.resets_at || data.five_hour.reset_at;
+  updateCircularProgress('circle5h', 'percent5h', 'circleTime5h', used5h, reset5h, FIVE_HOUR_WINDOW_MS);
+  document.getElementById('reset5h').textContent = formatTimeRemaining(reset5h);
 
-  // 7-day
+  // 7-day window (7 days = 7 * 24 * 60 * 60 * 1000 ms = 604,800,000 ms)
+  const SEVEN_DAY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const used7d = data.seven_day?.utilization || 0;
-  updateCircularProgress('circle7d', 'percent7d', used7d);
-  document.getElementById('reset7d').textContent = formatTimeRemaining(data.seven_day?.resets_at);
+  const reset7d = data.seven_day?.resets_at || data.seven_day?.reset_at;
+  updateCircularProgress('circle7d', 'percent7d', 'circleTime7d', used7d, reset7d, SEVEN_DAY_WINDOW_MS);
+  document.getElementById('reset7d').textContent = formatTimeRemaining(reset7d);
 
   // Plan
   const planElem = document.getElementById('plan');
