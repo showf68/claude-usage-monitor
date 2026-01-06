@@ -517,8 +517,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         clearInterval(loginCheckInterval);
         loginCheckInterval = null;
 
-        // Update badge to show success
+        // Show success for 3 seconds, then display usage
         updateBadge('OK', '#10b981');
+        setTimeout(async () => {
+          // Fetch again to update badge with real usage
+          const newData = await fetchUsageAuto();
+          if (newData && newData.five_hour) {
+            const used = Math.round(newData.five_hour.utilization || 0);
+            updateBadgeUsage(used);
+          }
+        }, 3000);
       }
     }, 2000);
 
