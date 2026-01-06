@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-4.0-orange)
+![Version](https://img.shields.io/badge/version-4.5-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -53,7 +53,7 @@ That's it! The extension will start monitoring your usage.
 | **Visual Progress** | Beautiful circular progress indicators |
 | **Color Coding** | Green (< 50%), Orange (50-80%), Red (> 80%) |
 | **Smart Alerts** | Notifications at 70%, 80%, 90%, 95% usage |
-| **Auto-refresh** | Updates every minute automatically |
+| **Auto-refresh** | Updates every minute automatically + smart login detection |
 | **Cookie Auth** | Auto-detect claude.ai session - no config needed! |
 | **Token Auth** | Manual setup with credentials.json |
 | **Multi-language** | English, French, Spanish, Chinese, Hebrew |
@@ -65,7 +65,7 @@ That's it! The extension will start monitoring your usage.
 
 ### Option 1: Download ZIP (Recommended)
 
-1. Download [`claude-usage-monitor-v4.0.zip`](https://github.com/showf68/claude-usage-monitor/releases/latest)
+1. Download [`claude-usage-monitor-v4.5.zip`](https://github.com/showf68/claude-usage-monitor/releases/latest)
 2. Extract the ZIP to a folder
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer Mode** (top-right toggle)
@@ -90,11 +90,11 @@ The extension supports **two authentication methods**:
 The easiest way! Just be logged in to [claude.ai](https://claude.ai) in Chrome.
 
 1. Click the extension icon
-2. Go to **Settings** (gear icon)
-3. Select the **"Auto (Cookie)"** tab
-4. If you see "Session found", click **"Connect with Claude.ai Session"**
+2. Click **🔗 "Login to Claude.ai"** button
+3. Log in to your Claude account (if not already logged in)
+4. **That's it!** The extension automatically detects your connection within seconds
 
-That's it! No tokens or files needed.
+No tokens or files needed. The extension monitors your session every 2 seconds until connected.
 
 ### Option B: Manual Mode (Token)
 
@@ -226,7 +226,7 @@ claude-usage-monitor/
 │   ├── zh/messages.json   # Chinese
 │   └── he/messages.json   # Hebrew
 ├── dist/                  # Packaged releases
-│   └── claude-usage-monitor-v4.0.zip  # ZIP package
+│   └── claude-usage-monitor-v4.5.zip  # ZIP package
 ├── docs/                  # Documentation
 │   ├── README.fr.md       # French
 │   ├── README.es.md       # Spanish
@@ -238,7 +238,15 @@ claude-usage-monitor/
 
 ## Changelog
 
-### v4.0 (Latest)
+### v4.5 (Latest)
+- **New:** Auto-refresh after login - automatically detects connection every 2 seconds (no manual refresh needed!)
+- **New:** Smart badge display - shows "OK" ✓ for 3 seconds after successful login, then auto-displays usage percentage
+- **New:** Version number displayed in footer
+- **Fix:** Removed double emoji on login buttons
+- **Fix:** Centered login button in error view
+- **Improved:** Login check runs in background (survives popup close)
+
+### v4.0
 - **New:** Cookie authentication mode - auto-detect claude.ai session
 - **New:** Two auth modes: Auto (Cookie) and Manual (Token)
 - **New:** Settings tabs to switch between auth modes
