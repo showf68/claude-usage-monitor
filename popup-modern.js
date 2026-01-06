@@ -156,12 +156,27 @@ function showView(viewName) {
   });
 }
 
-function showError(errorMsg) {
+function showError(errorMsg, needsLogin = false) {
   lastError = errorMsg;
   const errorElem = document.getElementById('errorMessage');
+  const loginBtn = document.getElementById('loginBtn');
+
   if (errorElem) {
-    errorElem.textContent = errorMsg || 'Unknown error';
+    // Translate NOT_LOGGED_IN error
+    if (errorMsg === 'NOT_LOGGED_IN') {
+      errorElem.setAttribute('data-i18n', 'notLoggedIn');
+      errorElem.textContent = chrome.i18n.getMessage('notLoggedIn') || 'Claude.ai not logged in. Please log in to Claude.ai and retry.';
+    } else {
+      errorElem.removeAttribute('data-i18n');
+      errorElem.textContent = errorMsg || 'Unknown error';
+    }
   }
+
+  // Show/hide login button
+  if (loginBtn) {
+    loginBtn.style.display = (errorMsg === 'NOT_LOGGED_IN' || needsLogin) ? 'block' : 'none';
+  }
+
   showView('errorView');
 }
 
@@ -172,7 +187,7 @@ function updateUI(data) {
   }
 
   if (data.error) {
-    showError(data.error);
+    showError(data.error, data.needsLogin);
     return;
   }
 
@@ -337,7 +352,7 @@ function refresh() {
     }
 
     if (response.error) {
-      showError(response.error);
+      showError(response.error, response.needsLogin);
       return;
     }
 
@@ -574,6 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refreshBtn')?.addEventListener('click', refresh);
   document.getElementById('settingsBtn')?.addEventListener('click', openModal);
   document.getElementById('modalClose')?.addEventListener('click', closeModal);
+  document.getElementById('loginBtn')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://claude.ai' });
+  });
   document.getElementById('retryBtn')?.addEventListener('click', refresh);
   document.getElementById('reconfigureBtn')?.addEventListener('click', reconfigure);
 

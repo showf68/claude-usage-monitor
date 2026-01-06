@@ -157,7 +157,12 @@ async function fetchUsageWithCookies() {
     });
 
     if (!orgsResponse.ok) {
-      const errorMsg = `Failed to get organizations: ${orgsResponse.status}`;
+      // 403/401 = not logged in to claude.ai
+      if (orgsResponse.status === 403 || orgsResponse.status === 401) {
+        updateBadge('ERR', '#ef4444');
+        return { error: 'NOT_LOGGED_IN', needsLogin: true };
+      }
+      const errorMsg = `API error: ${orgsResponse.status}`;
       updateBadge('ERR', '#ef4444');
       return { error: errorMsg };
     }
