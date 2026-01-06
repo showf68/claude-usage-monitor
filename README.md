@@ -39,11 +39,9 @@ Claude Usage Monitor is a Chrome extension that displays your Claude API usage i
 2. **Extract** the ZIP file
 3. **Open** `chrome://extensions/` and enable Developer Mode
 4. **Click** "Load unpacked" and select the extracted folder
-5. **Choose your auth method:**
-   - **Auto (Cookie)**: Just be logged in to claude.ai - the extension detects your session automatically!
-   - **Manual (Token)**: Paste your `.credentials.json` content
+5. **That's it!** If you're already logged in to claude.ai, the extension auto-detects your session instantly! ✨
 
-That's it! The extension will start monitoring your usage.
+No configuration needed if you're already logged in to Claude!
 
 ## Features
 
@@ -54,7 +52,7 @@ That's it! The extension will start monitoring your usage.
 | **Color Coding** | Green (< 50%), Orange (50-80%), Red (> 80%) |
 | **Smart Alerts** | Notifications at 70%, 80%, 90%, 95% usage |
 | **Auto-refresh** | Updates every minute automatically + smart login detection |
-| **Cookie Auth** | Auto-detect claude.ai session - no config needed! |
+| **Cookie Auth** | Auto-detect claude.ai session on install - zero config! |
 | **Token Auth** | Manual setup with credentials.json |
 | **Multi-language** | English, French, Spanish, Chinese, Hebrew |
 | **Auto-detect Language** | Detects browser language automatically |
@@ -87,11 +85,12 @@ The extension supports **two authentication methods**:
 
 ### Option A: Auto Mode (Cookie) - Recommended
 
-The easiest way! Just be logged in to [claude.ai](https://claude.ai) in Chrome.
+**Zero configuration needed!** If you're already logged in to [claude.ai](https://claude.ai) in Chrome, the extension automatically detects your session on first install.
 
+**If not logged in yet:**
 1. Click the extension icon
 2. Click **🔗 "Login to Claude.ai"** button
-3. Log in to your Claude account (if not already logged in)
+3. Log in to your Claude account
 4. **That's it!** The extension automatically detects your connection within seconds
 
 No tokens or files needed. The extension monitors your session every 2 seconds until connected.
@@ -238,6 +237,7 @@ claude-usage-monitor/
 ## Changelog
 
 ### v4.5 (Latest)
+- **New:** 🎯 Smart auto-detection on first install - automatically detects if you're already logged in to claude.ai (zero configuration!)
 - **New:** Auto-refresh after login - automatically detects connection every 2 seconds (no manual refresh needed!)
 - **New:** Smart badge display - shows "OK" ✓ for 3 seconds after successful login, then auto-displays usage percentage
 - **New:** Version number displayed in footer
