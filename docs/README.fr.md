@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-3.4-orange)
+![Version](https://img.shields.io/badge/version-4.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -37,9 +37,11 @@ Claude Usage Monitor est une extension Chrome qui affiche votre utilisation de l
 2. **Extraire** le fichier ZIP
 3. **Ouvrir** `chrome://extensions/` et activer le Mode Developpeur
 4. **Cliquer** sur "Charger l'extension non empaquetee" et selectionner le dossier
-5. **Copier** le contenu de votre `.credentials.json` et le coller dans l'extension
+5. **Choisir votre methode d'authentification :**
+   - **Auto (Cookie)** : Soyez simplement connecte a claude.ai - l'extension detecte votre session automatiquement !
+   - **Manuel (Token)** : Collez le contenu de votre `.credentials.json`
 
-C'est tout ! L'extension analysera automatiquement vos tokens et commencera la surveillance.
+C'est tout ! L'extension commencera a surveiller votre utilisation.
 
 ## Fonctionnalites
 
@@ -50,9 +52,10 @@ C'est tout ! L'extension analysera automatiquement vos tokens et commencera la s
 | **Code couleur** | Vert (< 50%), Orange (50-80%), Rouge (> 80%) |
 | **Alertes intelligentes** | Notifications a 70%, 80%, 90%, 95% d'utilisation |
 | **Actualisation auto** | Mise a jour automatique chaque minute |
+| **Auth Cookie** | Detection auto de la session claude.ai - aucune config requise ! |
+| **Auth Token** | Configuration manuelle avec credentials.json |
 | **Multi-langue** | Anglais, Francais, Espagnol, Chinois, Hebreu |
 | **Detection auto** | Detecte automatiquement la langue du navigateur |
-| **Configuration facile** | Collez simplement vos identifiants JSON |
 | **Theme sombre** | Interface moderne concue pour les developpeurs |
 | **Confidentialite** | Toutes les donnees restent locales |
 
@@ -61,7 +64,7 @@ C'est tout ! L'extension analysera automatiquement vos tokens et commencera la s
 ### Option 1 : Telecharger depuis les Releases (Recommande)
 
 1. Aller sur [Releases](https://github.com/showf68/claude-usage-monitor/releases/latest)
-2. Telecharger `claude-usage-monitor-v3.3.zip`
+2. Telecharger `claude-usage-monitor-v4.0.zip`
 3. Extraire le ZIP dans un dossier
 4. Ouvrir Chrome et aller a `chrome://extensions/`
 5. Activer le **Mode Developpeur** (bouton en haut a droite)
@@ -79,9 +82,24 @@ Puis charger le dossier dans Chrome comme decrit ci-dessus.
 
 ## Configuration
 
-### Etape 1 : Trouver vos identifiants
+L'extension supporte **deux methodes d'authentification** :
 
-Vos identifiants Claude sont stockes dans :
+### Option A : Mode Auto (Cookie) - Recommande
+
+La methode la plus simple ! Soyez simplement connecte a [claude.ai](https://claude.ai) dans Chrome.
+
+1. Cliquez sur l'icone de l'extension
+2. Allez dans **Parametres** (icone engrenage)
+3. Selectionnez l'onglet **"Auto (Cookie)"**
+4. Si vous voyez "Session trouvee", cliquez sur **"Connecter avec la session Claude.ai"**
+
+C'est tout ! Aucun token ou fichier necessaire.
+
+### Option B : Mode Manuel (Token)
+
+Utilisez cette methode si le mode cookie ne fonctionne pas ou si vous preferez un controle explicite.
+
+#### Etape 1 : Trouver vos identifiants
 
 | Plateforme | Chemin |
 |------------|--------|
@@ -89,16 +107,14 @@ Vos identifiants Claude sont stockes dans :
 | **macOS** | `~/.claude/.credentials.json` |
 | **Linux** | `~/.claude/.credentials.json` |
 
-### Etape 2 : Copier & Coller
+#### Etape 2 : Copier & Coller
 
 1. Ouvrir le fichier d'identifiants dans un editeur de texte
 2. **Tout selectionner** (Ctrl+A / Cmd+A)
 3. **Copier** (Ctrl+C / Cmd+C)
-4. Cliquer sur l'icone de l'extension dans Chrome
+4. Cliquer sur l'icone de l'extension → Parametres → onglet **"Manuel (Token)"**
 5. **Coller** le contenu JSON complet
 6. Cliquer sur **"Enregistrer et connecter"**
-
-L'extension extrait automatiquement l'`accessToken` et le `refreshToken` de votre JSON.
 
 ## Utilisation
 
@@ -151,6 +167,23 @@ Votre token d'acces a peut-etre expire. Obtenez de nouveaux identifiants :
 3. Reconfigurez l'extension
 </details>
 
+## Changelog
+
+### v4.0 (Derniere)
+- **Nouveau :** Mode d'authentification par cookie - detection auto de la session claude.ai
+- **Nouveau :** Deux modes d'auth : Auto (Cookie) et Manuel (Token)
+- **Nouveau :** Onglets dans les parametres pour changer de mode
+- **Nouveau :** Indicateur de statut de session pour le mode cookie
+- **Nouveau :** Lien GitHub dans le footer de l'extension
+- Configuration simplifiee - soyez simplement connecte a claude.ai !
+
+### v3.4
+- **Fix :** Le package ZIP fonctionne maintenant correctement sur tous les systemes
+
+### v3.3
+- **Nouveau :** Support multi-langue (EN, FR, ES, ZH, HE)
+- **Nouveau :** Detection automatique de la langue du navigateur
+
 ## Confidentialite et Securite
 
 | Aspect | Details |
@@ -160,9 +193,28 @@ Votre token d'acces a peut-etre expire. Obtenez de nouveaux identifiants :
 | **Appels reseau** | Uniquement vers les APIs officielles d'Anthropic |
 | **Open Source** | Code complet disponible pour audit |
 
+## Contribuer
+
+**Ce projet est ouvert a tous !** Nous accueillons chaleureusement les contributions de la communaute.
+
+Les contributions sont les bienvenues ! Voici comment participer :
+
+1. Fork le repository
+2. Creez une branche (`git checkout -b feature/amelioration`)
+3. Committez vos changements
+4. Poussez vers la branche
+5. Ouvrez une Pull Request
+
+**Idees de contributions :**
+- Nouvelles fonctionnalites
+- Corrections de bugs
+- Ameliorations de l'interface
+- Nouvelles traductions
+- Documentation
+
 ## Licence
 
-Licence MIT - voir [LICENSE](LICENSE) pour plus de details.
+Licence MIT - voir [LICENSE](../LICENSE) pour plus de details.
 
 ---
 
@@ -170,8 +222,10 @@ Licence MIT - voir [LICENSE](LICENSE) pour plus de details.
 
 **Concu pour la communaute des developpeurs Claude**
 
+**Rejoignez le projet et contribuez !**
+
 Si cette extension vous aide, pensez a lui donner une etoile
 
-[Signaler un bug](https://github.com/showf68/claude-usage-monitor/issues) | [Demander une fonctionnalite](https://github.com/showf68/claude-usage-monitor/issues)
+[Signaler un bug](https://github.com/showf68/claude-usage-monitor/issues) | [Demander une fonctionnalite](https://github.com/showf68/claude-usage-monitor/issues) | [Contribuer](https://github.com/showf68/claude-usage-monitor)
 
 </div>

@@ -1,11 +1,13 @@
-// Claude Usage Monitor - Popup Script v3.3
+// Claude Usage Monitor - Popup Script v3.5
 // Multi-language support with browser detection
+// Cookie and Token auth modes
 
 const circumference = 2 * Math.PI * 42; // radius = 42
 let lastError = null;
 let parsedTokens = null;
 let currentLang = 'en';
 let translations = {};
+let currentAuthMode = 'cookie'; // 'cookie' or 'token'
 
 // Available languages with display names
 const languages = {
@@ -285,9 +287,16 @@ async function init() {
   // Load language first
   await initLanguage();
 
-  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError']);
+  // Load saved auth mode
+  await loadAuthMode();
 
-  if (!result.refreshToken && !result.accessToken && !result.token) {
+  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode']);
+
+  // Check if configured (either has tokens or using cookie mode)
+  const hasTokens = result.refreshToken || result.accessToken || result.token;
+  const usingCookies = result.authMode === 'cookie';
+
+  if (!hasTokens && !usingCookies) {
     showView('setupView');
     return;
   }
@@ -444,6 +453,122 @@ function toggleLangDropdown() {
   dropdown.classList.toggle('show');
 }
 
+// ==================== AUTH MODE ====================
+
+// Switch auth mode tab
+function switchAuthTab(mode) {
+  currentAuthMode = mode;
+
+  // Update tab styles
+  document.getElementById('tabCookie')?.classList.toggle('active', mode === 'cookie');
+  document.getElementById('tabToken')?.classList.toggle('active', mode === 'token');
+
+  // Update content visibility
+  document.getElementById('cookieContent')?.classList.toggle('active', mode === 'cookie');
+  document.getElementById('tokenContent')?.classList.toggle('active', mode === 'token');
+
+  // Check cookie status if switching to cookie mode
+  if (mode === 'cookie') {
+    checkCookieStatus();
+  }
+}
+
+// Check cookie session status
+function checkCookieStatus() {
+  const statusElem = document.getElementById('cookieStatus');
+  const connectBtn = document.getElementById('cookieConnect');
+
+  if (!statusElem) return;
+
+  // Show checking state
+  statusElem.className = 'cookie-status checking';
+  statusElem.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v6l4 2"/>
+    </svg>
+    <span>${t('checkingCookies') || 'Checking claude.ai session...'}</span>
+  `;
+
+  chrome.runtime.sendMessage({ action: 'checkCookies' }, (response) => {
+    if (chrome.runtime.lastError) {
+      statusElem.className = 'cookie-status error';
+      statusElem.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span>Extension error</span>
+      `;
+      if (connectBtn) connectBtn.disabled = true;
+      return;
+    }
+
+    if (response?.valid) {
+      statusElem.className = 'cookie-status success';
+      const orgName = response.organizations?.[0]?.name || 'Personal';
+      statusElem.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>${t('sessionFound') || 'Session found'}: ${orgName}</span>
+      `;
+      if (connectBtn) connectBtn.disabled = false;
+    } else {
+      statusElem.className = 'cookie-status error';
+      statusElem.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span>${response?.error || t('noSession') || 'No session found'}</span>
+      `;
+      if (connectBtn) connectBtn.disabled = true;
+    }
+  });
+}
+
+// Connect with cookies
+function connectWithCookies() {
+  const connectBtn = document.getElementById('cookieConnect');
+  if (connectBtn) {
+    connectBtn.disabled = true;
+    connectBtn.textContent = t('connecting') || 'Connecting...';
+  }
+
+  chrome.runtime.sendMessage({ action: 'connectWithCookies' }, (response) => {
+    if (connectBtn) {
+      connectBtn.disabled = false;
+      connectBtn.textContent = t('connectWithCookie') || 'Connect with Claude.ai Session';
+    }
+
+    if (chrome.runtime.lastError) {
+      showError('Extension error: ' + chrome.runtime.lastError.message);
+      return;
+    }
+
+    if (response?.success) {
+      closeModal();
+      if (response.data) {
+        updateUI(response.data);
+        document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
+      }
+    } else {
+      showError(response?.error || 'Failed to connect with cookies');
+    }
+  });
+}
+
+// Load saved auth mode
+async function loadAuthMode() {
+  const result = await chrome.storage.local.get(['authMode']);
+  currentAuthMode = result.authMode || 'cookie';
+  switchAuthTab(currentAuthMode);
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refreshBtn')?.addEventListener('click', refresh);
@@ -466,6 +591,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Live parsing on input
   document.getElementById('jsonInput')?.addEventListener('input', () => handleJsonInput('jsonInput', 'parseResult'));
   document.getElementById('modalJsonInput')?.addEventListener('input', () => handleJsonInput('modalJsonInput', 'modalParseResult'));
+
+  // Auth mode tabs
+  document.getElementById('tabCookie')?.addEventListener('click', () => switchAuthTab('cookie'));
+  document.getElementById('tabToken')?.addEventListener('click', () => switchAuthTab('token'));
+
+  // Cookie connect button
+  document.getElementById('cookieConnect')?.addEventListener('click', connectWithCookies);
 
   // Language selector
   document.getElementById('langBtn')?.addEventListener('click', (e) => {

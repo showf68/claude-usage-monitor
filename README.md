@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-3.4-orange)
+![Version](https://img.shields.io/badge/version-4.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -39,9 +39,11 @@ Claude Usage Monitor is a Chrome extension that displays your Claude API usage i
 2. **Extract** the ZIP file
 3. **Open** `chrome://extensions/` and enable Developer Mode
 4. **Click** "Load unpacked" and select the extracted folder
-5. **Copy** your `.credentials.json` content and paste it in the extension
+5. **Choose your auth method:**
+   - **Auto (Cookie)**: Just be logged in to claude.ai - the extension detects your session automatically!
+   - **Manual (Token)**: Paste your `.credentials.json` content
 
-That's it! The extension will automatically parse your tokens and start monitoring.
+That's it! The extension will start monitoring your usage.
 
 ## Features
 
@@ -52,9 +54,10 @@ That's it! The extension will automatically parse your tokens and start monitori
 | **Color Coding** | Green (< 50%), Orange (50-80%), Red (> 80%) |
 | **Smart Alerts** | Notifications at 70%, 80%, 90%, 95% usage |
 | **Auto-refresh** | Updates every minute automatically |
+| **Cookie Auth** | Auto-detect claude.ai session - no config needed! |
+| **Token Auth** | Manual setup with credentials.json |
 | **Multi-language** | English, French, Spanish, Chinese, Hebrew |
 | **Auto-detect Language** | Detects browser language automatically |
-| **Easy Setup** | Just paste your credentials JSON |
 | **Dark Theme** | Modern UI designed for developers |
 | **Privacy First** | All data stays local, no external servers |
 
@@ -62,7 +65,7 @@ That's it! The extension will automatically parse your tokens and start monitori
 
 ### Option 1: Download ZIP (Recommended)
 
-1. Download [`claude-usage-monitor-v3.4.zip`](https://github.com/showf68/claude-usage-monitor/releases/latest)
+1. Download [`claude-usage-monitor-v4.0.zip`](https://github.com/showf68/claude-usage-monitor/releases/latest)
 2. Extract the ZIP to a folder
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer Mode** (top-right toggle)
@@ -80,9 +83,24 @@ Then load the folder in Chrome as described above.
 
 ## Configuration
 
-### Step 1: Find Your Credentials
+The extension supports **two authentication methods**:
 
-Your Claude credentials are stored in:
+### Option A: Auto Mode (Cookie) - Recommended
+
+The easiest way! Just be logged in to [claude.ai](https://claude.ai) in Chrome.
+
+1. Click the extension icon
+2. Go to **Settings** (gear icon)
+3. Select the **"Auto (Cookie)"** tab
+4. If you see "Session found", click **"Connect with Claude.ai Session"**
+
+That's it! No tokens or files needed.
+
+### Option B: Manual Mode (Token)
+
+Use this if cookie mode doesn't work or you prefer explicit token control.
+
+#### Step 1: Find Your Credentials
 
 | Platform | Path |
 |----------|------|
@@ -90,20 +108,17 @@ Your Claude credentials are stored in:
 | **macOS** | `~/.claude/.credentials.json` |
 | **Linux** | `~/.claude/.credentials.json` |
 
-### Step 2: Copy & Paste
+#### Step 2: Copy & Paste
 
 1. Open the credentials file in any text editor
 2. **Select All** (Ctrl+A / Cmd+A)
 3. **Copy** (Ctrl+C / Cmd+C)
-4. Click the extension icon in Chrome
+4. Click the extension icon → Settings → **"Manual (Token)"** tab
 5. **Paste** the entire JSON content
 6. Click **"Save & Connect"**
 
-The extension automatically extracts the `accessToken` and `refreshToken` from your JSON.
+#### Credentials Format
 
-### Credentials Format
-
-Your file should look like this:
 ```json
 {
   "claudeAiOauth": {
@@ -211,7 +226,7 @@ claude-usage-monitor/
 │   ├── zh/messages.json   # Chinese
 │   └── he/messages.json   # Hebrew
 ├── dist/                  # Packaged releases
-│   └── claude-usage-monitor-v3.4.zip  # ZIP package
+│   └── claude-usage-monitor-v4.0.zip  # ZIP package
 ├── docs/                  # Documentation
 │   ├── README.fr.md       # French
 │   ├── README.es.md       # Spanish
@@ -223,7 +238,15 @@ claude-usage-monitor/
 
 ## Changelog
 
-### v3.4 (Latest)
+### v4.0 (Latest)
+- **New:** Cookie authentication mode - auto-detect claude.ai session
+- **New:** Two auth modes: Auto (Cookie) and Manual (Token)
+- **New:** Settings tabs to switch between auth modes
+- **New:** Session status indicator for cookie mode
+- **New:** GitHub link in extension footer
+- Simplified setup - just be logged in to claude.ai!
+
+### v3.4
 - **Fix:** ZIP package now works correctly on all systems
 - Removed CRX (not supported by Chrome policy)
 
@@ -258,13 +281,22 @@ claude-usage-monitor/
 
 ## Contributing
 
-Contributions welcome! Please:
+**This project is open to everyone!** We warmly welcome contributions from the community.
+
+Contributions are welcome! Here's how to participate:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing`)
 3. Commit your changes
 4. Push to the branch
 5. Open a Pull Request
+
+**Contribution ideas:**
+- New features
+- Bug fixes
+- UI improvements
+- New translations
+- Documentation
 
 ## License
 

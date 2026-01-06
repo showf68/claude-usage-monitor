@@ -1,6 +1,10 @@
-// Claude Usage Monitor - Background Service Worker v3.2
+// Claude Usage Monitor - Background Service Worker v3.5
 
 const API_URL = 'https://api.anthropic.com/api/oauth/usage';
+const CLAUDE_AI_API = 'https://claude.ai/api';
+
+// Auth modes: 'cookie' or 'token'
+let currentAuthMode = 'token';
 
 // Claude.ai OAuth token refresh endpoints
 const TOKEN_ENDPOINTS = [
@@ -102,6 +106,163 @@ async function refreshAccessToken() {
     return { error: errorMsg };
   }
 }
+
+// ==================== COOKIE AUTH ====================
+
+// Check if user has valid claude.ai session cookies
+async function checkCookieSession() {
+  try {
+    const cookies = await chrome.cookies.getAll({ domain: '.claude.ai' });
+    const sessionCookie = cookies.find(c =>
+      c.name === 'sessionKey' ||
+      c.name === '__cf_bm' ||
+      c.name === 'lastActiveOrg'
+    );
+
+    if (!sessionCookie) {
+      return { valid: false, error: 'No claude.ai session found. Please log in to claude.ai first.' };
+    }
+
+    // Try to fetch organization info to validate session
+    const response = await fetch(`${CLAUDE_AI_API}/organizations`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const orgs = await response.json();
+      if (orgs && orgs.length > 0) {
+        return { valid: true, organizations: orgs };
+      }
+    }
+
+    return { valid: false, error: 'Session expired. Please log in to claude.ai again.' };
+  } catch (error) {
+    return { valid: false, error: `Cookie check failed: ${error.message}` };
+  }
+}
+
+// Fetch usage data using cookies (claude.ai web session)
+async function fetchUsageWithCookies() {
+  try {
+    // First get organization ID
+    const orgsResponse = await fetch(`${CLAUDE_AI_API}/organizations`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!orgsResponse.ok) {
+      const errorMsg = `Failed to get organizations: ${orgsResponse.status}`;
+      updateBadge('ERR', '#ef4444');
+      return { error: errorMsg };
+    }
+
+    const orgs = await orgsResponse.json();
+    if (!orgs || orgs.length === 0) {
+      const errorMsg = 'No organizations found. Please log in to claude.ai.';
+      updateBadge('CFG', '#f59e0b');
+      return { error: errorMsg };
+    }
+
+    const orgId = orgs[0].uuid;
+
+    // Fetch usage/rate limit info
+    const usageResponse = await fetch(`${CLAUDE_AI_API}/organizations/${orgId}/rate_limit`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!usageResponse.ok) {
+      // Try alternative endpoint
+      const altResponse = await fetch(`${CLAUDE_AI_API}/organizations/${orgId}/usage`, {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!altResponse.ok) {
+        const errorMsg = `Failed to get usage: ${usageResponse.status}`;
+        updateBadge('ERR', '#ef4444');
+        return { error: errorMsg };
+      }
+
+      const altData = await altResponse.json();
+      return processUsageData(altData, orgs[0]);
+    }
+
+    const usageData = await usageResponse.json();
+    return processUsageData(usageData, orgs[0]);
+
+  } catch (error) {
+    const errorMsg = `Cookie fetch error: ${error.message}`;
+    console.error('Cookie fetch error:', error);
+    updateBadge('ERR', '#ef4444');
+    return { error: errorMsg };
+  }
+}
+
+// Process and normalize usage data from different endpoints
+function processUsageData(data, org) {
+  console.log('Raw usage data:', data);
+
+  // Try to extract usage info - format may vary
+  let fiveHourUsage = 0;
+  let sevenDayUsage = 0;
+  let fiveHourReset = null;
+  let sevenDayReset = null;
+
+  // Handle different response formats
+  if (data.rate_limit) {
+    fiveHourUsage = data.rate_limit.usage_percent || 0;
+    fiveHourReset = data.rate_limit.reset_at;
+  } else if (data.usage) {
+    fiveHourUsage = data.usage.percent || 0;
+  } else if (typeof data.percent !== 'undefined') {
+    fiveHourUsage = data.percent;
+  } else if (data.five_hour) {
+    // Already in expected format
+    return saveAndReturnUsage(data);
+  }
+
+  // Normalize to expected format
+  const normalizedData = {
+    five_hour: {
+      utilization: fiveHourUsage,
+      reset_at: fiveHourReset
+    },
+    daily: {
+      utilization: sevenDayUsage,
+      reset_at: sevenDayReset
+    },
+    subscription_type: org?.subscription_type || 'unknown',
+    _source: 'cookie'
+  };
+
+  return saveAndReturnUsage(normalizedData);
+}
+
+async function saveAndReturnUsage(data) {
+  await chrome.storage.local.set({
+    usage: data,
+    lastUpdate: Date.now()
+  });
+  await chrome.storage.local.remove(['lastError']);
+
+  const used = Math.round(data.five_hour?.utilization || 0);
+  updateBadgeUsage(used);
+
+  return data;
+}
+
+// ==================== TOKEN AUTH ====================
 
 // Fetch usage data
 async function fetchUsage() {
@@ -252,19 +413,73 @@ async function checkAlerts(used) {
   }
 }
 
+// ==================== MAIN FETCH DISPATCHER ====================
+
+// Unified fetch that uses the configured auth mode
+async function fetchUsageAuto() {
+  const result = await chrome.storage.local.get(['authMode']);
+  const authMode = result.authMode || 'token';
+
+  console.log('Fetching usage with mode:', authMode);
+
+  if (authMode === 'cookie') {
+    return fetchUsageWithCookies();
+  } else {
+    return fetchUsage();
+  }
+}
+
 // Init
-fetchUsage();
+(async () => {
+  const result = await chrome.storage.local.get(['authMode']);
+  currentAuthMode = result.authMode || 'token';
+  console.log('Init with auth mode:', currentAuthMode);
+  fetchUsageAuto();
+})();
 
 // Auto-refresh every minute
 chrome.alarms.create('refresh', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'refresh') fetchUsage();
+  if (alarm.name === 'refresh') fetchUsageAuto();
 });
 
 // Message handlers
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'refresh') {
-    fetchUsage().then(data => sendResponse(data));
+    fetchUsageAuto().then(data => sendResponse(data));
+    return true;
+  }
+
+  if (message.action === 'checkCookies') {
+    checkCookieSession().then(result => sendResponse(result));
+    return true;
+  }
+
+  if (message.action === 'setAuthMode') {
+    const mode = message.mode; // 'cookie' or 'token'
+    chrome.storage.local.set({ authMode: mode }).then(() => {
+      currentAuthMode = mode;
+      console.log('Auth mode set to:', mode);
+      if (mode === 'cookie') {
+        fetchUsageWithCookies().then(data => sendResponse({ success: true, data }));
+      } else {
+        fetchUsage().then(data => sendResponse({ success: true, data }));
+      }
+    });
+    return true;
+  }
+
+  if (message.action === 'connectWithCookies') {
+    chrome.storage.local.set({ authMode: 'cookie' }).then(() => {
+      currentAuthMode = 'cookie';
+      fetchUsageWithCookies().then(data => {
+        if (data.error) {
+          sendResponse({ success: false, error: data.error });
+        } else {
+          sendResponse({ success: true, data });
+        }
+      });
+    });
     return true;
   }
 

@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-3.4-orange)
+![Version](https://img.shields.io/badge/version-4.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -37,9 +37,11 @@ Claude Usage Monitor es una extension de Chrome que muestra tu uso de la API de 
 2. **Extraer** el archivo ZIP
 3. **Abrir** `chrome://extensions/` y activar el Modo Desarrollador
 4. **Hacer clic** en "Cargar extension sin empaquetar" y seleccionar la carpeta
-5. **Copiar** el contenido de tu `.credentials.json` y pegarlo en la extension
+5. **Elegir tu metodo de autenticacion:**
+   - **Auto (Cookie)**: Solo inicia sesion en claude.ai - la extension detecta tu sesion automaticamente!
+   - **Manual (Token)**: Pega el contenido de tu `.credentials.json`
 
-Eso es todo. La extension analizara automaticamente tus tokens y comenzara a monitorear.
+Eso es todo! La extension comenzara a monitorear tu uso.
 
 ## Caracteristicas
 
@@ -50,9 +52,10 @@ Eso es todo. La extension analizara automaticamente tus tokens y comenzara a mon
 | **Codigo de colores** | Verde (< 50%), Naranja (50-80%), Rojo (> 80%) |
 | **Alertas inteligentes** | Notificaciones al 70%, 80%, 90%, 95% de uso |
 | **Actualizacion automatica** | Se actualiza automaticamente cada minuto |
+| **Auth Cookie** | Deteccion automatica de sesion claude.ai - sin configuracion! |
+| **Auth Token** | Configuracion manual con credentials.json |
 | **Multi-idioma** | Ingles, Frances, Espanol, Chino, Hebreo |
 | **Deteccion automatica** | Detecta automaticamente el idioma del navegador |
-| **Configuracion facil** | Solo pega tus credenciales JSON |
 | **Tema oscuro** | Interfaz moderna disenada para desarrolladores |
 | **Privacidad primero** | Todos los datos permanecen locales |
 
@@ -61,7 +64,7 @@ Eso es todo. La extension analizara automaticamente tus tokens y comenzara a mon
 ### Opcion 1: Descargar desde Releases (Recomendado)
 
 1. Ir a [Releases](https://github.com/showf68/claude-usage-monitor/releases/latest)
-2. Descargar `claude-usage-monitor-v3.3.zip`
+2. Descargar `claude-usage-monitor-v4.0.zip`
 3. Extraer el ZIP en una carpeta
 4. Abrir Chrome e ir a `chrome://extensions/`
 5. Activar el **Modo Desarrollador** (boton arriba a la derecha)
@@ -79,9 +82,24 @@ Luego cargar la carpeta en Chrome como se describe arriba.
 
 ## Configuracion
 
-### Paso 1: Encontrar tus credenciales
+La extension soporta **dos metodos de autenticacion**:
 
-Tus credenciales de Claude estan almacenadas en:
+### Opcion A: Modo Auto (Cookie) - Recomendado
+
+La forma mas facil! Solo inicia sesion en [claude.ai](https://claude.ai) en Chrome.
+
+1. Haz clic en el icono de la extension
+2. Ve a **Configuracion** (icono de engranaje)
+3. Selecciona la pestana **"Auto (Cookie)"**
+4. Si ves "Sesion encontrada", haz clic en **"Conectar con sesion Claude.ai"**
+
+Eso es todo! No se necesitan tokens ni archivos.
+
+### Opcion B: Modo Manual (Token)
+
+Usa esto si el modo cookie no funciona o prefieres control explicito.
+
+#### Paso 1: Encontrar tus credenciales
 
 | Plataforma | Ruta |
 |------------|------|
@@ -89,16 +107,14 @@ Tus credenciales de Claude estan almacenadas en:
 | **macOS** | `~/.claude/.credentials.json` |
 | **Linux** | `~/.claude/.credentials.json` |
 
-### Paso 2: Copiar y Pegar
+#### Paso 2: Copiar y Pegar
 
 1. Abrir el archivo de credenciales en cualquier editor de texto
 2. **Seleccionar todo** (Ctrl+A / Cmd+A)
 3. **Copiar** (Ctrl+C / Cmd+C)
-4. Hacer clic en el icono de la extension en Chrome
+4. Hacer clic en el icono de la extension → Configuracion → pestana **"Manual (Token)"**
 5. **Pegar** el contenido JSON completo
 6. Hacer clic en **"Guardar y conectar"**
-
-La extension extrae automaticamente el `accessToken` y `refreshToken` de tu JSON.
 
 ## Uso
 
@@ -142,6 +158,23 @@ La extension necesita configuracion:
 3. Haz clic en "Guardar y conectar"
 </details>
 
+## Changelog
+
+### v4.0 (Ultima)
+- **Nuevo:** Modo de autenticacion por cookie - deteccion automatica de sesion claude.ai
+- **Nuevo:** Dos modos de auth: Auto (Cookie) y Manual (Token)
+- **Nuevo:** Pestanas en configuracion para cambiar de modo
+- **Nuevo:** Indicador de estado de sesion para modo cookie
+- **Nuevo:** Enlace a GitHub en el footer de la extension
+- Configuracion simplificada - solo inicia sesion en claude.ai!
+
+### v3.4
+- **Fix:** El paquete ZIP ahora funciona correctamente en todos los sistemas
+
+### v3.3
+- **Nuevo:** Soporte multi-idioma (EN, FR, ES, ZH, HE)
+- **Nuevo:** Deteccion automatica del idioma del navegador
+
 ## Privacidad y Seguridad
 
 | Aspecto | Detalles |
@@ -151,9 +184,28 @@ La extension necesita configuracion:
 | **Llamadas de red** | Solo a las APIs oficiales de Anthropic |
 | **Codigo abierto** | Codigo completo disponible para auditoria |
 
+## Contribuir
+
+**Este proyecto esta abierto a todos!** Damos la bienvenida a las contribuciones de la comunidad.
+
+Las contribuciones son bienvenidas! Asi es como puedes participar:
+
+1. Haz fork del repositorio
+2. Crea una rama (`git checkout -b feature/mejora`)
+3. Haz commit de tus cambios
+4. Push a la rama
+5. Abre un Pull Request
+
+**Ideas de contribucion:**
+- Nuevas funcionalidades
+- Correccion de errores
+- Mejoras de interfaz
+- Nuevas traducciones
+- Documentacion
+
 ## Licencia
 
-Licencia MIT - ver [LICENSE](LICENSE) para detalles.
+Licencia MIT - ver [LICENSE](../LICENSE) para detalles.
 
 ---
 
@@ -161,8 +213,10 @@ Licencia MIT - ver [LICENSE](LICENSE) para detalles.
 
 **Creado para la comunidad de desarrolladores de Claude**
 
+**Unete al proyecto y contribuye!**
+
 Si esta extension te ayuda, considera darle una estrella
 
-[Reportar error](https://github.com/showf68/claude-usage-monitor/issues) | [Solicitar funcion](https://github.com/showf68/claude-usage-monitor/issues)
+[Reportar error](https://github.com/showf68/claude-usage-monitor/issues) | [Solicitar funcion](https://github.com/showf68/claude-usage-monitor/issues) | [Contribuir](https://github.com/showf68/claude-usage-monitor)
 
 </div>

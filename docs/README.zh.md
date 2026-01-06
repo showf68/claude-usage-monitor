@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-3.4-orange)
+![Version](https://img.shields.io/badge/version-4.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -37,9 +37,11 @@ Claude Usage Monitor 是一款 Chrome 扩展程序，可实时显示您的 Claud
 2. **解压** ZIP 文件
 3. **打开** `chrome://extensions/` 并启用开发者模式
 4. **点击** "加载已解压的扩展程序" 并选择文件夹
-5. **复制** 您的 `.credentials.json` 内容并粘贴到扩展程序中
+5. **选择您的认证方式：**
+   - **自动 (Cookie)**：只需登录 claude.ai - 扩展程序会自动检测您的会话！
+   - **手动 (Token)**：粘贴您的 `.credentials.json` 内容
 
-完成！扩展程序将自动解析您的令牌并开始监控。
+完成！扩展程序将开始监控您的使用情况。
 
 ## 功能
 
@@ -50,9 +52,10 @@ Claude Usage Monitor 是一款 Chrome 扩展程序，可实时显示您的 Claud
 | **颜色编码** | 绿色 (< 50%)、橙色 (50-80%)、红色 (> 80%) |
 | **智能警报** | 在 70%、80%、90%、95% 使用率时发送通知 |
 | **自动刷新** | 每分钟自动更新 |
+| **Cookie 认证** | 自动检测 claude.ai 会话 - 无需配置！ |
+| **Token 认证** | 使用 credentials.json 手动设置 |
 | **多语言** | 英语、法语、西班牙语、中文、希伯来语 |
 | **自动检测语言** | 自动检测浏览器语言 |
-| **轻松设置** | 只需粘贴您的凭据 JSON |
 | **深色主题** | 为开发者设计的现代界面 |
 | **隐私优先** | 所有数据保留在本地 |
 
@@ -61,7 +64,7 @@ Claude Usage Monitor 是一款 Chrome 扩展程序，可实时显示您的 Claud
 ### 选项 1：从 Releases 下载（推荐）
 
 1. 前往 [Releases](https://github.com/showf68/claude-usage-monitor/releases/latest)
-2. 下载 `claude-usage-monitor-v3.3.zip`
+2. 下载 `claude-usage-monitor-v4.0.zip`
 3. 将 ZIP 解压到文件夹
 4. 打开 Chrome 并前往 `chrome://extensions/`
 5. 启用**开发者模式**（右上角开关）
@@ -79,9 +82,24 @@ cd claude-usage-monitor
 
 ## 配置
 
-### 步骤 1：找到您的凭据
+扩展程序支持**两种认证方式**：
 
-您的 Claude 凭据存储在：
+### 选项 A：自动模式 (Cookie) - 推荐
+
+最简单的方式！只需在 Chrome 中登录 [claude.ai](https://claude.ai)。
+
+1. 点击扩展程序图标
+2. 前往**设置**（齿轮图标）
+3. 选择**"自动 (Cookie)"**标签
+4. 如果看到"已找到会话"，点击**"使用 Claude.ai 会话连接"**
+
+完成！无需令牌或文件。
+
+### 选项 B：手动模式 (Token)
+
+如果 Cookie 模式不起作用或您更喜欢显式控制，请使用此选项。
+
+#### 步骤 1：找到您的凭据
 
 | 平台 | 路径 |
 |------|------|
@@ -89,16 +107,14 @@ cd claude-usage-monitor
 | **macOS** | `~/.claude/.credentials.json` |
 | **Linux** | `~/.claude/.credentials.json` |
 
-### 步骤 2：复制和粘贴
+#### 步骤 2：复制和粘贴
 
 1. 在任何文本编辑器中打开凭据文件
 2. **全选** (Ctrl+A / Cmd+A)
 3. **复制** (Ctrl+C / Cmd+C)
-4. 点击 Chrome 中的扩展程序图标
+4. 点击扩展程序图标 → 设置 → **"手动 (Token)"**标签
 5. **粘贴**完整的 JSON 内容
 6. 点击**"保存并连接"**
-
-扩展程序会自动从您的 JSON 中提取 `accessToken` 和 `refreshToken`。
 
 ## 使用方法
 
@@ -142,6 +158,23 @@ cd claude-usage-monitor
 3. 点击"保存并连接"
 </details>
 
+## 更新日志
+
+### v4.0（最新）
+- **新功能：** Cookie 认证模式 - 自动检测 claude.ai 会话
+- **新功能：** 两种认证模式：自动 (Cookie) 和手动 (Token)
+- **新功能：** 设置中的标签页用于切换模式
+- **新功能：** Cookie 模式的会话状态指示器
+- **新功能：** 扩展程序页脚中的 GitHub 链接
+- 简化设置 - 只需登录 claude.ai！
+
+### v3.4
+- **修复：** ZIP 包现在可以在所有系统上正常工作
+
+### v3.3
+- **新功能：** 多语言支持 (EN, FR, ES, ZH, HE)
+- **新功能：** 自动检测浏览器语言
+
 ## 隐私与安全
 
 | 方面 | 详情 |
@@ -151,9 +184,28 @@ cd claude-usage-monitor
 | **网络调用** | 仅调用 Anthropic 官方 API |
 | **开源** | 完整代码可供审计 |
 
+## 贡献
+
+**本项目对所有人开放！** 我们热烈欢迎社区贡献。
+
+欢迎贡献！以下是参与方式：
+
+1. Fork 仓库
+2. 创建分支 (`git checkout -b feature/improvement`)
+3. 提交更改
+4. 推送到分支
+5. 打开 Pull Request
+
+**贡献想法：**
+- 新功能
+- 错误修复
+- 界面改进
+- 新翻译
+- 文档
+
 ## 许可证
 
-MIT 许可证 - 详见 [LICENSE](LICENSE)。
+MIT 许可证 - 详见 [LICENSE](../LICENSE)。
 
 ---
 
@@ -161,8 +213,10 @@ MIT 许可证 - 详见 [LICENSE](LICENSE)。
 
 **为 Claude 开发者社区打造**
 
+**加入项目，一起贡献！**
+
 如果这个扩展程序对您有帮助，请考虑给它一个星标
 
-[报告错误](https://github.com/showf68/claude-usage-monitor/issues) | [功能请求](https://github.com/showf68/claude-usage-monitor/issues)
+[报告错误](https://github.com/showf68/claude-usage-monitor/issues) | [功能请求](https://github.com/showf68/claude-usage-monitor/issues) | [贡献代码](https://github.com/showf68/claude-usage-monitor)
 
 </div>
