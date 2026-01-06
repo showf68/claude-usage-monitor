@@ -196,11 +196,17 @@
     .info-value { font-weight: 600; color: #e4e7eb; }
 
     /* Setup */
-    .setup { padding: 16px; }
+    .setup {
+      padding: 32px 24px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
     .setup h2 {
-      font-size: 16px;
-      margin-bottom: 12px;
+      font-size: 20px;
+      margin-bottom: 8px;
       color: #f59e0b;
+      text-align: center;
+      font-weight: 700;
     }
 
     .setup label {
@@ -232,17 +238,41 @@
 
     .btn-primary {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       background: linear-gradient(135deg, #d97706, #f59e0b);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
       font-weight: 700;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      transition: all 0.2s;
     }
 
-    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #e4e7eb;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(245,158,11,0.3);
+      transform: translateY(-1px);
+    }
 
     .file-hint {
       background: rgba(245,158,11,0.1);
@@ -730,6 +760,10 @@
           </svg>
           <span data-i18n="checkingCookies">Checking claude.ai session...</span>
         </div>
+
+        <button class="btn-secondary" id="modalLoginBtn" style="margin-bottom:12px;">
+          🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span>
+        </button>
 
         <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect with Claude.ai Session</button>
 

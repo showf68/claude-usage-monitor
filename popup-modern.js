@@ -596,6 +596,9 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.tabs.create({ url: 'https://claude.ai' });
   });
   document.getElementById('setupSettingsBtn')?.addEventListener('click', openModal);
+  document.getElementById('modalLoginBtn')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://claude.ai' });
+  });
   document.getElementById('retryBtn')?.addEventListener('click', refresh);
   document.getElementById('reconfigureBtn')?.addEventListener('click', reconfigure);
 
