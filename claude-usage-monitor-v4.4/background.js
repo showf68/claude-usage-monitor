@@ -5,7 +5,6 @@ const CLAUDE_AI_API = 'https://claude.ai/api';
 
 // Auth modes: 'cookie' or 'token'
 let currentAuthMode = 'token';
-let loginCheckInterval = null; // Auto-refresh interval after login
 
 // Claude.ai OAuth token refresh endpoints
 const TOKEN_ENDPOINTS = [
@@ -486,43 +485,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       });
     });
-    return true;
-  }
-
-  if (message.action === 'startLoginCheck') {
-    // Clear existing interval
-    if (loginCheckInterval) {
-      clearInterval(loginCheckInterval);
-    }
-
-    // Auto-refresh every 2 seconds, max 30 attempts (1 minute)
-    let attempts = 0;
-    loginCheckInterval = setInterval(async () => {
-      attempts++;
-      console.log(`Login check attempt ${attempts}/30`);
-
-      if (attempts > 30) {
-        console.log('Login check timeout - stopping');
-        clearInterval(loginCheckInterval);
-        loginCheckInterval = null;
-        return;
-      }
-
-      // Try to fetch usage
-      const data = await fetchUsageAuto();
-
-      // If successful (no error), stop checking
-      if (data && !data.error && data.five_hour) {
-        console.log('Login successful - stopping check');
-        clearInterval(loginCheckInterval);
-        loginCheckInterval = null;
-
-        // Update badge to show success
-        updateBadge('OK', '#10b981');
-      }
-    }, 2000);
-
-    sendResponse({ success: true });
     return true;
   }
 
