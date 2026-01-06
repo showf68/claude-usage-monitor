@@ -27,11 +27,5 @@
   "invalidAccessToken": { "message": "Format accessToken invalide. Doit commencer par sk-ant-oat" },
   "invalidRefreshToken": { "message": "Format refreshToken invalide. Doit commencer par sk-ant-ort" },
   "pleaseEnter": { "message": "Veuillez coller le contenu de votre .credentials.json" },
-  "version": { "message": "Collez le contenu JSON complet" },
-  "notLoggedIn": { "message": "Claude.ai non connecté. Veuillez vous connecter sur Claude.ai et réessayer." },
-  "loginToClaude": { "message": "Se connecter à Claude.ai" },
-  "chooseMethod": { "message": "Choisissez votre méthode d'authentification :" },
-  "cookieMode": { "message": "Recommandé - Utilise les cookies du navigateur" },
-  "configureManually": { "message": "Configurer avec JSON" },
-  "jsonMode": { "message": "Avancé - Coller .credentials.json" }
+  "version": { "message": "Collez le contenu JSON complet" }
 }

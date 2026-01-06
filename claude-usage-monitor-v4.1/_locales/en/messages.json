@@ -29,9 +29,5 @@
   "pleaseEnter": { "message": "Please paste your .credentials.json content" },
   "version": { "message": "Paste the entire JSON file content" },
   "notLoggedIn": { "message": "Claude.ai not logged in. Please log in to Claude.ai and retry." },
-  "loginToClaude": { "message": "Login to Claude.ai" },
-  "chooseMethod": { "message": "Choose your authentication method:" },
-  "cookieMode": { "message": "Recommended - Uses browser cookies" },
-  "configureManually": { "message": "Configure with JSON" },
-  "jsonMode": { "message": "Advanced - Paste .credentials.json" }
+  "loginToClaude": { "message": "🔗 Login to Claude.ai" }
 }

@@ -8,7 +8,6 @@ let parsedTokens = null;
 let currentLang = 'en';
 let translations = {};
 let currentAuthMode = 'cookie'; // 'cookie' or 'token'
-let loginCheckInterval = null; // Auto-refresh interval after login
 
 // Available languages with display names
 const languages = {
@@ -358,37 +357,12 @@ function refresh() {
     }
 
     if (response.five_hour) {
-      // Stop login check interval on success
-      if (loginCheckInterval) {
-        clearInterval(loginCheckInterval);
-        loginCheckInterval = null;
-      }
       updateUI(response);
       document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
     } else {
       showError('Invalid response format');
     }
   });
-}
-
-// Start auto-refresh after opening claude.ai login page
-function startLoginCheck() {
-  // Clear existing interval
-  if (loginCheckInterval) {
-    clearInterval(loginCheckInterval);
-  }
-
-  // Auto-refresh every 2 seconds, max 30 attempts (1 minute)
-  let attempts = 0;
-  loginCheckInterval = setInterval(() => {
-    attempts++;
-    if (attempts > 30) {
-      clearInterval(loginCheckInterval);
-      loginCheckInterval = null;
-      return;
-    }
-    refresh();
-  }, 2000);
 }
 
 // Modal
@@ -617,17 +591,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modalClose')?.addEventListener('click', closeModal);
   document.getElementById('loginBtn')?.addEventListener('click', () => {
     chrome.tabs.create({ url: 'https://claude.ai' });
-    startLoginCheck();
   });
   document.getElementById('setupLoginBtn')?.addEventListener('click', () => {
     chrome.tabs.create({ url: 'https://claude.ai' });
-    startLoginCheck();
   });
   document.getElementById('setupSettingsBtn')?.addEventListener('click', openModal);
-  document.getElementById('modalLoginBtn')?.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://claude.ai' });
-    startLoginCheck();
-  });
   document.getElementById('retryBtn')?.addEventListener('click', refresh);
   document.getElementById('reconfigureBtn')?.addEventListener('click', reconfigure);
 
