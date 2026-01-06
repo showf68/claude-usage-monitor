@@ -435,12 +435,54 @@ async function fetchUsageAuto() {
   }
 }
 
-// Init
+// Init - Smart auto-detection
 (async () => {
-  const result = await chrome.storage.local.get(['authMode']);
-  currentAuthMode = result.authMode || 'token';
-  console.log('Init with auth mode:', currentAuthMode);
-  fetchUsageAuto();
+  const result = await chrome.storage.local.get(['authMode', 'refreshToken']);
+
+  // If authMode is already set, use it
+  if (result.authMode) {
+    currentAuthMode = result.authMode;
+    console.log('Init with saved auth mode:', currentAuthMode);
+    fetchUsageAuto();
+    return;
+  }
+
+  // No authMode set - try to auto-detect
+  console.log('No auth mode configured, trying auto-detection...');
+
+  // Try cookie mode first (if user is already logged in to claude.ai)
+  console.log('Trying cookie mode...');
+  const cookieData = await fetchUsageWithCookies();
+
+  if (cookieData && !cookieData.error && cookieData.five_hour) {
+    // Cookie mode works! Use it
+    console.log('✅ Cookie mode detected - user already logged in to claude.ai');
+    currentAuthMode = 'cookie';
+    await chrome.storage.local.set({ authMode: 'cookie' });
+    updateBadge('OK', '#10b981');
+
+    // Show OK for 3 seconds, then display usage
+    setTimeout(async () => {
+      const used = Math.round(cookieData.five_hour.utilization || 0);
+      updateBadgeUsage(used);
+    }, 3000);
+
+    return;
+  }
+
+  // Cookie mode failed, check if token is configured
+  if (result.refreshToken) {
+    console.log('Token configured, using token mode');
+    currentAuthMode = 'token';
+    await chrome.storage.local.set({ authMode: 'token' });
+    fetchUsageAuto();
+    return;
+  }
+
+  // Nothing configured - show CFG badge
+  console.log('⚠️ No authentication configured');
+  currentAuthMode = 'token'; // Default
+  updateBadge('CFG', '#eab308');
 })();
 
 // Auto-refresh every minute
