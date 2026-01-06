@@ -79,7 +79,7 @@ git clone https://github.com/showf68/claude-usage-monitor.git
 cd claude-usage-monitor
 ```
 
-Then load the folder in Chrome as described above.
+Then load the `claude-usage-monitor` folder directly in Chrome (the extension files are at the root).
 
 ## Configuration
 
@@ -225,9 +225,8 @@ claude-usage-monitor/
 │   ├── es/messages.json   # Spanish
 │   ├── zh/messages.json   # Chinese
 │   └── he/messages.json   # Hebrew
-├── dist/                  # Packaged releases
-│   └── claude-usage-monitor-v4.5.zip  # ZIP package
-├── docs/                  # Documentation
+├── dist/                  # Packaged releases (ZIPs)
+├── docs/                  # Multilingual documentation
 │   ├── README.fr.md       # French
 │   ├── README.es.md       # Spanish
 │   ├── README.zh.md       # Chinese

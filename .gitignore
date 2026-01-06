@@ -15,13 +15,12 @@ desktop.ini
 *.temp
 dist/temp/
 
-# Old version folders (keep only latest)
+# Old version folders (not needed - source is at root)
 claude-usage-monitor-v*/
-!claude-usage-monitor-v4.5/
 
 # Old ZIPs in dist (releases are on GitHub)
 dist/*.zip
-!dist/claude-usage-monitor-v4.5.zip
+!dist/claude-usage-monitor-v*.zip
 
 # Logs
 *.log
