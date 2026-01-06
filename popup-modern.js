@@ -592,6 +592,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginBtn')?.addEventListener('click', () => {
     chrome.tabs.create({ url: 'https://claude.ai' });
   });
+  document.getElementById('setupLoginBtn')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://claude.ai' });
+  });
+  document.getElementById('setupSettingsBtn')?.addEventListener('click', openModal);
   document.getElementById('retryBtn')?.addEventListener('click', refresh);
   document.getElementById('reconfigureBtn')?.addEventListener('click', reconfigure);
 

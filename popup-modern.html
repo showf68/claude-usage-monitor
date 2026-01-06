@@ -616,22 +616,19 @@
     <!-- Setup View -->
     <div class="setup" id="setupView" style="display:none;">
       <h2 data-i18n="configuration">Configuration</h2>
+      <p style="text-align:center;color:#94a3b8;margin-bottom:24px;" data-i18n="chooseMethod">Choose your authentication method:</p>
 
-      <div class="file-hint" id="openCredentials">
-        <span data-i18n="copyPath">Click to copy .credentials.json path</span>
-      </div>
+      <button class="btn-primary" id="setupLoginBtn" style="margin-bottom:12px;">
+        🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span>
+      </button>
+      <p style="text-align:center;font-size:11px;color:#64748b;margin-bottom:24px;" data-i18n="cookieMode">Recommended - Uses browser cookies</p>
 
-      <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
-      <textarea id="jsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-...","refreshToken":"sk-ant-ort01-..."}}'></textarea>
+      <div style="text-align:center;margin:20px 0;color:#475569;">── or ──</div>
 
-      <div id="parseResult"></div>
-
-      <button class="btn-primary" id="saveBtn" data-i18n="saveConnect">Save & Connect</button>
-
-      <div class="debug-info">
-        <span data-i18n="debugHint">Open the file and copy ALL its content (Ctrl+A, Ctrl+C)</span>
-        <code>%USERPROFILE%\.claude\.credentials.json</code>
-      </div>
+      <button class="btn-secondary" id="setupSettingsBtn">
+        ⚙️ <span data-i18n="configureManually">Configure with JSON</span>
+      </button>
+      <p style="text-align:center;font-size:11px;color:#64748b;margin-top:8px;" data-i18n="jsonMode">Advanced - Paste .credentials.json</p>
     </div>
 
     <!-- Usage View -->
