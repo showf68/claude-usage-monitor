@@ -139,6 +139,7 @@
 
     .circle-svg { transform: rotate(-90deg); }
     .circle-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
+    .circle-bg-inner { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
 
     .circle-progress {
       fill: none;
@@ -150,6 +151,15 @@
     .circle-progress.low { stroke: #22c55e; }
     .circle-progress.medium { stroke: #f59e0b; }
     .circle-progress.high { stroke: #ef4444; }
+
+    .circle-progress-time {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke: #64748b;
+      transition: stroke-dashoffset 0.5s ease;
+      opacity: 0.8;
+    }
 
     .circle-text {
       position: absolute;
@@ -667,7 +677,14 @@
         <div class="circle-card">
           <div class="circle-wrapper">
             <svg class="circle-svg" width="100" height="100">
+              <!-- Outer ring background -->
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
+              <!-- Inner ring background -->
+              <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
+              <!-- Inner ring progress (time elapsed) -->
+              <circle class="circle-progress-time" id="circleTime5h" cx="50" cy="50" r="34"
+                      stroke-dasharray="213.63" stroke-dashoffset="0"/>
+              <!-- Outer ring progress (usage) -->
               <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42"
                       stroke-dasharray="263.89" stroke-dashoffset="0"/>
             </svg>
@@ -682,7 +699,14 @@
         <div class="circle-card">
           <div class="circle-wrapper">
             <svg class="circle-svg" width="100" height="100">
+              <!-- Outer ring background -->
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
+              <!-- Inner ring background -->
+              <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
+              <!-- Inner ring progress (time elapsed) -->
+              <circle class="circle-progress-time" id="circleTime7d" cx="50" cy="50" r="34"
+                      stroke-dasharray="213.63" stroke-dashoffset="0"/>
+              <!-- Outer ring progress (usage) -->
               <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42"
                       stroke-dasharray="263.89" stroke-dashoffset="0"/>
             </svg>
