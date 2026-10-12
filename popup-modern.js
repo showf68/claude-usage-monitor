@@ -1,4 +1,4 @@
-// Claude Usage Monitor - Popup Script v3.5
+// AI Usage Monitor (Claude Code + Codex) - Popup Script v5.0
 // Multi-language support with browser detection
 // Cookie and Token auth modes
 
@@ -9,6 +9,8 @@ let parsedTokens = null;
 let currentLang = 'en';
 let translations = {};
 let currentAuthMode = 'cookie'; // 'cookie' or 'token'
+let currentProvider = 'claude';
+let codexParsed = null;
 
 // Available languages with display names
 const languages = {
@@ -227,26 +229,164 @@ function updateUI(data) {
 
   showView('usageView');
 
-  // 5-hour window (5 hours = 5 * 60 * 60 * 1000 ms = 18,000,000 ms)
+  // 5-hour window
   const FIVE_HOUR_WINDOW_MS = 5 * 60 * 60 * 1000;
   const used5h = data.five_hour.utilization || 0;
   const reset5h = data.five_hour.resets_at || data.five_hour.reset_at;
   updateCircularProgress('circle5h', 'percent5h', 'circleTime5h', used5h, reset5h, FIVE_HOUR_WINDOW_MS);
   document.getElementById('reset5h').textContent = formatTimeRemaining(reset5h);
 
-  // 7-day window (7 days = 7 * 24 * 60 * 60 * 1000 ms = 604,800,000 ms)
+  // 7-day window
   const SEVEN_DAY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const used7d = data.seven_day?.utilization || 0;
   const reset7d = data.seven_day?.resets_at || data.seven_day?.reset_at;
   updateCircularProgress('circle7d', 'percent7d', 'circleTime7d', used7d, reset7d, SEVEN_DAY_WINDOW_MS);
   document.getElementById('reset7d').textContent = formatTimeRemaining(reset7d);
 
-  // Plan
+  // Extras : fenetres par modele, usage supplementaire
+  const extras = [];
+  if (data.seven_day_sonnet) extras.push(extraRow('Sonnet 7d', data.seven_day_sonnet.utilization, data.seven_day_sonnet.resets_at));
+  if (data.seven_day_opus) extras.push(extraRow('Opus 7d', data.seven_day_opus.utilization, data.seven_day_opus.resets_at));
+  if (data.extra_usage?.is_enabled && data.extra_usage.utilization != null) {
+    extras.push(extraRow('Extra usage', data.extra_usage.utilization, null));
+  }
+  const extrasElem = document.getElementById('claudeExtras');
+  extrasElem.innerHTML = extras.join('');
+  extrasElem.style.display = extras.length ? 'block' : 'none';
+
   const planElem = document.getElementById('plan');
   if (data.plan && planElem) {
     planElem.textContent = data.plan;
     planElem.style.display = 'block';
   }
+
+  setDot('dotClaude', used5h);
+}
+
+function extraRow(label, used, resetAt) {
+  const u = Math.max(0, Math.min(100, used || 0));
+  const reset = resetAt ? ` <span style="color:#64748b">${formatTimeRemaining(resetAt)}</span>` : '';
+  return `<div class="extra-row"><span>${label}</span><span class="bar"><i class="${getColorClass(u)}" style="width:${u}%"></i></span><span>${Math.round(u)}%${reset}</span></div>`;
+}
+
+function setDot(id, used) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = used == null ? 'dot err' : `dot ${getColorClass(used)}`;
+}
+
+// ==================== CODEX ====================
+
+function windowLabel(w) {
+  const h = Math.round((w.window_ms || 0) / 3600000);
+  if (!h) return 'Window';
+  if (h % 24 === 0) return `${h / 24} ${h === 24 ? 'Day' : 'Days'}`;
+  return `${h} Hours`;
+}
+
+function ringHtml(id, label) {
+  return `<div class="circle-card">
+    <div class="circle-wrapper">
+      <svg class="circle-svg" width="100" height="100">
+        <circle class="circle-bg" cx="50" cy="50" r="42"/>
+        <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
+        <circle class="circle-progress-time" id="${id}T" cx="50" cy="50" r="34" stroke-dasharray="213.63" stroke-dashoffset="0"/>
+        <circle class="circle-progress low" id="${id}C" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="0"/>
+      </svg>
+      <div class="circle-text">
+        <div class="circle-percent" id="${id}P">--%</div>
+        <div class="circle-label">${label}</div>
+      </div>
+    </div>
+    <div class="reset-time"><span id="${id}R">--</span></div>
+  </div>`;
+}
+
+function renderCodex(data) {
+  const circles = document.getElementById('codexCircles');
+  const info = document.getElementById('codexInfo');
+  const err = document.getElementById('codexError');
+
+  if (!data) {
+    circles.innerHTML = '';
+    info.style.display = 'none';
+    err.style.display = 'block';
+    err.innerHTML = 'Codex not connected.<br><button class="btn-primary" id="codexInlineConnect">Connect Codex</button>';
+    document.getElementById('codexInlineConnect')?.addEventListener('click', openModal);
+    setDot('dotCodex', null);
+    return;
+  }
+
+  if (data.error) {
+    circles.innerHTML = '';
+    info.style.display = 'none';
+    err.style.display = 'block';
+    const msg = data.error === 'NOT_LOGGED_IN' ? 'Not logged in to chatgpt.com.' : data.error;
+    err.innerHTML = `${msg}<br>${data.needsLogin ? '<button class="btn-primary" id="codexInlineLogin">Login to chatgpt.com</button>' : ''}`;
+    document.getElementById('codexInlineLogin')?.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://chatgpt.com' });
+      chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
+    });
+    setDot('dotCodex', null);
+    return;
+  }
+
+  err.style.display = 'none';
+  const windows = data.windows || [];
+  const main = windows.filter(w => w.key !== 'code_review');
+  circles.innerHTML = main.map((w, i) => ringHtml(`cx${i}`, windowLabel(w))).join('');
+  main.forEach((w, i) => {
+    updateCircularProgress(`cx${i}C`, `cx${i}P`, `cx${i}T`, w.utilization || 0, w.resets_at, w.window_ms);
+    document.getElementById(`cx${i}R`).textContent = formatTimeRemaining(w.resets_at);
+  });
+
+  const rows = [];
+  const review = windows.find(w => w.key === 'code_review');
+  if (review) rows.push(extraRow('Code review', review.utilization, review.resets_at));
+  if (data.credits && (data.credits.has_credits || data.credits.unlimited)) {
+    rows.push(`<div class="info-row"><span class="info-label">Credits</span><span class="info-value">${data.credits.unlimited ? 'Unlimited' : data.credits.balance}</span></div>`);
+  }
+  if (data.limit_reached) {
+    rows.push('<div class="info-row"><span class="info-label" style="color:#ef4444">Limit reached</span></div>');
+  }
+  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">Plan</span><span class="info-value">${data.plan}</span></div>`);
+  if (data.email) rows.push(`<div class="info-row"><span class="info-label">Account</span><span class="info-value">${data.email}</span></div>`);
+  info.innerHTML = rows.join('');
+  info.style.display = rows.length ? 'block' : 'none';
+
+  const shortest = [...main].sort((a, b) => (a.window_ms || 1e12) - (b.window_ms || 1e12))[0];
+  setDot('dotCodex', shortest ? shortest.utilization : null);
+}
+
+function switchProvider(provider) {
+  currentProvider = provider;
+  document.getElementById('tabClaude')?.classList.toggle('active', provider === 'claude');
+  document.getElementById('tabCodex')?.classList.toggle('active', provider === 'codex');
+  document.getElementById('claudePanel').style.display = provider === 'claude' ? 'block' : 'none';
+  document.getElementById('codexPanel').style.display = provider === 'codex' ? 'block' : 'none';
+  chrome.storage.local.set({ lastProvider: provider });
+}
+
+// Affiche les deux fournisseurs ; l'erreur d'un seul ne masque pas l'autre
+function renderAll(res) {
+  const { claude, codex, codexOff } = res;
+  document.getElementById('tabCodex').style.display = codexOff ? 'none' : 'flex';
+  if (codexOff && currentProvider === 'codex') switchProvider('claude');
+  if (claude && !claude.error && claude.five_hour) {
+    updateUI(claude);
+  } else if (claude && claude.error && (codexOff || !codex || codex.error)) {
+    showError(claude.error, claude.needsLogin);
+    return;
+  } else {
+    showView('usageView');
+    if (claude && claude.error) {
+      const extrasElem = document.getElementById('claudeExtras');
+      extrasElem.innerHTML = `<div style="color:#fca5a5;font-size:12px;padding:6px 0">Claude: ${claude.error === 'NOT_LOGGED_IN' ? 'not logged in to claude.ai' : claude.error}</div>`;
+      extrasElem.style.display = 'block';
+      setDot('dotClaude', null);
+    }
+  }
+  if (!codexOff) renderCodex(codex);
 }
 
 // Parse JSON input and extract tokens
@@ -330,6 +470,19 @@ function showParseResult(resultElemId, parseResult) {
   }
 }
 
+// Codex : extraire access_token / account_id d'un auth.json colle
+function parseCodexCredentials(text) {
+  try {
+    const d = JSON.parse(text.trim());
+    const tk = d.tokens || d;
+    const accessToken = tk.access_token || tk.accessToken;
+    if (!accessToken) return { error: 'No access_token found in the JSON.' };
+    return { accessToken, accountId: tk.account_id || tk.accountId || '', success: true };
+  } catch (e) {
+    return { error: t('invalidJson') + ': ' + e.message };
+  }
+}
+
 // Initialize
 async function init() {
   // Load language first
@@ -338,27 +491,27 @@ async function init() {
   // Load saved auth mode
   await loadAuthMode();
 
-  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode']);
+  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider']);
+  const badgeSel = document.getElementById('badgeProvider');
+  if (badgeSel) badgeSel.value = result.badgeProvider || 'auto';
+  if (result.lastProvider) switchProvider(result.lastProvider);
 
   // Check if configured (either has tokens or using cookie mode)
   const hasTokens = result.refreshToken || result.accessToken || result.token;
   const usingCookies = result.authMode === 'cookie';
 
-  if (!hasTokens && !usingCookies) {
+  if (!hasTokens && !usingCookies && !result.codexUsage) {
     showView('setupView');
     return;
   }
 
-  if (result.lastError) {
-    showError(result.lastError);
-    return;
-  }
-
-  if (result.usage) {
-    updateUI(result.usage);
+  if (result.usage || result.codexUsage) {
+    renderAll({ claude: result.usage, codex: result.codexUsage, codexOff: !!result.codexDisabled });
     if (result.lastUpdate) {
       document.getElementById('lastUpdate').textContent = formatTimeAgo(result.lastUpdate);
     }
+  } else if (result.lastError) {
+    showError(result.lastError);
   } else {
     showView('usageView');
   }
@@ -384,23 +537,16 @@ function refresh() {
       return;
     }
 
-    if (response.error) {
-      showError(response.error, response.needsLogin);
-      return;
-    }
-
-    if (response.five_hour) {
-      updateUI(response);
+    chrome.storage.local.get(['codexDisabled']).then(({ codexDisabled }) => {
+      renderAll({ claude: response.claude, codex: response.codex, codexOff: !!codexDisabled });
       document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
-    } else {
-      showError('Invalid response format');
-    }
+    });
   });
 }
 
 // Start auto-refresh in background after opening claude.ai login page
 function startLoginCheck() {
-  chrome.runtime.sendMessage({ action: 'startLoginCheck' }, (response) => {
+  chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'claude' }, (response) => {
     if (response && response.success) {
       console.log('Background login check started');
     }
@@ -408,7 +554,18 @@ function startLoginCheck() {
 }
 
 // Modal
+function checkCodexStatus() {
+  const el = document.getElementById('codexStatus');
+  if (!el) return;
+  chrome.runtime.sendMessage({ action: 'checkCodexSession' }, (r) => {
+    if (chrome.runtime.lastError) return;
+    el.className = r?.valid ? 'cookie-status success' : 'cookie-status error';
+    el.innerHTML = `<span>${r?.valid ? 'Codex session found (' + r.source + ')' : 'No chatgpt.com session'}</span>`;
+  });
+}
+
 function openModal() {
+  checkCodexStatus();
   document.getElementById('modalBackdrop').classList.add('show');
   document.getElementById('modalParseResult').innerHTML = '';
   document.getElementById('modalJsonInput').value = '';
@@ -418,11 +575,26 @@ function closeModal() {
   document.getElementById('modalBackdrop').classList.remove('show');
 }
 
+// Non-blocking toast (replaces alert)
+function showToast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:10px;background:#1e293b;border:1px solid rgba(245,158,11,0.5);color:#fde68a;font-size:11px;z-index:99;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
 // Copy credentials path
 function copyCredentialsPath() {
   const path = '%USERPROFILE%\\.claude\\.credentials.json';
   navigator.clipboard.writeText(path).then(() => {
-    alert(`${t('pathCopied')}\n\n${path}\n\n${t('pasteInExplorer')}\n${t('openAndCopy')}`);
+    showToast(`${t('pathCopied')} ${path} - ${t('pasteInExplorer')} ${t('openAndCopy')}`);
   });
 }
 
@@ -665,6 +837,48 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auth mode tabs
   document.getElementById('tabCookie')?.addEventListener('click', () => switchAuthTab('cookie'));
   document.getElementById('tabToken')?.addEventListener('click', () => switchAuthTab('token'));
+
+  // Provider tabs
+  document.getElementById('tabClaude')?.addEventListener('click', () => switchProvider('claude'));
+  document.getElementById('tabCodex')?.addEventListener('click', () => switchProvider('codex'));
+
+  // Codex settings
+  document.getElementById('codexLoginBtn')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://chatgpt.com' });
+    chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
+  });
+  document.getElementById('codexConnect')?.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'connectCodex' }, (r) => {
+      closeModal();
+      refresh();
+      switchProvider('codex');
+      if (r && !r.success) showToast(r.error || 'Codex connection failed');
+    });
+  });
+  document.getElementById('codexJsonInput')?.addEventListener('input', (e) => {
+    const out = document.getElementById('codexParseResult');
+    const v = e.target.value.trim();
+    if (!v) { out.innerHTML = ''; codexParsed = null; return; }
+    const r = parseCodexCredentials(v);
+    codexParsed = r.success ? r : null;
+    out.className = r.success ? 'parse-result success' : 'parse-result error';
+    out.innerHTML = r.success ? `✅ access_token ${r.accessToken.substring(0, 12)}...` : `❌ ${r.error}`;
+  });
+  document.getElementById('codexSave')?.addEventListener('click', () => {
+    if (!codexParsed) return;
+    chrome.runtime.sendMessage({ action: 'setCodexTokens', ...codexParsed }, (r) => {
+      closeModal();
+      refresh();
+      switchProvider('codex');
+      if (r && !r.success) showToast(r.error || 'Codex token rejected');
+    });
+  });
+  document.getElementById('codexDisable')?.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); switchProvider('claude'); refresh(); });
+  });
+  document.getElementById('badgeProvider')?.addEventListener('change', (e) => {
+    chrome.runtime.sendMessage({ action: 'setBadgeProvider', provider: e.target.value });
+  });
 
   // Cookie connect button
   document.getElementById('cookieConnect')?.addEventListener('click', connectWithCookies);

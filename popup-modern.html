@@ -612,6 +612,32 @@
       width: 14px;
       height: 14px;
     }
+
+    /* Provider tabs */
+    .provider-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .provider-tab {
+      flex: 1; padding: 8px 10px; border-radius: 10px; cursor: pointer;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8; font-size: 12px; font-weight: 600; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .provider-tab.active { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.5); color: #fbbf24; }
+    .provider-tab .dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+    .provider-tab .dot.low { background: #22c55e; }
+    .provider-tab .dot.medium { background: #f59e0b; }
+    .provider-tab .dot.high { background: #ef4444; }
+    .provider-tab .dot.err { background: #64748b; }
+    .extra-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; color: #cbd5e1; }
+    .extra-row .bar { flex: 1; height: 6px; margin: 0 10px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .extra-row .bar > i { display: block; height: 100%; border-radius: 3px; }
+    .extra-row .bar > i.low { background: #22c55e; }
+    .extra-row .bar > i.medium { background: #f59e0b; }
+    .extra-row .bar > i.high { background: #ef4444; }
+    .panel-error { padding: 14px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; font-size: 12px; text-align: center; }
+    .panel-error button { margin-top: 10px; }
+    .badge-select { width: 100%; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); font-size: 12px; font-family: inherit; }
+    .section-title { margin: 18px 0 8px; font-size: 12px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.04em; }
+    .codex-credentials { width: 100%; min-height: 70px; }
   </style>
 </head>
 <body>
@@ -619,7 +645,7 @@
   <div class="header">
     <div class="logo">CC</div>
     <div class="title">
-      <h1>Claude Usage Monitor</h1>
+      <h1>AI Usage Monitor</h1>
       <div class="plan" id="plan" style="display:none;"></div>
     </div>
     <div class="header-actions">
@@ -673,6 +699,12 @@
 
     <!-- Usage View -->
     <div id="usageView" style="display:none;">
+      <div class="provider-tabs" id="providerTabs">
+        <button class="provider-tab active" id="tabClaude" data-provider="claude"><span class="dot" id="dotClaude"></span>Claude Code</button>
+        <button class="provider-tab" id="tabCodex" data-provider="codex"><span class="dot" id="dotCodex"></span>Codex</button>
+      </div>
+
+      <div id="claudePanel">
       <div class="circles-container">
         <div class="circle-card">
           <div class="circle-wrapper">
@@ -719,6 +751,15 @@
         </div>
       </div>
 
+      <div class="info-card" id="claudeExtras" style="display:none;"></div>
+      </div>
+
+      <div id="codexPanel" style="display:none;">
+        <div class="circles-container" id="codexCircles"></div>
+        <div class="info-card" id="codexInfo"></div>
+        <div class="panel-error" id="codexError" style="display:none;"></div>
+      </div>
+
       <div class="info-card">
         <div class="info-row">
           <span class="info-label" data-i18n="lastUpdated">Last Updated</span>
@@ -748,7 +789,7 @@
         </svg>
         GitHub
       </a>
-      <span style="font-size:10px;color:#64748b;">v4.5</span>
+      <span style="font-size:10px;color:#64748b;">v5.0</span>
     </div>
   </div>
 
@@ -813,7 +854,25 @@
         <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save & Connect</button>
       </div>
 
-      <div class="modal-footer">v4.0 - <span data-i18n="version">Paste the entire JSON file content</span></div>
+      <!-- Codex -->
+      <div class="section-title">Codex (ChatGPT)</div>
+      <div class="cookie-status checking" id="codexStatus"><span>...</span></div>
+      <button class="btn-secondary" id="codexLoginBtn" style="margin-bottom:10px;">🔗 Login to chatgpt.com</button>
+      <button class="btn-primary" id="codexConnect" style="margin-bottom:10px;">Connect Codex (browser session)</button>
+      <label>Or paste ~/.codex/auth.json:</label>
+      <textarea id="codexJsonInput" class="codex-credentials" placeholder='{"tokens":{"access_token":"...","account_id":"..."}}'></textarea>
+      <div id="codexParseResult"></div>
+      <button class="btn-secondary" id="codexSave" style="margin-bottom:8px;">Save Codex token</button>
+      <button class="btn-secondary" id="codexDisable">Disable Codex</button>
+
+      <div class="section-title">Badge</div>
+      <select id="badgeProvider" class="badge-select">
+        <option value="auto">Highest of Claude / Codex</option>
+        <option value="claude">Claude Code only</option>
+        <option value="codex">Codex only</option>
+      </select>
+
+      <div class="modal-footer">v5.0 - <span data-i18n="version">Paste the entire JSON file content</span></div>
     </div>
   </div>
 

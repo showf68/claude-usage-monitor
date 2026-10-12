@@ -1,20 +1,19 @@
-// Claude Usage Monitor - Background Service Worker v3.5
+// AI Usage Monitor (Claude Code + Codex) - Background Service Worker v5.0
 
 const API_URL = 'https://api.anthropic.com/api/oauth/usage';
 const CLAUDE_AI_API = 'https://claude.ai/api';
+const CODEX_USAGE_URL = 'https://chatgpt.com/backend-api/wham/usage';
+const CODEX_SESSION_URL = 'https://chatgpt.com/api/auth/session';
 
-// Auth modes: 'cookie' or 'token'
-let currentAuthMode = 'token';
-let loginCheckInterval = null; // Auto-refresh interval after login
+const PROVIDERS = {
+  claude: { name: 'Claude Code', cacheKey: 'usage' },
+  codex: { name: 'Codex', cacheKey: 'codexUsage' }
+};
 
-// Claude.ai OAuth token refresh endpoints
-const TOKEN_ENDPOINTS = [
-  'https://claude.ai/api/auth/refresh_token',
-  'https://api.claude.ai/v1/auth/token',
-  'https://console.anthropic.com/v1/oauth/token'
-];
+let loginCheckInterval = null;
 
-// Refresh access token using Claude.ai OAuth
+// ==================== CLAUDE : REFRESH TOKEN ====================
+
 async function refreshAccessToken() {
   try {
     const result = await chrome.storage.local.get(['refreshToken']);
@@ -23,37 +22,24 @@ async function refreshAccessToken() {
     if (!refreshToken) {
       return { error: 'No refresh token configured. Please add your token in Settings.' };
     }
-
-    // Validate token format
     if (!refreshToken.startsWith('sk-ant-o')) {
       return { error: 'Invalid token format. Token must start with sk-ant-oat01- (access) or sk-ant-ort01- (refresh)' };
     }
 
-    // If it's an access token, try to use it directly first
     if (refreshToken.startsWith('sk-ant-oat01-')) {
-      console.log('Token appears to be an access token, using directly');
-      await chrome.storage.local.set({
-        token: refreshToken,
-        accessToken: refreshToken
-      });
+      await chrome.storage.local.set({ token: refreshToken, accessToken: refreshToken });
       return { token: refreshToken };
     }
 
-    console.log('Attempting to refresh token...');
     let lastErrorMsg = '';
 
-    // Try Claude.ai refresh endpoint first (POST with token in body)
     try {
       const response = await fetch('https://claude.ai/api/auth/refresh_token', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken }),
         credentials: 'include'
       });
-
       if (response.ok) {
         const data = await response.json();
         if (data.access_token) {
@@ -63,7 +49,6 @@ async function refreshAccessToken() {
             refreshToken: data.refresh_token || refreshToken
           });
           await chrome.storage.local.remove(['lastError']);
-          console.log('Token refreshed via claude.ai');
           return { token: data.access_token };
         }
       }
@@ -72,7 +57,6 @@ async function refreshAccessToken() {
       lastErrorMsg = `claude.ai refresh: ${e.message}`;
     }
 
-    // Try with bearer auth header
     try {
       const response = await fetch(API_URL, {
         headers: {
@@ -82,14 +66,8 @@ async function refreshAccessToken() {
           'anthropic-beta': 'oauth-2025-04-20'
         }
       });
-
       if (response.ok) {
-        // The refresh token works as access token directly
-        console.log('Refresh token works as access token');
-        await chrome.storage.local.set({
-          token: refreshToken,
-          accessToken: refreshToken
-        });
+        await chrome.storage.local.set({ token: refreshToken, accessToken: refreshToken });
         await chrome.storage.local.remove(['lastError']);
         return { token: refreshToken };
       }
@@ -108,190 +86,90 @@ async function refreshAccessToken() {
   }
 }
 
-// ==================== COOKIE AUTH ====================
+// ==================== CLAUDE : COOKIE AUTH ====================
 
-// Check if user has valid claude.ai session cookies
 async function checkCookieSession() {
   try {
     const cookies = await chrome.cookies.getAll({ domain: '.claude.ai' });
     const sessionCookie = cookies.find(c =>
-      c.name === 'sessionKey' ||
-      c.name === '__cf_bm' ||
-      c.name === 'lastActiveOrg'
+      c.name === 'sessionKey' || c.name === '__cf_bm' || c.name === 'lastActiveOrg'
     );
-
     if (!sessionCookie) {
       return { valid: false, error: 'No claude.ai session found. Please log in to claude.ai first.' };
     }
-
-    // Try to fetch organization info to validate session
     const response = await fetch(`${CLAUDE_AI_API}/organizations`, {
       credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
     });
-
     if (response.ok) {
       const orgs = await response.json();
-      if (orgs && orgs.length > 0) {
-        return { valid: true, organizations: orgs };
-      }
+      if (orgs && orgs.length > 0) return { valid: true, organizations: orgs };
     }
-
     return { valid: false, error: 'Session expired. Please log in to claude.ai again.' };
   } catch (error) {
     return { valid: false, error: `Cookie check failed: ${error.message}` };
   }
 }
 
-// Fetch usage data using cookies (claude.ai web session)
 async function fetchUsageWithCookies() {
   try {
-    // First get organization ID
     const orgsResponse = await fetch(`${CLAUDE_AI_API}/organizations`, {
       credentials: 'include',
-      headers: {
-        'Accept': 'application/json'
-      }
+      headers: { 'Accept': 'application/json' }
     });
 
     if (!orgsResponse.ok) {
-      // 403/401 = not logged in to claude.ai
       if (orgsResponse.status === 403 || orgsResponse.status === 401) {
-        updateBadge('ERR', '#ef4444');
         return { error: 'NOT_LOGGED_IN', needsLogin: true };
       }
-      const errorMsg = `API error: ${orgsResponse.status}`;
-      updateBadge('ERR', '#ef4444');
-      return { error: errorMsg };
+      return { error: `API error: ${orgsResponse.status}` };
     }
 
     const orgs = await orgsResponse.json();
     if (!orgs || orgs.length === 0) {
-      const errorMsg = 'No organizations found. Please log in to claude.ai.';
-      updateBadge('CFG', '#f59e0b');
-      return { error: errorMsg };
+      return { error: 'No organizations found. Please log in to claude.ai.' };
     }
 
-    const orgId = orgs[0].uuid;
-
-    // Fetch usage/rate limit info
-    const usageResponse = await fetch(`${CLAUDE_AI_API}/organizations/${orgId}/rate_limit`, {
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!usageResponse.ok) {
-      // Try alternative endpoint
-      const altResponse = await fetch(`${CLAUDE_AI_API}/organizations/${orgId}/usage`, {
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json'
+    // Plusieurs organisations possibles : prendre celle qui rend un five_hour
+    let lastStatus = null;
+    for (const org of orgs) {
+      for (const suffix of ['usage', 'rate_limit']) {
+        const r = await fetch(`${CLAUDE_AI_API}/organizations/${org.uuid}/${suffix}`, {
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
+        });
+        lastStatus = r.status;
+        if (!r.ok) continue;
+        const data = await r.json();
+        if (data && data.five_hour) {
+          data.plan = data.plan || planLabel(org.billing_type || org.subscription_type || org.rate_limit_tier);
+          data._source = 'cookie';
+          return data;
         }
-      });
-
-      if (!altResponse.ok) {
-        const errorMsg = `Failed to get usage: ${usageResponse.status}`;
-        updateBadge('ERR', '#ef4444');
-        return { error: errorMsg };
       }
-
-      const altData = await altResponse.json();
-      return processUsageData(altData, orgs[0]);
     }
-
-    const usageData = await usageResponse.json();
-    return processUsageData(usageData, orgs[0]);
-
+    return { error: `Cookie mode: no usage data from claude.ai (HTTP ${lastStatus}). Use token mode.` };
   } catch (error) {
-    const errorMsg = `Cookie fetch error: ${error.message}`;
-    console.error('Cookie fetch error:', error);
-    updateBadge('ERR', '#ef4444');
-    return { error: errorMsg };
+    return { error: `Cookie fetch error: ${error.message}` };
   }
 }
 
-// Process and normalize usage data from different endpoints
-function processUsageData(data, org) {
-  console.log('Raw usage data:', data);
+// ==================== CLAUDE : TOKEN AUTH ====================
 
-  // Try to extract usage info - format may vary
-  let fiveHourUsage = 0;
-  let sevenDayUsage = 0;
-  let fiveHourReset = null;
-  let sevenDayReset = null;
-
-  // Handle different response formats
-  if (data.rate_limit) {
-    fiveHourUsage = data.rate_limit.usage_percent || 0;
-    fiveHourReset = data.rate_limit.reset_at;
-  } else if (data.usage) {
-    fiveHourUsage = data.usage.percent || 0;
-  } else if (typeof data.percent !== 'undefined') {
-    fiveHourUsage = data.percent;
-  } else if (data.five_hour) {
-    // Already in expected format
-    return saveAndReturnUsage(data);
-  }
-
-  // Normalize to expected format
-  const normalizedData = {
-    five_hour: {
-      utilization: fiveHourUsage,
-      reset_at: fiveHourReset
-    },
-    daily: {
-      utilization: sevenDayUsage,
-      reset_at: sevenDayReset
-    },
-    subscription_type: org?.subscription_type || 'unknown',
-    _source: 'cookie'
-  };
-
-  return saveAndReturnUsage(normalizedData);
-}
-
-async function saveAndReturnUsage(data) {
-  await chrome.storage.local.set({
-    usage: data,
-    lastUpdate: Date.now()
-  });
-  await chrome.storage.local.remove(['lastError']);
-
-  const used = Math.round(data.five_hour?.utilization || 0);
-  updateBadgeUsage(used);
-
-  return data;
-}
-
-// ==================== TOKEN AUTH ====================
-
-// Fetch usage data
-async function fetchUsage() {
-  let result = await chrome.storage.local.get(['token', 'accessToken', 'refreshToken']);
+async function fetchUsageToken() {
+  const result = await chrome.storage.local.get(['token', 'accessToken', 'refreshToken']);
   let token = result.token || result.accessToken;
 
-  // If no access token but have refresh token, try to get one
   if (!token && result.refreshToken) {
     const refreshResult = await refreshAccessToken();
-    if (refreshResult.error) {
-      updateBadge('ERR', '#ef4444');
-      return { error: refreshResult.error };
-    }
+    if (refreshResult.error) return { error: refreshResult.error };
     token = refreshResult.token;
   }
-
   if (!token) {
-    updateBadge('CFG', '#f59e0b');
-    return { error: 'No token available. Please configure your token in Settings.' };
+    return { error: 'No token available. Please configure your token in Settings.', needsConfig: true };
   }
 
   try {
-    console.log('Fetching usage data...');
     const response = await fetch(API_URL, {
       headers: {
         'Accept': 'application/json',
@@ -303,329 +181,379 @@ async function fetchUsage() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('Usage API error:', response.status, errorText);
-
       if (response.status === 403 || response.status === 401) {
-        // Token might be expired, try refresh
-        console.log('Token might be expired, trying refresh...');
-
-        // Clear current token and try refresh
         await chrome.storage.local.remove(['token', 'accessToken']);
-
         if (result.refreshToken) {
           const refreshResult = await refreshAccessToken();
-          if (!refreshResult.error) {
-            return fetchUsage(); // Retry
-          }
+          if (!refreshResult.error) return fetchUsageToken();
           return { error: `Auth failed (${response.status}): ${refreshResult.error}` };
         }
-
         const errorMsg = `Token expired (${response.status}). Please update your token in Settings.`;
         await chrome.storage.local.set({ lastError: errorMsg });
-        updateBadge('ERR', '#ef4444');
         return { error: errorMsg };
       }
-
       const errorMsg = `API Error ${response.status}: ${errorText.substring(0, 150)}`;
       await chrome.storage.local.set({ lastError: errorMsg });
-      updateBadge('ERR', '#ef4444');
       return { error: errorMsg };
     }
 
     const data = await response.json();
-    console.log('Usage data received:', data);
-
-    // Validate response
     if (!data.five_hour) {
       const errorMsg = 'Invalid API response: missing five_hour data. Response: ' + JSON.stringify(data).substring(0, 100);
       await chrome.storage.local.set({ lastError: errorMsg });
-      updateBadge('ERR', '#ef4444');
       return { error: errorMsg };
     }
-
-    // Save
-    await chrome.storage.local.set({
-      usage: data,
-      lastUpdate: Date.now()
-    });
-    await chrome.storage.local.remove(['lastError']);
-
-    // Update badge
-    const used = Math.round(data.five_hour?.utilization || 0);
-    updateBadgeUsage(used);
-
+    data._source = 'token';
     return data;
   } catch (error) {
     const errorMsg = `Network error: ${error.message}`;
-    console.error('Fetch error:', error);
     await chrome.storage.local.set({ lastError: errorMsg });
-    updateBadge('ERR', '#ef4444');
     return { error: errorMsg };
   }
 }
 
-// Badge updates
+function planLabel(raw) {
+  if (!raw) return null;
+  const s = String(raw).toLowerCase();
+  if (s.includes('max_20') || s.includes('20x')) return 'Max 20x';
+  if (s.includes('max_5') || s.includes('5x')) return 'Max 5x';
+  if (s.includes('max')) return 'Max';
+  if (s.includes('pro')) return 'Pro';
+  return null;
+}
+
+// Claude : dispatcher + cache + badge
+async function fetchClaude() {
+  const { authMode } = await chrome.storage.local.get(['authMode']);
+  const data = authMode === 'cookie' ? await fetchUsageWithCookies() : await fetchUsageToken();
+  if (data.error) return data;
+  await chrome.storage.local.set({ usage: data, lastUpdate: Date.now() });
+  await chrome.storage.local.remove(['lastError']);
+  return data;
+}
+
+// ==================== CODEX ====================
+
+// Normalise la reponse wham/usage en fenetres generiques
+function normalizeCodex(raw) {
+  const windows = [];
+  const rl = raw.rate_limit || {};
+  for (const key of ['primary_window', 'secondary_window']) {
+    const w = rl[key];
+    if (!w) continue;
+    const seconds = w.limit_window_seconds || 0;
+    windows.push({
+      key,
+      utilization: w.used_percent ?? 0,
+      resets_at: w.reset_at ? new Date(w.reset_at * 1000).toISOString()
+        : (w.reset_after_seconds != null ? new Date(Date.now() + w.reset_after_seconds * 1000).toISOString() : null),
+      window_ms: seconds * 1000
+    });
+  }
+  const review = raw.code_review_rate_limit?.primary_window;
+  if (review) {
+    windows.push({
+      key: 'code_review',
+      utilization: review.used_percent ?? 0,
+      resets_at: review.reset_at ? new Date(review.reset_at * 1000).toISOString() : null,
+      window_ms: (review.limit_window_seconds || 0) * 1000
+    });
+  }
+  return {
+    windows,
+    plan: raw.plan_type || null,
+    email: raw.email || null,
+    limit_reached: !!rl.limit_reached,
+    credits: raw.credits ? {
+      has_credits: !!raw.credits.has_credits,
+      unlimited: !!raw.credits.unlimited,
+      balance: raw.credits.balance
+    } : null
+  };
+}
+
+// Jeton ChatGPT : colle (auth.json de Codex) sinon session navigateur
+async function getCodexCredentials() {
+  const stored = await chrome.storage.local.get(['codexAccessToken', 'codexAccountId', 'codexAuthMode']);
+  if (stored.codexAuthMode === 'token' && stored.codexAccessToken) {
+    return { token: stored.codexAccessToken, accountId: stored.codexAccountId || '', source: 'token' };
+  }
+  try {
+    const r = await fetch(CODEX_SESSION_URL, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+    if (r.ok) {
+      const s = await r.json();
+      if (s && s.accessToken) {
+        return { token: s.accessToken, accountId: s.account?.id || '', source: 'cookie' };
+      }
+    }
+  } catch (e) { /* tombe sur le jeton colle */ }
+  if (stored.codexAccessToken) {
+    return { token: stored.codexAccessToken, accountId: stored.codexAccountId || '', source: 'token' };
+  }
+  return null;
+}
+
+async function fetchCodex() {
+  const creds = await getCodexCredentials();
+  if (!creds) return { error: 'NOT_LOGGED_IN', needsLogin: true };
+  try {
+    const headers = { 'Accept': 'application/json', 'Authorization': `Bearer ${creds.token}` };
+    if (creds.accountId) headers['ChatGPT-Account-Id'] = creds.accountId;
+    const r = await fetch(CODEX_USAGE_URL, { headers, credentials: creds.source === 'cookie' ? 'include' : 'omit' });
+    if (r.status === 401 || r.status === 403) {
+      if (creds.source === 'token') await chrome.storage.local.remove(['codexAccessToken']);
+      return { error: creds.source === 'token' ? 'Codex token expired. Paste auth.json again or log in to chatgpt.com.' : 'NOT_LOGGED_IN', needsLogin: true };
+    }
+    if (!r.ok) return { error: `Codex API error ${r.status}` };
+    const data = normalizeCodex(await r.json());
+    if (!data.windows.length) return { error: 'Codex: no rate limit windows in response' };
+    data._source = creds.source;
+    await chrome.storage.local.set({ codexUsage: data, codexLastUpdate: Date.now(), codexEnabled: true });
+    return data;
+  } catch (error) {
+    return { error: `Codex network error: ${error.message}` };
+  }
+}
+
+// ==================== BADGE + ALERTES ====================
+
 function updateBadge(text, color) {
   chrome.action.setBadgeText({ text });
   chrome.action.setBadgeBackgroundColor({ color });
   chrome.action.setBadgeTextColor({ color: '#FFFFFF' });
 }
 
-function updateBadgeUsage(used) {
-  const text = used <= 99 ? `${used}` : '99';
-  let color = '#16a34a'; // Green
-  if (used >= 80) color = '#dc2626'; // Red
-  else if (used >= 50) color = '#ea580c'; // Orange
-
-  updateBadge(text, color);
-  checkAlerts(used);
+function colorFor(used) {
+  if (used >= 80) return '#dc2626';
+  if (used >= 50) return '#ea580c';
+  return '#16a34a';
 }
 
-// Alerts
-let lastAlertThreshold = null;
+// Valeur "principale" par fournisseur : fenetre la plus courte (Claude 5h, Codex fenetre la plus petite)
+function mainUsage(provider, data) {
+  if (!data || data.error) return null;
+  if (provider === 'claude') return Math.round(data.five_hour?.utilization || 0);
+  const ws = (data.windows || []).filter(w => w.key !== 'code_review');
+  if (!ws.length) return null;
+  ws.sort((a, b) => (a.window_ms || 1e12) - (b.window_ms || 1e12));
+  return Math.round(ws[0].utilization || 0);
+}
 
-async function checkAlerts(used) {
+async function refreshBadge(results) {
+  const { badgeProvider } = await chrome.storage.local.get(['badgeProvider']);
+  const mode = badgeProvider || 'auto';
+  const values = {
+    claude: mainUsage('claude', results.claude),
+    codex: mainUsage('codex', results.codex)
+  };
+
+  let shown = null;
+  if (mode === 'claude' || mode === 'codex') shown = values[mode];
+  else shown = Math.max(...Object.values(values).filter(v => v !== null), -1);
+  if (shown === -1) shown = null;
+
+  if (shown === null) {
+    const errs = [results.claude, results.codex].filter(r => r && r.error);
+    if (errs.some(e => e.needsConfig)) updateBadge('CFG', '#eab308');
+    else if (errs.length) updateBadge('ERR', '#ef4444');
+    else updateBadge('', '#16a34a');
+    return;
+  }
+  updateBadge(shown <= 99 ? `${shown}` : '99', colorFor(shown));
+  for (const p of Object.keys(values)) {
+    if (values[p] !== null) await checkAlerts(p, values[p]);
+  }
+}
+
+// Alertes par fournisseur : seuils memorises separement
+async function checkAlerts(provider, used) {
   const thresholds = [70, 80, 90, 95];
-  const result = await chrome.storage.local.get(['alertedThresholds', 'lastAlertTime']);
-  const alerted = result.alertedThresholds || [];
-  const lastTime = result.lastAlertTime || 0;
+  const keyAlerted = `alerted_${provider}`;
+  const keyTime = `alertTime_${provider}`;
+  const result = await chrome.storage.local.get([keyAlerted, keyTime]);
+  const alerted = result[keyAlerted] || [];
+  const lastTime = result[keyTime] || 0;
   const now = Date.now();
 
-  // Cooldown 5 min
+  if (used < 50 && alerted.length > 0) {
+    await chrome.storage.local.set({ [keyAlerted]: [], [keyTime]: 0 });
+    return;
+  }
   if (now - lastTime < 5 * 60 * 1000) return;
 
   for (const threshold of thresholds) {
-    if (used >= threshold && !alerted.includes(threshold) && lastAlertThreshold !== threshold) {
-      lastAlertThreshold = threshold;
-
+    if (used >= threshold && !alerted.includes(threshold)) {
       chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icons/icon128.png',
-        title: 'Claude Usage Alert',
-        message: `You've used ${used}% of your quota!`,
+        title: `${PROVIDERS[provider].name} Usage Alert`,
+        message: `You've used ${used}% of your ${PROVIDERS[provider].name} quota!`,
         priority: 2
       });
-
       alerted.push(threshold);
-      await chrome.storage.local.set({ alertedThresholds: alerted, lastAlertTime: now });
+      await chrome.storage.local.set({ [keyAlerted]: alerted, [keyTime]: now });
       return;
     }
   }
-
-  // Reset when below 50%
-  if (used < 50 && alerted.length > 0) {
-    await chrome.storage.local.set({ alertedThresholds: [], lastAlertTime: 0 });
-    lastAlertThreshold = null;
-  }
 }
 
-// ==================== MAIN FETCH DISPATCHER ====================
+// ==================== DISPATCHER ====================
 
-// Unified fetch that uses the configured auth mode
-async function fetchUsageAuto() {
-  const result = await chrome.storage.local.get(['authMode']);
-  const authMode = result.authMode || 'token';
-
-  console.log('Fetching usage with mode:', authMode);
-
-  if (authMode === 'cookie') {
-    return fetchUsageWithCookies();
-  } else {
-    return fetchUsage();
-  }
+async function isCodexEnabled() {
+  const { codexEnabled, codexDisabled } = await chrome.storage.local.get(['codexEnabled', 'codexDisabled']);
+  return !codexDisabled && (codexEnabled !== false);
 }
 
-// Init - Smart auto-detection
+// Recupere les deux fournisseurs en parallele
+async function fetchAll() {
+  const codexOn = await isCodexEnabled();
+  const [c, x] = await Promise.all([
+    fetchClaude(),
+    codexOn ? fetchCodex() : Promise.resolve(null)
+  ]);
+  const results = { claude: c, codex: x };
+  await refreshBadge(results);
+  return results;
+}
+
+// Init : au premier lancement, detection automatique des sessions
 (async () => {
-  const result = await chrome.storage.local.get(['authMode', 'refreshToken']);
-
-  // If authMode is already set, use it
-  if (result.authMode) {
-    currentAuthMode = result.authMode;
-    console.log('Init with saved auth mode:', currentAuthMode);
-    fetchUsageAuto();
-    return;
+  const st = await chrome.storage.local.get(['authMode', 'refreshToken']);
+  if (!st.authMode) {
+    const cookieData = await fetchUsageWithCookies();
+    if (cookieData && !cookieData.error && cookieData.five_hour) {
+      await chrome.storage.local.set({ authMode: 'cookie' });
+    } else if (st.refreshToken) {
+      await chrome.storage.local.set({ authMode: 'token' });
+    }
   }
-
-  // No authMode set - try to auto-detect
-  console.log('No auth mode configured, trying auto-detection...');
-
-  // Try cookie mode first (if user is already logged in to claude.ai)
-  console.log('Trying cookie mode...');
-  const cookieData = await fetchUsageWithCookies();
-
-  if (cookieData && !cookieData.error && cookieData.five_hour) {
-    // Cookie mode works! Use it
-    console.log('✅ Cookie mode detected - user already logged in to claude.ai');
-    currentAuthMode = 'cookie';
-    await chrome.storage.local.set({ authMode: 'cookie' });
-    updateBadge('OK', '#10b981');
-
-    // Show OK for 3 seconds, then display usage
-    setTimeout(async () => {
-      const used = Math.round(cookieData.five_hour.utilization || 0);
-      updateBadgeUsage(used);
-    }, 3000);
-
-    return;
-  }
-
-  // Cookie mode failed, check if token is configured
-  if (result.refreshToken) {
-    console.log('Token configured, using token mode');
-    currentAuthMode = 'token';
-    await chrome.storage.local.set({ authMode: 'token' });
-    fetchUsageAuto();
-    return;
-  }
-
-  // Nothing configured - show CFG badge
-  console.log('⚠️ No authentication configured');
-  currentAuthMode = 'token'; // Default
-  updateBadge('CFG', '#eab308');
+  fetchAll();
 })();
 
-// Auto-refresh every minute
 chrome.alarms.create('refresh', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'refresh') fetchUsageAuto();
+  if (alarm.name === 'refresh') fetchAll();
 });
 
-// Message handlers
+// ==================== MESSAGES ====================
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'refresh') {
-    fetchUsageAuto().then(data => sendResponse(data));
-    return true;
-  }
+  switch (message.action) {
+    case 'refresh':
+      fetchAll().then(sendResponse);
+      return true;
 
-  if (message.action === 'checkCookies') {
-    checkCookieSession().then(result => sendResponse(result));
-    return true;
-  }
+    case 'checkCookies':
+      checkCookieSession().then(sendResponse);
+      return true;
 
-  if (message.action === 'setAuthMode') {
-    const mode = message.mode; // 'cookie' or 'token'
-    chrome.storage.local.set({ authMode: mode }).then(() => {
-      currentAuthMode = mode;
-      console.log('Auth mode set to:', mode);
-      if (mode === 'cookie') {
-        fetchUsageWithCookies().then(data => sendResponse({ success: true, data }));
-      } else {
-        fetchUsage().then(data => sendResponse({ success: true, data }));
-      }
-    });
-    return true;
-  }
+    case 'checkCodexSession':
+      getCodexCredentials().then(c => sendResponse(c ? { valid: true, source: c.source } : { valid: false }));
+      return true;
 
-  if (message.action === 'connectWithCookies') {
-    chrome.storage.local.set({ authMode: 'cookie' }).then(() => {
-      currentAuthMode = 'cookie';
-      fetchUsageWithCookies().then(data => {
-        if (data.error) {
-          sendResponse({ success: false, error: data.error });
-        } else {
-          sendResponse({ success: true, data });
-        }
-      });
-    });
-    return true;
-  }
-
-  if (message.action === 'startLoginCheck') {
-    // Clear existing interval
-    if (loginCheckInterval) {
-      clearInterval(loginCheckInterval);
-    }
-
-    // Auto-refresh every 2 seconds, max 30 attempts (1 minute)
-    let attempts = 0;
-    loginCheckInterval = setInterval(async () => {
-      attempts++;
-      console.log(`Login check attempt ${attempts}/30`);
-
-      if (attempts > 30) {
-        console.log('Login check timeout - stopping');
-        clearInterval(loginCheckInterval);
-        loginCheckInterval = null;
-        return;
-      }
-
-      // Try to fetch usage
-      const data = await fetchUsageAuto();
-
-      // If successful (no error), stop checking
-      if (data && !data.error && data.five_hour) {
-        console.log('Login successful - stopping check');
-        clearInterval(loginCheckInterval);
-        loginCheckInterval = null;
-
-        // Show success for 3 seconds, then display usage
-        updateBadge('OK', '#10b981');
-        setTimeout(async () => {
-          // Fetch again to update badge with real usage
-          const newData = await fetchUsageAuto();
-          if (newData && newData.five_hour) {
-            const used = Math.round(newData.five_hour.utilization || 0);
-            updateBadgeUsage(used);
-          }
-        }, 3000);
-      }
-    }, 2000);
-
-    sendResponse({ success: true });
-    return true;
-  }
-
-  if (message.action === 'setTokens') {
-    const tokenData = {};
-
-    // Check for access token
-    if (message.accessToken || message.token) {
-      const accessToken = message.accessToken || message.token;
-      if (accessToken.startsWith('sk-ant-oat')) {
-        tokenData.token = accessToken;
-        tokenData.accessToken = accessToken;
-        console.log('Saving access token');
-      }
-    }
-
-    // Check for refresh token
-    if (message.refreshToken) {
-      if (message.refreshToken.startsWith('sk-ant-ort')) {
-        tokenData.refreshToken = message.refreshToken;
-        console.log('Saving refresh token');
-      }
-    }
-
-    if (Object.keys(tokenData).length === 0) {
-      sendResponse({ success: false, error: 'No valid tokens provided. Tokens must start with sk-ant-oat or sk-ant-ort' });
+    case 'setAuthMode':
+    case 'connectWithCookies': {
+      const mode = message.action === 'connectWithCookies' ? 'cookie' : message.mode;
+      chrome.storage.local.set({ authMode: mode }).then(() => fetchClaude().then(data => {
+        if (data.error) sendResponse({ success: false, error: data.error });
+        else sendResponse({ success: true, data });
+      }));
       return true;
     }
 
-    // Clear old tokens and errors
-    chrome.storage.local.remove(['token', 'accessToken', 'refreshToken', 'lastError', 'usage']).then(() => {
-      chrome.storage.local.set(tokenData).then(() => {
-        fetchUsage().then(data => {
-          if (data.error) {
-            sendResponse({ success: true, error: data.error });
-          } else {
-            sendResponse({ success: true, data });
-          }
+    case 'connectCodex':
+      chrome.storage.local.set({ codexDisabled: false, codexEnabled: true, codexAuthMode: 'cookie' })
+        .then(() => fetchCodex())
+        .then(data => sendResponse(data.error ? { success: false, error: data.error } : { success: true, data }));
+      return true;
+
+    case 'setCodexTokens': {
+      if (!message.accessToken) {
+        sendResponse({ success: false, error: 'No Codex access token provided.' });
+        return true;
+      }
+      chrome.storage.local.set({
+        codexAccessToken: message.accessToken,
+        codexAccountId: message.accountId || '',
+        codexAuthMode: 'token',
+        codexDisabled: false,
+        codexEnabled: true
+      }).then(() => fetchCodex())
+        .then(data => sendResponse(data.error ? { success: false, error: data.error } : { success: true, data }));
+      return true;
+    }
+
+    case 'disableCodex':
+      chrome.storage.local.set({ codexDisabled: true })
+        .then(() => chrome.storage.local.remove(['codexUsage', 'codexAccessToken', 'codexAccountId', 'codexLastUpdate']))
+        .then(() => fetchAll())
+        .then(() => sendResponse({ success: true }));
+      return true;
+
+    case 'setBadgeProvider':
+      chrome.storage.local.set({ badgeProvider: message.provider }).then(async () => {
+        const st = await chrome.storage.local.get(['usage', 'codexUsage']);
+        await refreshBadge({ claude: st.usage, codex: st.codexUsage });
+        sendResponse({ success: true });
+      });
+      return true;
+
+    case 'startLoginCheck': {
+      if (loginCheckInterval) clearInterval(loginCheckInterval);
+      let attempts = 0;
+      loginCheckInterval = setInterval(async () => {
+        attempts++;
+        if (attempts > 30) {
+          clearInterval(loginCheckInterval);
+          loginCheckInterval = null;
+          return;
+        }
+        const results = await fetchAll();
+        const ok = message.provider === 'codex'
+          ? results.codex && !results.codex.error
+          : results.claude && !results.claude.error;
+        if (ok) {
+          clearInterval(loginCheckInterval);
+          loginCheckInterval = null;
+          updateBadge('OK', '#10b981');
+          setTimeout(fetchAll, 3000);
+        }
+      }, 2000);
+      sendResponse({ success: true });
+      return true;
+    }
+
+    case 'setTokens': {
+      const tokenData = {};
+      const accessToken = message.accessToken || message.token;
+      if (accessToken && accessToken.startsWith('sk-ant-oat')) {
+        tokenData.token = accessToken;
+        tokenData.accessToken = accessToken;
+      }
+      if (message.refreshToken && message.refreshToken.startsWith('sk-ant-ort')) {
+        tokenData.refreshToken = message.refreshToken;
+      }
+      if (Object.keys(tokenData).length === 0) {
+        sendResponse({ success: false, error: 'No valid tokens provided. Tokens must start with sk-ant-oat or sk-ant-ort' });
+        return true;
+      }
+      chrome.storage.local.remove(['token', 'accessToken', 'refreshToken', 'lastError', 'usage'])
+        .then(() => chrome.storage.local.set({ ...tokenData, authMode: 'token' }))
+        .then(() => fetchClaude())
+        .then(data => sendResponse(data.error ? { success: true, error: data.error } : { success: true, data }));
+      return true;
+    }
+
+    case 'getStatus':
+      chrome.storage.local.get(['refreshToken', 'token', 'accessToken', 'lastError', 'usage', 'codexUsage']).then(result => {
+        sendResponse({
+          hasRefreshToken: !!result.refreshToken,
+          hasAccessToken: !!(result.token || result.accessToken),
+          lastError: result.lastError,
+          hasUsageData: !!result.usage,
+          hasCodexData: !!result.codexUsage
         });
       });
-    });
-    return true;
-  }
-
-  if (message.action === 'getStatus') {
-    chrome.storage.local.get(['refreshToken', 'token', 'accessToken', 'lastError', 'usage']).then(result => {
-      sendResponse({
-        hasRefreshToken: !!result.refreshToken,
-        hasAccessToken: !!(result.token || result.accessToken),
-        lastError: result.lastError,
-        hasUsageData: !!result.usage
-      });
-    });
-    return true;
+      return true;
   }
 });
