@@ -1,4 +1,4 @@
-# Claude Usage Monitor
+# AI 用量监控 – Claude Code 与 Codex
 
 <div align="center">
 
@@ -12,16 +12,31 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-4.0-orange)
+![Version](https://img.shields.io/badge/version-5.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**通过精美的圆形进度指示器监控您的 Claude Code 使用量**
+**一键并排查看 Claude Code 与 Codex 配额**
 
 [快速开始](#快速开始) | [安装](#安装) | [功能](#功能) | [故障排除](#故障排除)
 
+![](images/screenshot.png)
+
+![](images/screenshot-settings.png)
+
 </div>
+
+---
+
+## 5.0 新功能
+
+- **支持 Codex**：显示 ChatGPT 套餐的 Codex 限额（读取 `chatgpt.com/backend-api/wham/usage`，使用 chatgpt.com 会话或粘贴 `~/.codex/auth.json`）。
+- **三个圆环并排**：Claude Code 的 5 小时与 7 天在同一张卡片中，Codex 在旁边。
+- **全新设计**，两个标签页：*用量*（默认）和 *设置与信息*（语言、徽章、Claude 与 Codex 连接）。
+- **图标徽章**：显示两者中较高者，或仅 Claude，或仅 Codex。
+- **按工具分别提醒**：70%、80%、90%、95%。
+- 套餐包含时显示额外进度条：Sonnet / Opus 每周限额、Codex 代码审查。
 
 ---
 

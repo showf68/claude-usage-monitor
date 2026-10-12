@@ -1,4 +1,4 @@
-# Claude Usage Monitor
+# AI Usage Monitor – Claude Code et Codex
 
 <div align="center">
 
@@ -12,16 +12,31 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-4.0-orange)
+![Version](https://img.shields.io/badge/version-5.0-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**Surveillez votre utilisation de Claude Code avec de beaux indicateurs circulaires**
+**Vos quotas Claude Code et Codex côte à côte, en un clic**
 
 [Demarrage Rapide](#demarrage-rapide) | [Installation](#installation) | [Fonctionnalites](#fonctionnalites) | [Depannage](#depannage)
 
+![](images/screenshot.png)
+
+![](images/screenshot-settings.png)
+
 </div>
+
+---
+
+## Nouveautés de la 5.0
+
+- **Codex** : les limites Codex de votre abonnement ChatGPT (lues sur `chatgpt.com/backend-api/wham/usage`, avec votre session chatgpt.com ou en collant `~/.codex/auth.json`).
+- **Trois jauges côte à côte** : Claude Code 5 heures et 7 jours dans une même carte, Codex à côté.
+- **Nouveau design** à deux onglets : *Jauges* (par défaut) et *Réglages & infos* (langue, badge, connexion Claude et Codex).
+- **Badge de l’icône** : le plus haut des deux, Claude seul ou Codex seul.
+- **Alertes par outil** à 70 %, 80 %, 90 % et 95 %.
+- Barres en plus quand votre abonnement les a : limites hebdomadaires Sonnet / Opus, revue de code Codex.
 
 ---
 
