@@ -1,31 +1,143 @@
 {
-  "extName": { "message": "מעקב שימוש Claude" },
-  "extDescription": { "message": "עקוב אחר השימוש שלך ב-Claude Code עם מחוונים בזמן אמת." },
-  "title": { "message": "מעקב שימוש Claude" },
-  "configuration": { "message": "הגדרות" },
-  "settings": { "message": "הגדרות" },
-  "copyPath": { "message": "לחץ להעתקת נתיב .credentials.json" },
-  "pasteJson": { "message": "הדבק את תוכן ה-.credentials.json שלך:" },
-  "saveConnect": { "message": "שמור והתחבר" },
-  "debugHint": { "message": "פתח את הקובץ והעתק את כל התוכן (Ctrl+A, Ctrl+C)" },
-  "hours5": { "message": "5 שעות" },
-  "days7": { "message": "7 ימים" },
-  "lastUpdated": { "message": "עדכון אחרון" },
-  "connectionError": { "message": "שגיאת התחברות" },
-  "retry": { "message": "נסה שוב" },
-  "reconfigure": { "message": "הגדר מחדש" },
-  "language": { "message": "שפה" },
-  "tokensFound": { "message": "טוקנים נמצאו:" },
-  "accessToken": { "message": "גישה" },
-  "refreshToken": { "message": "רענון" },
-  "plan": { "message": "מנוי" },
-  "pathCopied": { "message": "הנתיב הועתק!" },
-  "pasteInExplorer": { "message": "הדבק בסייר Windows (Win+R)" },
-  "openAndCopy": { "message": "ואז פתח את הקובץ והעתק את כל התוכן." },
-  "invalidJson": { "message": "פורמט JSON לא תקין" },
-  "noTokens": { "message": "לא נמצאו טוקנים. וודא שהדבקת את כל תוכן .credentials.json." },
-  "invalidAccessToken": { "message": "פורמט accessToken לא תקין. צריך להתחיל ב-sk-ant-oat" },
-  "invalidRefreshToken": { "message": "פורמט refreshToken לא תקין. צריך להתחיל ב-sk-ant-ort" },
-  "pleaseEnter": { "message": "אנא הדבק את תוכן ה-.credentials.json שלך" },
-  "version": { "message": "הדבק את כל תוכן קובץ ה-JSON" }
+  "extName": {
+    "message": "מעקב שימוש בבינה מלאכותית – קלוד קוד וקודקס"
+  },
+  "extDescription": {
+    "message": "המכסות שלך בקלוד קוד ובקודקס במבט אחד: מחוונים לחמש שעות ולשבוע, ספירה לאחור עד האיפוס, תג וסמל התראות."
+  },
+  "title": {
+    "message": "מעקב שימוש בבינה מלאכותית"
+  },
+  "configuration": {
+    "message": "הגדרות"
+  },
+  "settings": {
+    "message": "הגדרות"
+  },
+  "copyPath": {
+    "message": "לחץ להעתקת נתיב .credentials.json"
+  },
+  "pasteJson": {
+    "message": "הדבק את תוכן ה-.credentials.json שלך:"
+  },
+  "saveConnect": {
+    "message": "שמור והתחבר"
+  },
+  "debugHint": {
+    "message": "פתח את הקובץ והעתק את כל התוכן (Ctrl+A, Ctrl+C)"
+  },
+  "hours5": {
+    "message": "5 שעות"
+  },
+  "days7": {
+    "message": "7 ימים"
+  },
+  "lastUpdated": {
+    "message": "עודכן"
+  },
+  "connectionError": {
+    "message": "שגיאת התחברות"
+  },
+  "retry": {
+    "message": "נסה שוב"
+  },
+  "reconfigure": {
+    "message": "הגדר מחדש"
+  },
+  "language": {
+    "message": "שפה"
+  },
+  "tokensFound": {
+    "message": "טוקנים נמצאו:"
+  },
+  "accessToken": {
+    "message": "גישה"
+  },
+  "refreshToken": {
+    "message": "רענון"
+  },
+  "plan": {
+    "message": "מנוי"
+  },
+  "pathCopied": {
+    "message": "הנתיב הועתק!"
+  },
+  "pasteInExplorer": {
+    "message": "הדבק בסייר Windows (Win+R)"
+  },
+  "openAndCopy": {
+    "message": "ואז פתח את הקובץ והעתק את כל התוכן."
+  },
+  "invalidJson": {
+    "message": "פורמט JSON לא תקין"
+  },
+  "noTokens": {
+    "message": "לא נמצאו טוקנים. וודא שהדבקת את כל תוכן .credentials.json."
+  },
+  "invalidAccessToken": {
+    "message": "פורמט accessToken לא תקין. צריך להתחיל ב-sk-ant-oat"
+  },
+  "invalidRefreshToken": {
+    "message": "פורמט refreshToken לא תקין. צריך להתחיל ב-sk-ant-ort"
+  },
+  "pleaseEnter": {
+    "message": "אנא הדבק את תוכן ה-.credentials.json שלך"
+  },
+  "version": {
+    "message": "הדבק את כל תוכן קובץ ה-JSON"
+  },
+  "tabGauges": {
+    "message": "מחוונים"
+  },
+  "tabSettings": {
+    "message": "הגדרות ומידע"
+  },
+  "sectionPrefs": {
+    "message": "העדפות"
+  },
+  "badgeLabel": {
+    "message": "התג שעל הסמל"
+  },
+  "badgeAuto": {
+    "message": "הגבוה מביניהם"
+  },
+  "codexDisable": {
+    "message": "השבתה"
+  },
+  "codexConnect": {
+    "message": "חיבור קודקס"
+  },
+  "codexPaste": {
+    "message": "או הדבקת הקובץ auth.json"
+  },
+  "codexSave": {
+    "message": "שמירת אסימון קודקס"
+  },
+  "codexSessionFound": {
+    "message": "נמצא חיבור לקודקס"
+  },
+  "codexNoSession": {
+    "message": "אין חיבור לצ'אט ג'י־פי־טי"
+  },
+  "codexNotConnected": {
+    "message": "קודקס לא מחובר."
+  },
+  "codexNotLogged": {
+    "message": "קודקס: אין התחברות לצ'אט ג'י־פי־טי."
+  },
+  "credits": {
+    "message": "קרדיטים"
+  },
+  "sessionFound": {
+    "message": "נמצא חיבור"
+  },
+  "noSession": {
+    "message": "אין חיבור"
+  },
+  "connecting": {
+    "message": "מתחבר..."
+  },
+  "connectWithCookie": {
+    "message": "התחברות"
+  }
 }

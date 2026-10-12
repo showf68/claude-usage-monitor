@@ -1,12 +1,12 @@
 {
   "extName": {
-    "message": "AI Usage Monitor (Claude Code + Codex)"
+    "message": "AI Usage Monitor – Claude Code et Codex"
   },
   "extDescription": {
-    "message": "Surveillez votre utilisation de Claude Code et de Codex en temps réel : anneaux, badge et alertes."
+    "message": "Vos quotas Claude Code et Codex d’un coup d’œil : jauges 5 heures et semaine, compte à rebours, badge et alertes."
   },
   "title": {
-    "message": "Claude Usage Monitor"
+    "message": "AI Usage Monitor"
   },
   "configuration": {
     "message": "Configuration"
