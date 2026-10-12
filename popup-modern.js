@@ -138,13 +138,10 @@ function formatTimeRemaining(resetAt) {
 }
 
 function formatTimeAgo(timestamp) {
-  const diff = Date.now() - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return 'just now';
+  const minutes = Math.round((Date.now() - timestamp) / 60000);
+  const rtf = new Intl.RelativeTimeFormat(currentLang, { numeric: 'auto' });
+  if (minutes >= 60) return rtf.format(-Math.round(minutes / 60), 'hour');
+  return rtf.format(-minutes, 'minute');
 }
 
 // View management
@@ -223,7 +220,7 @@ function updateUI(data) {
   const planElem = document.getElementById('plan');
   if (data.plan && planElem) {
     planElem.textContent = data.plan;
-    planElem.style.display = 'block';
+    planElem.style.display = 'inline-block';
   }
 
 }
@@ -448,7 +445,7 @@ async function init() {
   if (result.usage || result.codexUsage) {
     renderAll({ claude: result.usage, codex: result.codexUsage, codexOff: !!result.codexDisabled });
     if (result.lastUpdate) {
-      document.getElementById('lastUpdate').textContent = formatTimeAgo(result.lastUpdate);
+      setUpdated(result.lastUpdate);
     }
   } else if (result.lastError) {
     showError(result.lastError);
@@ -479,7 +476,7 @@ function refresh() {
 
     chrome.storage.local.get(['codexDisabled']).then(({ codexDisabled }) => {
       renderAll({ claude: response.claude, codex: response.codex, codexOff: !!codexDisabled });
-      document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
+      setUpdated(Date.now());
     });
   });
 }
@@ -504,15 +501,34 @@ function checkCodexStatus() {
   });
 }
 
+// Onglets horizontaux : jauges (defaut) / reglages et infos
+function switchTab(name) {
+  const settings = name === 'settings';
+  document.getElementById('tabGauges').setAttribute('aria-selected', String(!settings));
+  document.getElementById('tabSettings').setAttribute('aria-selected', String(settings));
+  document.getElementById('paneGauges').hidden = settings;
+  document.getElementById('paneSettings').hidden = !settings;
+  if (settings) {
+    checkCodexStatus();
+    if (currentAuthMode === 'cookie') checkCookieStatus();
+  }
+}
+
 function openModal() {
-  checkCodexStatus();
-  document.getElementById('modalBackdrop').classList.add('show');
   document.getElementById('modalParseResult').innerHTML = '';
   document.getElementById('modalJsonInput').value = '';
+  switchTab('settings');
 }
 
 function closeModal() {
-  document.getElementById('modalBackdrop').classList.remove('show');
+  switchTab('gauges');
+}
+
+function setUpdated(ts) {
+  const txt = formatTimeAgo(ts);
+  document.getElementById('lastUpdate').textContent = txt;
+  const info = document.getElementById('infoUpdate');
+  if (info) info.textContent = new Date(ts).toLocaleTimeString();
 }
 
 // Non-blocking toast (replaces alert)
@@ -581,7 +597,7 @@ function saveTokens(jsonInputId, parseResultId) {
       closeModal();
       if (response.data) {
         updateUI(response.data);
-        document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
+        setUpdated(Date.now());
       } else if (response.error) {
         showError(response.error);
       }
@@ -596,9 +612,8 @@ function saveTokens(jsonInputId, parseResultId) {
 // Reconfigure - clear token and show setup
 function reconfigure() {
   chrome.storage.local.remove(['refreshToken', 'accessToken', 'token', 'usage', 'lastError'], () => {
-    document.getElementById('jsonInput').value = '';
-    document.getElementById('parseResult').innerHTML = '';
-    showView('setupView');
+    switchAuthTab('token');
+    openModal();
   });
 }
 
@@ -723,7 +738,7 @@ function connectWithCookies() {
       closeModal();
       if (response.data) {
         updateUI(response.data);
-        document.getElementById('lastUpdate').textContent = formatTimeAgo(Date.now());
+        setUpdated(Date.now());
       }
     } else {
       showError(response?.error || 'Failed to connect with cookies');
@@ -807,6 +822,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (r && !r.success) showToast(r.error || 'Codex token rejected');
     });
   });
+  document.getElementById('tabGauges')?.addEventListener('click', () => switchTab('gauges'));
+  document.getElementById('tabSettings')?.addEventListener('click', () => switchTab('settings'));
+
   document.getElementById('codexDisable')?.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); refresh(); });
   });

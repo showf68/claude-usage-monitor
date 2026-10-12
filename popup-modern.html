@@ -2,959 +2,198 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      width: 400px;
-      min-height: 320px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f1419;
-      color: #e4e7eb;
-      overflow-x: hidden;
-    }
-
-    /* Header */
-    .header {
-      background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 40px;
-      height: 36px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 16px;
-    }
-
-    .title { flex: 1; }
-    .title h1 { font-size: 14px; font-weight: 700; }
-    .title .plan { font-size: 11px; opacity: 0.85; margin-top: 1px; }
-
-    .header-actions { display: flex; gap: 6px; }
-
-    .icon-btn {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-
-    .icon-btn:hover { background: rgba(255,255,255,0.25); }
-    .icon-btn.settings:hover svg { animation: spin 1s linear infinite; }
-    .icon-btn.spinning svg { animation: spin 1s linear infinite; }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Language Selector */
-    .lang-selector {
-      position: relative;
-    }
-
-    .lang-btn {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      padding: 4px 8px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      height: 32px;
-      transition: background 0.2s;
-    }
-
-    .lang-btn:hover { background: rgba(255,255,255,0.25); }
-
-    .lang-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 4px;
-      background: #1a1f2e;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      z-index: 100;
-      min-width: 120px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .lang-dropdown.show { display: block; }
-
-    .lang-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 12px;
-      color: #e4e7eb;
-      transition: background 0.2s;
-    }
-
-    .lang-option:hover { background: rgba(245, 158, 11, 0.2); }
-    .lang-option.active { background: rgba(245, 158, 11, 0.3); }
-
-    /* Content */
-    .content { padding: 16px; }
-
-    /* Circles */
-    .circles-container {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 4px;
-      gap: 6px;
-    }
-
-    .circle-card { flex: 1; text-align: center; }
-
-    .circle-wrapper {
-      position: relative;
-      width: 84px;
-      height: 84px;
-      margin: 0 auto 6px;
-    }
-
-    .circle-svg { transform: rotate(-90deg); width: 84px; height: 84px; }
-    .circle-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
-    .circle-bg-inner { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
-
-    .circle-progress {
-      fill: none;
-      stroke-width: 8;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.5s ease;
-    }
-
-    .circle-progress.low { stroke: #22c55e; }
-    .circle-progress.medium { stroke: #f59e0b; }
-    .circle-progress.high { stroke: #ef4444; }
-
-    .circle-progress-time {
-      fill: none;
-      stroke-width: 6;
-      stroke-linecap: round;
-      stroke: #64748b;
-      transition: stroke-dashoffset 0.5s ease;
-      opacity: 0.8;
-    }
-
-    .circle-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .circle-percent { font-size: 19px; font-weight: 800; line-height: 1; }
-    .circle-percent.low { color: #22c55e; }
-    .circle-percent.medium { color: #f59e0b; }
-    .circle-percent.high { color: #ef4444; }
-
-    .circle-label {
-      font-size: 9px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-      margin-top: 2px;
-    }
-
-    .reset-time { font-size: 10px; color: #64748b; }
-    .reset-time span { color: #f59e0b; font-weight: 600; }
-
-    /* Info Card */
-    .info-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 10px;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
-      font-size: 11px;
-    }
-
-    .info-label { color: #94a3b8; }
-    .info-value { font-weight: 600; color: #e4e7eb; }
-
-    /* Setup */
-    .setup {
-      padding: 32px 24px;
-      max-width: 320px;
-      margin: 0 auto;
-    }
-    .setup h2 {
-      font-size: 20px;
-      margin-bottom: 8px;
-      color: #f59e0b;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .setup label {
-      font-size: 11px;
-      color: #94a3b8;
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    .setup textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #f1f5f9;
-      font-size: 11px;
-      font-family: monospace;
-      margin-bottom: 10px;
-      resize: vertical;
-    }
-
-    .setup textarea:focus {
-      outline: none;
-      border-color: #f59e0b;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-      transition: all 0.2s;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
-    }
-
-    .btn-secondary {
-      width: 100%;
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px;
-      color: #e4e7eb;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(245,158,11,0.3);
-      transform: translateY(-1px);
-    }
-
-    .file-hint {
-      background: rgba(245,158,11,0.1);
-      border: 1px solid rgba(245,158,11,0.2);
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 11px;
-      color: #fbbf24;
-      margin-bottom: 12px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .file-hint:hover { background: rgba(245,158,11,0.15); }
-
-    /* Error */
-    .error-container {
-      padding: 16px;
-    }
-
-    .error-box {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .error-title {
-      color: #ef4444;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .error-message {
-      color: #f87171;
-      font-size: 11px;
-      margin-bottom: 12px;
-      word-break: break-all;
-      background: rgba(0,0,0,0.2);
-      padding: 8px;
-      border-radius: 4px;
-      font-family: monospace;
-      text-align: left;
-      max-height: 80px;
-      overflow-y: auto;
-    }
-
-    .error-box button {
-      padding: 10px 20px;
-      background: rgba(239,68,68,0.2);
-      border: 1px solid rgba(239,68,68,0.4);
-      border-radius: 6px;
-      color: #ef4444;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      margin: 4px;
-    }
-
-    .error-box button:hover { background: rgba(239,68,68,0.3); }
-
-    /* Modal */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 400px;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      padding: 16px;
-      overflow-y: auto;
-    }
-
-    .modal-backdrop.show {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 20px;
-    }
-
-    .modal {
-      background: #1a1f2e;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 12px;
-      padding: 14px;
-      width: 100%;
-      max-width: 360px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .modal h2 {
-      font-size: 16px;
-      color: #f59e0b;
-      margin: 0;
-    }
-
-    .modal-close {
-      background: rgba(255,255,255,0.05);
-      border: none;
-      color: #94a3b8;
-      font-size: 20px;
-      cursor: pointer;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-close:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
-
-    .modal label {
-      font-size: 11px;
-      color: #94a3b8;
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    .modal textarea {
-      width: 100%;
-      height: 80px;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #f1f5f9;
-      font-size: 10px;
-      font-family: monospace;
-      margin-bottom: 8px;
-      resize: none;
-    }
-
-    .modal textarea:focus { outline: none; border-color: #f59e0b; }
-
-    .modal .file-hint {
-      margin-bottom: 8px;
-      padding: 8px;
-      font-size: 10px;
-    }
-
-    .modal .btn-primary {
-      margin-top: 2px;
-      padding: 10px;
-      font-size: 12px;
-    }
-
-    .modal-footer {
-      font-size: 9px;
-      color: #64748b;
-      text-align: center;
-      margin-top: 8px;
-    }
-
-    /* Auth Mode Tabs */
-    .auth-tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 12px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      padding: 4px;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: 8px 12px;
-      background: transparent;
-      border: none;
-      border-radius: 6px;
-      color: #94a3b8;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .auth-tab:hover {
-      color: #e4e7eb;
-      background: rgba(255,255,255,0.05);
-    }
-
-    .auth-tab.active {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      color: white;
-    }
-
-    .auth-tab svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .auth-content {
-      display: none;
-    }
-
-    .auth-content.active {
-      display: block;
-    }
-
-    .cookie-status {
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .cookie-status.checking {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: #93c5fd;
-    }
-
-    .cookie-status.success {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: #4ade80;
-    }
-
-    .cookie-status.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-    }
-
-    .cookie-status svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    .cookie-hint {
-      font-size: 10px;
-      color: #64748b;
-      margin-top: 8px;
-      line-height: 1.4;
-    }
-
-    /* Success indicator */
-    .parse-result {
-      margin-top: 6px;
-      margin-bottom: 6px;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 10px;
-    }
-
-    .parse-result.success {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: #4ade80;
-    }
-
-    .parse-result.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-    }
-
-    .parse-result .token-info {
-      margin-top: 6px;
-      font-family: monospace;
-      word-break: break-all;
-    }
-
-    /* Debug info */
-    .debug-info {
-      margin-top: 12px;
-      padding: 10px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 8px;
-      font-size: 10px;
-      color: #93c5fd;
-    }
-
-    .debug-info code {
-      display: block;
-      background: rgba(0,0,0,0.2);
-      padding: 6px;
-      border-radius: 4px;
-      margin-top: 6px;
-      word-break: break-all;
-      font-family: monospace;
-    }
-
-    /* Footer */
-    .footer {
-      padding: 12px 16px;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      margin-top: 8px;
-    }
-
-    .footer a {
-      color: #64748b;
-      text-decoration: none;
-      font-size: 11px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.2s;
-    }
-
-    .footer a:hover {
-      color: #f59e0b;
-    }
-
-    .footer svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    /* (ancien) Provider tabs */
-    .provider-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
-    .provider-tab {
-      flex: 1; padding: 8px 10px; border-radius: 10px; cursor: pointer;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-      color: #94a3b8; font-size: 12px; font-weight: 600; font-family: inherit;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .provider-tab.active { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.5); color: #fbbf24; }
-    .provider-tab .dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
-    .provider-tab .dot.low { background: #22c55e; }
-    .provider-tab .dot.medium { background: #f59e0b; }
-    .provider-tab .dot.high { background: #ef4444; }
-    .provider-tab .dot.err { background: #64748b; }
-    .extra-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; color: #cbd5e1; }
-    .extra-row .bar { flex: 1; height: 6px; margin: 0 10px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
-    .extra-row .bar > i { display: block; height: 100%; border-radius: 3px; }
-    .extra-row .bar > i.low { background: #22c55e; }
-    .extra-row .bar > i.medium { background: #f59e0b; }
-    .extra-row .bar > i.high { background: #ef4444; }
-    .panel-error { padding: 14px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; font-size: 12px; text-align: center; }
-    .panel-error button { margin-top: 10px; }
-    .badge-select { width: 100%; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); font-size: 12px; font-family: inherit; }
-    .section-title { margin: 18px 0 8px; font-size: 12px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.04em; }
-    .codex-credentials { width: 100%; min-height: 70px; }
-
-    /* ===== Finition v5 ===== */
-    body {
-      width: 400px;
-      background:
-        radial-gradient(120% 60% at 50% -10%, rgba(245,158,11,0.14), transparent 60%),
-        radial-gradient(80% 50% at 100% 100%, rgba(16,185,129,0.07), transparent 60%),
-        #0b0f14;
-    }
-    .header {
-      background: linear-gradient(120deg, #b45309 0%, #d97706 45%, #f59e0b 100%);
-      box-shadow: 0 6px 24px rgba(217,119,6,0.35);
-      position: relative;
-    }
-    .header::after {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(60% 120% at 85% -20%, rgba(255,255,255,0.28), transparent 60%);
-      pointer-events: none;
-    }
-    .logo {
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.28);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
-      letter-spacing: 0.5px;
-    }
-    .title h1 { letter-spacing: 0.2px; font-size: 15px; }
-    .content { padding: 18px 14px 12px; }
-
-    .circles-container { gap: 8px; margin-bottom: 12px; }
-    .gauge-card {
-      min-width: 0;
-      padding: 12px 6px 10px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.09);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
-    }
-    .gauge-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(245,158,11,0.45);
-      box-shadow: 0 12px 26px rgba(0,0,0,0.45), 0 0 0 1px rgba(245,158,11,0.15);
-    }
-    .gauge-head {
-      display: flex; align-items: center; justify-content: center; gap: 5px;
-      font-size: 10px; font-weight: 700; color: #e2e8f0; letter-spacing: .02em;
-      margin-bottom: 8px; white-space: nowrap;
-    }
-    .pdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-    .pdot.claude { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
-    .pdot.codex { background: #34d399; box-shadow: 0 0 8px #34d399; }
-
-    .circle-wrapper { width: 92px; height: 92px; margin: 0 auto 8px; }
-    .circle-svg { width: 92px; height: 92px; }
-    .circle-bg { stroke: rgba(255,255,255,0.07); stroke-width: 9; }
-    .circle-progress { stroke-width: 9; transition: stroke-dashoffset 1s cubic-bezier(.22,1,.36,1), stroke .3s; }
-    .circle-progress.low { stroke: url(#gLow); filter: drop-shadow(0 0 5px rgba(34,197,94,0.55)); }
-    .circle-progress.medium { stroke: url(#gMed); filter: drop-shadow(0 0 5px rgba(249,115,22,0.55)); }
-    .circle-progress.high { stroke: url(#gHigh); filter: drop-shadow(0 0 6px rgba(239,68,68,0.65)); }
-    .circle-percent { font-size: 21px; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
-    .circle-percent.low { color: #86efac; }
-    .circle-percent.medium { color: #fdba74; }
-    .circle-percent.high { color: #fda4af; }
-
-    .gauge-window {
-      font-size: 10px; font-weight: 700; color: #94a3b8;
-      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px;
-    }
-    .reset-time {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 8px; border-radius: 999px;
-      background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.22);
-      font-size: 10px;
-    }
-    .reset-time, .reset-time span { color: #fbbf24; font-weight: 700; }
-
-    .info-card {
-      background: rgba(255,255,255,0.035);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px; padding: 8px 12px; margin-bottom: 8px;
-    }
-    .info-row { padding: 6px 0; font-size: 11.5px; }
-    .info-row + .info-row, .extra-row + .info-row, .info-row + .extra-row { border-top: 1px solid rgba(255,255,255,0.05); }
-    .extra-row .bar { height: 7px; border-radius: 4px; }
-    .extra-row .bar > i.low { background: linear-gradient(90deg, #4ade80, #16a34a); }
-    .extra-row .bar > i.medium { background: linear-gradient(90deg, #fcd34d, #f97316); }
-    .extra-row .bar > i.high { background: linear-gradient(90deg, #fb7185, #dc2626); }
-    .panel-error { margin-bottom: 8px; }
-
-    .footer { border-top: 1px solid rgba(255,255,255,0.06); }
-
-    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .gauge-card { animation: rise .45s ease both; }
-    .gauge-card:nth-child(2) { animation-delay: .07s; }
-    .gauge-card:nth-child(3) { animation-delay: .14s; }
-    @media (prefers-reduced-motion: reduce) { .gauge-card, .circle-progress { animation: none; transition: none; } }
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">CC</div>
-    <div class="title">
-      <h1>AI Usage Monitor</h1>
-      <div class="plan" id="plan" style="display:none;"></div>
-    </div>
-    <div class="header-actions">
-      <div class="lang-selector">
-        <button class="lang-btn" id="langBtn" title="Language">
-          <span id="currentLangFlag">EN</span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="gLow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#16a34a"/></linearGradient>
+      <linearGradient id="gMed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+      <linearGradient id="gHigh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
+    </defs>
+  </svg>
+
+  <!-- Bandeau + onglets -->
+  <header class="band">
+    <div class="top">
+      <div class="mark">
+        <svg viewBox="0 0 48 48" width="26" height="26" fill="none" stroke-linecap="round">
+          <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.3)" stroke-width="4.5"/>
+          <path d="M24 5a19 19 0 0 1 17.3 11.2" stroke="#fff" stroke-width="4.5"/>
+          <circle cx="24" cy="24" r="9.5" stroke="rgba(255,255,255,0.3)" stroke-width="4.5"/>
+          <path d="M24 14.5a9.5 9.5 0 0 1 9.1 6.8" stroke="#fde68a" stroke-width="4.5"/>
+        </svg>
+      </div>
+      <div class="title">
+        <h1>AI Usage Monitor</h1>
+        <div class="plan" id="plan" style="display:none;"></div>
+      </div>
+      <div class="actions">
+        <div class="lang-selector">
+          <button class="lang-btn" id="langBtn" title="Language">
+            <span id="currentLangFlag">EN</span>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="lang-dropdown" id="langDropdown">
+            <div class="lang-option" data-lang="en">English</div>
+            <div class="lang-option" data-lang="fr">Français</div>
+            <div class="lang-option" data-lang="es">Español</div>
+            <div class="lang-option" data-lang="zh">中文</div>
+            <div class="lang-option" data-lang="he">עברית</div>
+          </div>
+        </div>
+        <button class="icon-btn" id="refreshBtn" title="Refresh">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 1-15.4 6.4L3 16M3 12a9 9 0 0 1 15.4-6.4L21 8"/>
+            <path d="M21 3v5h-5M3 21v-5h5"/>
+          </svg>
         </button>
-        <div class="lang-dropdown" id="langDropdown">
-          <div class="lang-option" data-lang="en">EN English</div>
-          <div class="lang-option" data-lang="fr">FR Francais</div>
-          <div class="lang-option" data-lang="es">ES Espanol</div>
-          <div class="lang-option" data-lang="zh">ZH Chinese</div>
-          <div class="lang-option" data-lang="he">HE Hebrew</div>
-        </div>
       </div>
-      <button class="icon-btn settings" id="settingsBtn" title="Settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" id="refreshBtn" title="Refresh">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M23 4v6h-6M1 20v-6h6"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-        </svg>
-      </button>
     </div>
-  </div>
 
-  <!-- Content -->
-  <div class="content" id="content">
-    <!-- Setup View -->
-    <div class="setup" id="setupView" style="display:none;">
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabGauges" aria-selected="true" aria-controls="paneGauges">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M12 12l6-6"/></svg></span>
+        <span data-i18n="tabGauges">Gauges</span>
+      </button>
+      <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="paneSettings">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
+        <span data-i18n="tabSettings">Settings &amp; info</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Onglet 1 : jauges -->
+  <main class="pane" id="paneGauges" role="tabpanel">
+    <div class="state" id="setupView" style="display:none;">
       <h2 data-i18n="configuration">Configuration</h2>
-      <p style="text-align:center;color:#94a3b8;margin-bottom:24px;" data-i18n="chooseMethod">Choose your authentication method:</p>
-
-      <button class="btn-primary" id="setupLoginBtn" style="margin-bottom:12px;">
-        🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span>
-      </button>
-      <p style="text-align:center;font-size:11px;color:#64748b;margin-bottom:24px;" data-i18n="cookieMode">Recommended - Uses browser cookies</p>
-
-      <div style="text-align:center;margin:20px 0;color:#475569;">── or ──</div>
-
-      <button class="btn-secondary" id="setupSettingsBtn">
-        ⚙️ <span data-i18n="configureManually">Configure with JSON</span>
-      </button>
-      <p style="text-align:center;font-size:11px;color:#64748b;margin-top:8px;" data-i18n="jsonMode">Advanced - Paste .credentials.json</p>
+      <p data-i18n="chooseMethod">Choose your authentication method:</p>
+      <button class="btn-primary" id="setupLoginBtn">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
+      <div class="hint" data-i18n="cookieMode">Recommended - Uses browser cookies</div>
+      <button class="btn-secondary" id="setupSettingsBtn">⚙️ <span data-i18n="configureManually">Configure with JSON</span></button>
+      <div class="hint" data-i18n="jsonMode">Advanced - Paste .credentials.json</div>
     </div>
 
-    <!-- Usage View -->
     <div id="usageView" style="display:none;">
-      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-        <defs>
-          <linearGradient id="gLow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#16a34a"/></linearGradient>
-          <linearGradient id="gMed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f97316"/></linearGradient>
-          <linearGradient id="gHigh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
-        </defs>
-      </svg>
       <div class="circles-container">
-        <div class="circle-card gauge-card">
+        <div class="circle-card">
           <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
             <svg class="circle-svg" viewBox="0 0 100 100">
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
-              <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42"
-                      stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+              <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
             </svg>
-            <div class="circle-text">
-              <div class="circle-percent" id="percent5h">--%</div>
-            </div>
+            <div class="circle-text"><div class="circle-percent" id="percent5h">--%</div></div>
           </div>
-          <div class="gauge-window"><span data-i18n="hours5">5 Hours</span></div>
-          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset5h">--</span></div>
+          <div class="gauge-window" data-i18n="hours5">5 Hours</div>
+          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset5h">--</span></div>
         </div>
-        <div class="circle-card gauge-card">
+
+        <div class="circle-card">
           <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
             <svg class="circle-svg" viewBox="0 0 100 100">
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
-              <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42"
-                      stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+              <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
             </svg>
-            <div class="circle-text">
-              <div class="circle-percent" id="percent7d">--%</div>
-            </div>
+            <div class="circle-text"><div class="circle-percent" id="percent7d">--%</div></div>
           </div>
-          <div class="gauge-window"><span data-i18n="days7">7 Days</span></div>
-          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset7d">--</span></div>
+          <div class="gauge-window" data-i18n="days7">7 Days</div>
+          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset7d">--</span></div>
         </div>
-        <div class="circle-card gauge-card" id="codexSlot" style="display:none;"></div>
+
+        <div class="circle-card" id="codexSlot" style="display:none;"></div>
       </div>
 
-      <div class="info-card" id="claudeExtras" style="display:none;"></div>
-      <div class="info-card" id="codexInfo" style="display:none;"></div>
-      <div class="panel-error" id="codexError" style="display:none;"></div>
-
-      <div class="info-card">
-        <div class="info-row">
-          <span class="info-label" data-i18n="lastUpdated">Last Updated</span>
-          <span class="info-value" id="lastUpdate">--</span>
-        </div>
-      </div>
+      <div class="extras" id="claudeExtras" style="display:none;"></div>
+      <div class="notice" id="codexError" style="display:none;"></div>
     </div>
 
-    <!-- Error View -->
-    <div class="error-container" id="errorView" style="display:none;">
+    <div id="errorView" style="display:none;">
       <div class="error-box">
         <div class="error-title" data-i18n="connectionError">Connection Error</div>
         <div class="error-message" id="errorMessage">Unknown error</div>
-        <button id="loginBtn" class="btn-primary" style="display:none;margin:16px auto;max-width:280px;">
-          🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span>
-        </button>
-        <button id="retryBtn" data-i18n="retry">Retry</button>
-        <button id="reconfigureBtn" data-i18n="reconfigure">Reconfigure</button>
+        <button id="loginBtn" class="btn-primary" style="display:none;margin-bottom:8px;">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
+        <div class="row-btns">
+          <button class="btn-secondary" id="retryBtn" data-i18n="retry">Retry</button>
+          <button class="btn-secondary" id="reconfigureBtn" data-i18n="reconfigure">Reconfigure</button>
+        </div>
       </div>
     </div>
+  </main>
 
-    <!-- Footer -->
-    <div class="footer" style="display:flex;justify-content:space-between;align-items:center;">
-      <a href="https://github.com/showf68/claude-usage-monitor" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-        GitHub
-      </a>
-      <span style="font-size:10px;color:#64748b;">v5.0</span>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 data-i18n="settings">Settings</h2>
-        <button class="modal-close" id="modalClose">&times;</button>
+  <!-- Onglet 2 : reglages et infos -->
+  <main class="pane" id="paneSettings" role="tabpanel" hidden>
+    <section class="section">
+      <div class="section-head"><span data-i18n="sectionInfo">Info</span></div>
+      <div class="info-row"><span class="info-label" data-i18n="lastUpdated">Last Updated</span><span class="info-value" id="infoUpdate">--</span></div>
+      <div class="info-row"><span class="info-label" data-i18n="badgeLabel">Toolbar badge</span>
+        <span class="info-value" style="width:60%">
+          <select id="badgeProvider">
+            <option value="auto" data-i18n="badgeAuto">Highest of Claude / Codex</option>
+            <option value="claude" data-i18n="badgeClaude">Claude Code only</option>
+            <option value="codex" data-i18n="badgeCodex">Codex only</option>
+          </select>
+        </span>
       </div>
+    </section>
 
-      <!-- Auth Mode Tabs -->
-      <div class="auth-tabs">
+    <section class="section">
+      <div class="section-head"><i class="pdot claude"></i><span class="grow">Claude Code</span></div>
+      <div class="seg">
         <button class="auth-tab active" id="tabCookie" data-mode="cookie">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           <span data-i18n="autoMode">Auto (Cookie)</span>
         </button>
         <button class="auth-tab" id="tabToken" data-mode="token">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <span data-i18n="manualMode">Manual (Token)</span>
         </button>
       </div>
 
-      <!-- Cookie Mode Content -->
       <div class="auth-content active" id="cookieContent">
-        <div class="cookie-status checking" id="cookieStatus">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
-          <span data-i18n="checkingCookies">Checking claude.ai session...</span>
-        </div>
-
-        <button class="btn-secondary" id="modalLoginBtn" style="margin-bottom:12px;">
-          🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span>
-        </button>
-
-        <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect with Claude.ai Session</button>
-
-        <div class="cookie-hint">
-          <span data-i18n="cookieHint">This mode automatically uses your claude.ai browser session. Make sure you're logged in to claude.ai in Chrome.</span>
+        <div class="cookie-status checking" id="cookieStatus"><span data-i18n="checkingCookies">Checking claude.ai session...</span></div>
+        <div class="two">
+          <button class="btn-secondary" id="modalLoginBtn">🔗 claude.ai</button>
+          <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect with Claude.ai Session</button>
         </div>
       </div>
 
-      <!-- Token Mode Content -->
       <div class="auth-content" id="tokenContent">
-        <div class="file-hint" id="openCredentialsModal">
-          <span data-i18n="copyPath">Click to copy .credentials.json path</span>
-        </div>
-
-        <label data-i18n="pasteJson">Paste your .credentials.json content:</label>
+        <div class="file-hint" id="openCredentialsModal" data-i18n="copyPath">Click to copy .credentials.json path</div>
         <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
-
-        <div id="modalParseResult"></div>
-
-        <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save & Connect</button>
+        <div class="parse-result" id="modalParseResult"></div>
+        <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save &amp; Connect</button>
       </div>
+    </section>
 
-      <!-- Codex -->
-      <div class="section-title">Codex (ChatGPT)</div>
+    <section class="section">
+      <div class="section-head"><i class="pdot codex"></i><span class="grow">Codex</span><button class="btn-ghost" id="codexDisable" data-i18n="codexDisable">Disable</button></div>
+      <div id="codexInfo" style="display:none;margin-bottom:8px;"></div>
       <div class="cookie-status checking" id="codexStatus"><span>...</span></div>
-      <button class="btn-secondary" id="codexLoginBtn" style="margin-bottom:10px;">🔗 Login to chatgpt.com</button>
-      <button class="btn-primary" id="codexConnect" style="margin-bottom:10px;">Connect Codex (browser session)</button>
-      <label>Or paste ~/.codex/auth.json:</label>
-      <textarea id="codexJsonInput" class="codex-credentials" placeholder='{"tokens":{"access_token":"...","account_id":"..."}}'></textarea>
-      <div id="codexParseResult"></div>
-      <button class="btn-secondary" id="codexSave" style="margin-bottom:8px;">Save Codex token</button>
-      <button class="btn-secondary" id="codexDisable">Disable Codex</button>
+      <div class="two">
+        <button class="btn-secondary" id="codexLoginBtn">🔗 chatgpt.com</button>
+        <button class="btn-primary" id="codexConnect" data-i18n="codexConnect">Connect Codex</button>
+      </div>
+      <details class="adv">
+        <summary data-i18n="codexPaste">Or paste ~/.codex/auth.json</summary>
+        <textarea id="codexJsonInput" placeholder='{"tokens":{"access_token":"...","account_id":"..."}}'></textarea>
+        <div class="parse-result" id="codexParseResult"></div>
+        <button class="btn-secondary" id="codexSave" style="margin-top:6px;" data-i18n="codexSave">Save Codex token</button>
+      </details>
+    </section>
+  </main>
 
-      <div class="section-title">Badge</div>
-      <select id="badgeProvider" class="badge-select">
-        <option value="auto">Highest of Claude / Codex</option>
-        <option value="claude">Claude Code only</option>
-        <option value="codex">Codex only</option>
-      </select>
-
-      <div class="modal-footer">v5.0 - <span data-i18n="version">Paste the entire JSON file content</span></div>
+  <footer class="footer">
+    <div class="status-chip"><i class="live"></i><span data-i18n="lastUpdated">Last Updated</span><b id="lastUpdate">--</b></div>
+    <div class="chips">
+      <a class="chip" href="https://github.com/showf68/claude-usage-monitor" target="_blank" rel="noopener" title="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <span class="chip ver">v5.0</span>
     </div>
-  </div>
+  </footer>
 
   <script src="popup-modern.js"></script>
 </body>
