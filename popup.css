@@ -390,3 +390,9 @@ body { width: 420px; }
 }
 .pane { padding-top: 14px; }
 .title { margin-bottom: 12px; }
+
+/* garde-fou : la ligne du haut ne deborde jamais */
+.top { min-width: 0; }
+.title, .tabs, .tab, .actions, .mark { flex-shrink: 0; }
+.tab span:last-child { white-space: nowrap; }
+.title h1 { white-space: nowrap; }
