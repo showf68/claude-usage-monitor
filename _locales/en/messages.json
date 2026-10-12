@@ -105,10 +105,10 @@
     "message": "Advanced - Paste .credentials.json"
   },
   "tabGauges": {
-    "message": "Gauges"
+    "message": "Monitor"
   },
   "tabSettings": {
-    "message": "Settings & info"
+    "message": "Settings"
   },
   "sectionInfo": {
     "message": "Info"

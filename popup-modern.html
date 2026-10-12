@@ -25,9 +25,18 @@
         </svg>
       </div>
       <div class="title">
-        <h1>AI Usage Monitor</h1>
-        <div class="plan" id="plan" style="display:none;"></div>
+        <h1>AI Usage</h1>
       </div>
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tabGauges" aria-selected="true" aria-controls="paneGauges">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M12 12l6-6"/></svg></span>
+          <span data-i18n="tabGauges">Monitor</span>
+        </button>
+        <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="paneSettings">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
+          <span data-i18n="tabSettings">Settings</span>
+        </button>
+      </nav>
       <div class="actions">
         <button class="icon-btn" id="refreshBtn" title="Refresh">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,17 +46,6 @@
         </button>
       </div>
     </div>
-
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabGauges" aria-selected="true" aria-controls="paneGauges">
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M12 12l6-6"/></svg></span>
-        <span data-i18n="tabGauges">Gauges</span>
-      </button>
-      <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="paneSettings">
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
-        <span data-i18n="tabSettings">Settings &amp; info</span>
-      </button>
-    </nav>
   </header>
 
   <!-- Onglet 1 : jauges -->
@@ -64,7 +62,7 @@
     <div id="usageView" style="display:none;">
       <div class="circles-container">
         <div class="circle-card is-claude duo" data-href="https://claude.ai/new#settings/usage" role="link" tabindex="0" title="claude.ai · Settings › Usage">
-          <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
+          <div class="gauge-head"><i class="pdot claude"></i>Claude Code<span class="plan" id="plan" style="display:none;"></span></div>
           <div class="pair">
             <div class="g">
               <div class="circle-wrapper">

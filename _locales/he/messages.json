@@ -87,10 +87,10 @@
     "message": "הדבק את כל תוכן קובץ ה-JSON"
   },
   "tabGauges": {
-    "message": "מחוונים"
+    "message": "מעקב"
   },
   "tabSettings": {
-    "message": "הגדרות ומידע"
+    "message": "הגדרות"
   },
   "sectionPrefs": {
     "message": "העדפות"

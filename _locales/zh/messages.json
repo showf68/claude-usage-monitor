@@ -87,10 +87,10 @@
     "message": "粘贴完整的 JSON 文件内容"
   },
   "tabGauges": {
-    "message": "用量"
+    "message": "监控"
   },
   "tabSettings": {
-    "message": "设置与信息"
+    "message": "设置"
   },
   "sectionPrefs": {
     "message": "偏好设置"

@@ -87,10 +87,10 @@
     "message": "Pega el contenido JSON completo"
   },
   "tabGauges": {
-    "message": "Indicadores"
+    "message": "Monitor"
   },
   "tabSettings": {
-    "message": "Ajustes e info"
+    "message": "Ajustes"
   },
   "sectionPrefs": {
     "message": "Preferencias"
