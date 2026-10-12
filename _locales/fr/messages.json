@@ -175,5 +175,23 @@
   },
   "credits": {
     "message": "Crédits"
+  },
+  "sectionAlerts": {
+    "message": "Alertes"
+  },
+  "alertsHint": {
+    "message": "Me prévenir quand l’usage atteint"
+  },
+  "sectionConn": {
+    "message": "Connexions"
+  },
+  "connected": {
+    "message": "Connecté"
+  },
+  "notConnected": {
+    "message": "Non connecté"
+  },
+  "disabled": {
+    "message": "Désactivé"
   }
 }

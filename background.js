@@ -367,10 +367,12 @@ async function refreshBadge(results) {
 
 // Alertes par fournisseur : seuils memorises separement
 async function checkAlerts(provider, used) {
-  const thresholds = [70, 80, 90, 95];
   const keyAlerted = `alerted_${provider}`;
   const keyTime = `alertTime_${provider}`;
-  const result = await chrome.storage.local.get([keyAlerted, keyTime]);
+  const result = await chrome.storage.local.get([keyAlerted, keyTime, 'alertsEnabled', 'alertThresholds']);
+  if (result.alertsEnabled === false) return;
+  const thresholds = (Array.isArray(result.alertThresholds) && result.alertThresholds.length ? result.alertThresholds : [70, 80, 90, 95])
+    .map(Number).sort((a, b) => a - b);
   const alerted = result[keyAlerted] || [];
   const lastTime = result[keyTime] || 0;
   const now = Date.now();

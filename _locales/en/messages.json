@@ -166,5 +166,23 @@
   },
   "connectWithCookie": {
     "message": "Connect session"
+  },
+  "sectionAlerts": {
+    "message": "Alerts"
+  },
+  "alertsHint": {
+    "message": "Notify me when usage reaches"
+  },
+  "sectionConn": {
+    "message": "Connections"
+  },
+  "connected": {
+    "message": "Connected"
+  },
+  "notConnected": {
+    "message": "Not connected"
+  },
+  "disabled": {
+    "message": "Disabled"
   }
 }

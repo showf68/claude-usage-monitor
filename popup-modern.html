@@ -133,47 +133,77 @@
     </section>
 
     <section class="section">
-      <div class="section-head"><span class="sh-ic claude"><svg viewBox="0 0 24 24"><path d="M12 3l2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4z"/></svg></span><span class="grow">Claude Code</span></div>
-      <div class="seg">
-        <button class="auth-tab active" id="tabCookie" data-mode="cookie">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span data-i18n="autoMode">Auto (Cookie)</span>
-        </button>
-        <button class="auth-tab" id="tabToken" data-mode="token">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span data-i18n="manualMode">Manual (Token)</span>
-        </button>
+      <div class="section-head">
+        <span class="sh-ic alert"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></span>
+        <span class="grow" data-i18n="sectionAlerts">Alerts</span>
+        <label class="switch" title="On / off"><input type="checkbox" id="alertsEnabled"><span class="knob"></span></label>
       </div>
-
-      <div class="auth-content active" id="cookieContent">
-        <div class="cookie-status checking" id="cookieStatus"><span data-i18n="checkingCookies">Checking claude.ai session...</span></div>
-        <div class="two">
-          <button class="btn-secondary" id="modalLoginBtn">🔗 claude.ai</button>
-          <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect with Claude.ai Session</button>
-        </div>
-      </div>
-
-      <div class="auth-content" id="tokenContent">
-        <div class="file-hint" id="openCredentialsModal" data-i18n="copyPath">Click to copy .credentials.json path</div>
-        <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
-        <div class="parse-result" id="modalParseResult"></div>
-        <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save &amp; Connect</button>
+      <div class="field-label" data-i18n="alertsHint">Notify me when usage reaches</div>
+      <div class="thr" id="thrRow">
+        <button class="thr-chip" data-thr="70">70%</button>
+        <button class="thr-chip" data-thr="80">80%</button>
+        <button class="thr-chip" data-thr="90">90%</button>
+        <button class="thr-chip" data-thr="95">95%</button>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head"><span class="sh-ic codex"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span><span class="grow">Codex</span><button class="btn-ghost" id="codexDisable" data-i18n="codexDisable">Disable</button></div>
-      <div id="codexInfo" style="display:none;margin-bottom:8px;"></div>
-      <div class="cookie-status checking" id="codexStatus"><span>...</span></div>
-      <div class="two">
-        <button class="btn-secondary" id="codexLoginBtn">🔗 chatgpt.com</button>
-        <button class="btn-primary" id="codexConnect" data-i18n="codexConnect">Connect Codex</button>
-      </div>
-      <details class="adv">
-        <summary data-i18n="codexPaste">Or paste ~/.codex/auth.json</summary>
-        <textarea id="codexJsonInput" placeholder='{"tokens":{"access_token":"...","account_id":"..."}}'></textarea>
-        <div class="parse-result" id="codexParseResult"></div>
-        <button class="btn-secondary" id="codexSave" style="margin-top:6px;" data-i18n="codexSave">Save Codex token</button>
+    <section class="section tight">
+      <div class="section-head"><span class="sh-ic link"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg></span><span data-i18n="sectionConn">Connections</span></div>
+
+      <details class="conn" id="connClaude">
+        <summary>
+          <span class="sh-ic claude"><svg viewBox="0 0 24 24"><path d="M12 3l2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4z"/></svg></span>
+          <span class="cn-name">Claude Code<small id="claudeConnState" class="conn-state off">--</small></span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+        </summary>
+        <div class="conn-body">
+          <div class="seg">
+            <button class="auth-tab active" id="tabCookie" data-mode="cookie">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span data-i18n="autoMode">Auto (Cookie)</span>
+            </button>
+            <button class="auth-tab" id="tabToken" data-mode="token">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span data-i18n="manualMode">Manual (Token)</span>
+            </button>
+          </div>
+          <div class="auth-content active" id="cookieContent">
+            <div class="cookie-status checking" id="cookieStatus"><span data-i18n="checkingCookies">Checking claude.ai session...</span></div>
+            <div class="two">
+              <button class="btn-secondary" id="modalLoginBtn">🔗 claude.ai</button>
+              <button class="btn-primary" id="cookieConnect" data-i18n="connectWithCookie">Connect session</button>
+            </div>
+          </div>
+          <div class="auth-content" id="tokenContent">
+            <div class="file-hint" id="openCredentialsModal" data-i18n="copyPath">Click to copy .credentials.json path</div>
+            <textarea id="modalJsonInput" placeholder='{"claudeAiOauth":{"accessToken":"sk-ant-oat01-..."}}'></textarea>
+            <div class="parse-result" id="modalParseResult"></div>
+            <button class="btn-primary" id="modalSave" data-i18n="saveConnect">Save &amp; Connect</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="conn" id="connCodex">
+        <summary>
+          <span class="sh-ic codex"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span>
+          <span class="cn-name">Codex<small id="codexConnState" class="conn-state off">--</small></span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+        </summary>
+        <div class="conn-body">
+          <div id="codexInfo" style="display:none;margin-bottom:8px;"></div>
+          <div class="cookie-status checking" id="codexStatus"><span>...</span></div>
+          <div class="two">
+            <button class="btn-secondary" id="codexLoginBtn">🔗 chatgpt.com</button>
+            <button class="btn-primary" id="codexConnect" data-i18n="codexConnect">Connect Codex</button>
+          </div>
+          <details class="adv">
+            <summary data-i18n="codexPaste">Or paste ~/.codex/auth.json</summary>
+            <textarea id="codexJsonInput" placeholder='{"tokens":{"access_token":"...","account_id":"..."}}'></textarea>
+            <div class="parse-result" id="codexParseResult"></div>
+            <button class="btn-secondary" id="codexSave" style="margin-top:6px;" data-i18n="codexSave">Save Codex token</button>
+          </details>
+          <button class="btn-ghost" id="codexDisable" data-i18n="codexDisable">Disable</button>
+        </div>
       </details>
     </section>
   </main>

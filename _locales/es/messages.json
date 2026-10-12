@@ -139,5 +139,23 @@
   },
   "connectWithCookie": {
     "message": "Conectar sesión"
+  },
+  "sectionAlerts": {
+    "message": "Alertas"
+  },
+  "alertsHint": {
+    "message": "Avisarme cuando el uso llegue a"
+  },
+  "sectionConn": {
+    "message": "Conexiones"
+  },
+  "connected": {
+    "message": "Conectado"
+  },
+  "notConnected": {
+    "message": "No conectado"
+  },
+  "disabled": {
+    "message": "Desactivado"
   }
 }

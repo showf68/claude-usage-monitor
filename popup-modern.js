@@ -304,9 +304,39 @@ function renderCodex(data) {
   info.style.display = rows.length ? 'block' : 'none';
 }
 
+// Etat des connexions (pastilles du volet Reglages)
+function setConnState(id, kind, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `conn-state ${kind}`;
+  el.textContent = text;
+}
+
+function updateConnStates(res) {
+  const { claude, codex, codexOff } = res;
+  const src = (x) => (x && x._source === 'token' ? (t('manualMode') || 'Token') : (t('autoMode') || 'Cookie'));
+  const short = (s) => s.replace(/\s*\(.*\)\s*/, '').trim();
+  const nc = t('notConnected') || 'Not connected';
+  if (claude && !claude.error && claude.five_hour) {
+    setConnState('claudeConnState', 'ok', `${t('connected') || 'Connected'} · ${short(src(claude))}${claude.plan ? ' · ' + claude.plan : ''}`);
+  } else {
+    setConnState('claudeConnState', 'bad', nc);
+    document.getElementById('connClaude').open = true;
+  }
+  if (codexOff) {
+    setConnState('codexConnState', 'off', t('disabled') || 'Disabled');
+  } else if (codex && !codex.error && codex.windows) {
+    setConnState('codexConnState', 'ok', `${t('connected') || 'Connected'} · ${short(src(codex))}${codex.plan ? ' · ' + codex.plan : ''}`);
+  } else {
+    setConnState('codexConnState', 'bad', nc);
+    document.getElementById('connCodex').open = true;
+  }
+}
+
 // Affiche les deux fournisseurs ; l'erreur d'un seul ne masque pas l'autre
 function renderAll(res) {
   const { claude, codex, codexOff } = res;
+  updateConnStates(res);
   if (claude && !claude.error && claude.five_hour) {
     updateUI(claude);
   } else if (claude && claude.error && (codexOff || !codex || codex.error)) {
@@ -431,6 +461,7 @@ async function init() {
 
   const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider']);
   setBadgeChoice(result.badgeProvider || 'auto');
+  loadAlertPrefs();
 
   // Check if configured (either has tokens or using cookie mode)
   const hasTokens = result.refreshToken || result.accessToken || result.token;
@@ -521,6 +552,25 @@ function openModal() {
 
 function closeModal() {
   switchTab('gauges');
+}
+
+// Alertes : interrupteur + seuils, lus par background.js a chaque verification
+const DEFAULT_THRESHOLDS = [70, 80, 90, 95];
+
+async function loadAlertPrefs() {
+  const r = await chrome.storage.local.get(['alertsEnabled', 'alertThresholds']);
+  const on = r.alertsEnabled !== false;
+  const thr = Array.isArray(r.alertThresholds) && r.alertThresholds.length ? r.alertThresholds : DEFAULT_THRESHOLDS;
+  document.getElementById('alertsEnabled').checked = on;
+  document.getElementById('thrRow').classList.toggle('off', !on);
+  document.querySelectorAll('.thr-chip').forEach(b => b.classList.toggle('active', thr.includes(Number(b.dataset.thr))));
+}
+
+function saveAlertPrefs() {
+  const on = document.getElementById('alertsEnabled').checked;
+  const thr = [...document.querySelectorAll('.thr-chip.active')].map(b => Number(b.dataset.thr));
+  document.getElementById('thrRow').classList.toggle('off', !on);
+  chrome.storage.local.set({ alertsEnabled: on, alertThresholds: thr.length ? thr : DEFAULT_THRESHOLDS });
 }
 
 function setBadgeChoice(v) {
@@ -831,6 +881,14 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('click', open);
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
   });
+
+  document.getElementById('alertsEnabled')?.addEventListener('change', saveAlertPrefs);
+  document.querySelectorAll('.thr-chip').forEach(b => b.addEventListener('click', () => {
+    const active = document.querySelectorAll('.thr-chip.active');
+    if (b.classList.contains('active') && active.length === 1) return; // au moins un seuil
+    b.classList.toggle('active');
+    saveAlertPrefs();
+  }));
 
   document.getElementById('tabGauges')?.addEventListener('click', () => switchTab('gauges'));
   document.getElementById('tabSettings')?.addEventListener('click', () => switchTab('settings'));

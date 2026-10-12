@@ -139,5 +139,23 @@
   },
   "connectWithCookie": {
     "message": "连接会话"
+  },
+  "sectionAlerts": {
+    "message": "提醒"
+  },
+  "alertsHint": {
+    "message": "用量达到以下比例时通知我"
+  },
+  "sectionConn": {
+    "message": "连接"
+  },
+  "connected": {
+    "message": "已连接"
+  },
+  "notConnected": {
+    "message": "未连接"
+  },
+  "disabled": {
+    "message": "已停用"
   }
 }

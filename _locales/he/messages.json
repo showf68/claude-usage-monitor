@@ -139,5 +139,23 @@
   },
   "connectWithCookie": {
     "message": "התחברות"
+  },
+  "sectionAlerts": {
+    "message": "התראות"
+  },
+  "alertsHint": {
+    "message": "התראה כשהשימוש מגיע ל־"
+  },
+  "sectionConn": {
+    "message": "חיבורים"
+  },
+  "connected": {
+    "message": "מחובר"
+  },
+  "notConnected": {
+    "message": "לא מחובר"
+  },
+  "disabled": {
+    "message": "מושבת"
   }
 }
