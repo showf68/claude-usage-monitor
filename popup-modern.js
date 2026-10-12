@@ -851,7 +851,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       const lang = option.dataset.lang;
       changeLanguage(lang).then(() => chrome.storage.local.get(['lastUpdate']).then(r => { if (r.lastUpdate) setUpdated(r.lastUpdate); }));
-      document.getElementById('langDropdown').classList.remove('show');
+      document.getElementById('langDropdown')?.classList.remove('show');
     });
   });
 

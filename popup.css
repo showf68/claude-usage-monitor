@@ -302,15 +302,16 @@ body { background: radial-gradient(120% 60% at 50% 100%, rgba(124, 58, 237, .10)
 /* Langue : grille de puces */
 .chip-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
 .lchip {
-  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border-radius: 10px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 2px 6px; border-radius: 10px; cursor: pointer;
   background: rgba(0,0,0,.25); border: 1px solid var(--line); color: var(--muted);
   transition: border-color .2s, background .2s, color .2s, transform .2s var(--ease);
 }
-.lchip b { font: 600 13px/1.1 var(--title); color: var(--fg); }
+.lchip .flag { width: 26px; height: 26px; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); transition: transform .25s var(--ease); }
+.lchip:hover .flag, .lchip.active .flag { transform: scale(1.12) rotate(-4deg); }
 .lchip span { font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .lchip:hover { border-color: rgba(245,158,11,.4); transform: translateY(-1px); }
 .lchip.active { background: linear-gradient(160deg, rgba(245,158,11,.22), rgba(234,88,12,.12)); border-color: rgba(245,158,11,.6); color: var(--gold); }
-.lchip.active b { color: #fff; }
+.lchip.active span { color: #fff; font-weight: 600; }
 
 /* Selecteur segmente */
 .seg { background: rgba(0,0,0,.32); }
@@ -329,3 +330,11 @@ option { background: #0f1424; color: #e5e9f2; }
 .cookie-status { border-radius: 11px; }
 .btn-secondary { background: rgba(255,255,255,.045); }
 .footer { border-top-color: rgba(255,255,255,.06); }
+
+/* Claude : deux jauges dans le meme cadre */
+.circle-card.duo { flex: 2; }
+.pair { display: flex; }
+.pair .g { flex: 1; min-width: 0; }
+.pair .g + .g { border-left: 1px solid rgba(255,255,255,.07); }
+body[dir="rtl"] .pair .g + .g { border-left: 0; border-right: 1px solid rgba(255,255,255,.07); }
+.circle-card.duo::before { left: 10%; right: 10%; }
