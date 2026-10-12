@@ -2,14 +2,12 @@
 // Multi-language support with browser detection
 // Cookie and Token auth modes
 
-const circumference = 2 * Math.PI * 42; // radius = 42 for outer ring
-const circumferenceInner = 2 * Math.PI * 34; // radius = 34 for inner ring
+const circumference = 2 * Math.PI * 42; // radius = 42
 let lastError = null;
 let parsedTokens = null;
 let currentLang = 'en';
 let translations = {};
 let currentAuthMode = 'cookie'; // 'cookie' or 'token'
-let currentProvider = 'claude';
 let codexParsed = null;
 
 // Available languages with display names
@@ -110,46 +108,16 @@ function getColorClass(used) {
   return 'high';
 }
 
-function calculateTimeElapsedPercent(resetAt, windowDuration) {
-  if (!resetAt) return 0;
-  
-  const now = new Date();
-  const reset = new Date(resetAt);
-  const timeRemaining = reset - now;
-  
-  // If reset time has passed or is invalid, return 100%
-  if (timeRemaining < 0) return 100;
-  
-  // Calculate time elapsed as percentage
-  const timeElapsed = windowDuration - timeRemaining;
-  const timeElapsedPercent = (timeElapsed / windowDuration) * 100;
-  
-  // Clamp between 0 and 100
-  return Math.max(0, Math.min(100, timeElapsedPercent));
-}
-
-function updateCircularProgress(circleId, percentId, timeCircleId, used, resetAt, windowDurationMs) {
+function updateCircularProgress(circleId, percentId, used) {
   const circle = document.getElementById(circleId);
   const percentElem = document.getElementById(percentId);
-  const timeCircle = document.getElementById(timeCircleId);
-  
   if (!circle || !percentElem) return;
 
-  // Update outer ring (usage)
-  const offset = circumference - (used / 100) * circumference;
-  circle.style.strokeDashoffset = offset;
-
+  circle.style.strokeDashoffset = circumference - (Math.min(100, used) / 100) * circumference;
   const colorClass = getColorClass(used);
-  circle.className = `circle-progress ${colorClass}`;
+  circle.setAttribute('class', `circle-progress ${colorClass}`);
   percentElem.className = `circle-percent ${colorClass}`;
   percentElem.textContent = `${Math.round(used)}%`;
-
-  // Update inner ring (time elapsed)
-  if (timeCircle && resetAt && windowDurationMs) {
-    const timeElapsedPercent = calculateTimeElapsedPercent(resetAt, windowDurationMs);
-    const timeOffset = circumferenceInner - (timeElapsedPercent / 100) * circumferenceInner;
-    timeCircle.style.strokeDashoffset = timeOffset;
-  }
 }
 
 function formatTimeRemaining(resetAt) {
@@ -230,17 +198,15 @@ function updateUI(data) {
   showView('usageView');
 
   // 5-hour window
-  const FIVE_HOUR_WINDOW_MS = 5 * 60 * 60 * 1000;
   const used5h = data.five_hour.utilization || 0;
   const reset5h = data.five_hour.resets_at || data.five_hour.reset_at;
-  updateCircularProgress('circle5h', 'percent5h', 'circleTime5h', used5h, reset5h, FIVE_HOUR_WINDOW_MS);
+  updateCircularProgress('circle5h', 'percent5h', used5h);
   document.getElementById('reset5h').textContent = formatTimeRemaining(reset5h);
 
   // 7-day window
-  const SEVEN_DAY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const used7d = data.seven_day?.utilization || 0;
   const reset7d = data.seven_day?.resets_at || data.seven_day?.reset_at;
-  updateCircularProgress('circle7d', 'percent7d', 'circleTime7d', used7d, reset7d, SEVEN_DAY_WINDOW_MS);
+  updateCircularProgress('circle7d', 'percent7d', used7d);
   document.getElementById('reset7d').textContent = formatTimeRemaining(reset7d);
 
   // Extras : fenetres par modele, usage supplementaire
@@ -260,7 +226,6 @@ function updateUI(data) {
     planElem.style.display = 'block';
   }
 
-  setDot('dotClaude', used5h);
 }
 
 function extraRow(label, used, resetAt) {
@@ -269,109 +234,82 @@ function extraRow(label, used, resetAt) {
   return `<div class="extra-row"><span>${label}</span><span class="bar"><i class="${getColorClass(u)}" style="width:${u}%"></i></span><span>${Math.round(u)}%${reset}</span></div>`;
 }
 
-function setDot(id, used) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = used == null ? 'dot err' : `dot ${getColorClass(used)}`;
-}
-
 // ==================== CODEX ====================
 
 function windowLabel(w) {
   const h = Math.round((w.window_ms || 0) / 3600000);
+  if (h === 5) return t('hours5');
+  if (h === 168) return t('days7');
   if (!h) return 'Window';
   if (h % 24 === 0) return `${h / 24} ${h === 24 ? 'Day' : 'Days'}`;
   return `${h} Hours`;
 }
 
 function ringHtml(id, label) {
-  return `<div class="circle-card">
+  return `<div class="gauge-head"><i class="pdot codex"></i>Codex</div>
     <div class="circle-wrapper">
-      <svg class="circle-svg" width="100" height="100">
+      <svg class="circle-svg" viewBox="0 0 100 100">
         <circle class="circle-bg" cx="50" cy="50" r="42"/>
-        <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
-        <circle class="circle-progress-time" id="${id}T" cx="50" cy="50" r="34" stroke-dasharray="213.63" stroke-dashoffset="0"/>
-        <circle class="circle-progress low" id="${id}C" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="0"/>
+        <circle class="circle-progress low" id="${id}C" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
       </svg>
-      <div class="circle-text">
-        <div class="circle-percent" id="${id}P">--%</div>
-        <div class="circle-label">${label}</div>
-      </div>
+      <div class="circle-text"><div class="circle-percent" id="${id}P">--%</div></div>
     </div>
-    <div class="reset-time"><span id="${id}R">--</span></div>
-  </div>`;
+    <div class="gauge-window">${label}</div>
+    <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="${id}R">--</span></div>`;
 }
 
 function renderCodex(data) {
-  const circles = document.getElementById('codexCircles');
+  const slot = document.getElementById('codexSlot');
   const info = document.getElementById('codexInfo');
   const err = document.getElementById('codexError');
 
-  if (!data) {
-    circles.innerHTML = '';
+  if (!data || data.error) {
+    slot.style.display = 'none';
     info.style.display = 'none';
     err.style.display = 'block';
-    err.innerHTML = 'Codex not connected.<br><button class="btn-primary" id="codexInlineConnect">Connect Codex</button>';
-    document.getElementById('codexInlineConnect')?.addEventListener('click', openModal);
-    setDot('dotCodex', null);
-    return;
-  }
-
-  if (data.error) {
-    circles.innerHTML = '';
-    info.style.display = 'none';
-    err.style.display = 'block';
-    const msg = data.error === 'NOT_LOGGED_IN' ? 'Not logged in to chatgpt.com.' : data.error;
-    err.innerHTML = `${msg}<br>${data.needsLogin ? '<button class="btn-primary" id="codexInlineLogin">Login to chatgpt.com</button>' : ''}`;
-    document.getElementById('codexInlineLogin')?.addEventListener('click', () => {
-      chrome.tabs.create({ url: 'https://chatgpt.com' });
-      chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
-    });
-    setDot('dotCodex', null);
+    if (!data) {
+      err.innerHTML = 'Codex not connected.<br><button class="btn-primary" id="codexInlineConnect">Connect Codex</button>';
+      document.getElementById('codexInlineConnect')?.addEventListener('click', openModal);
+    } else {
+      const msg = data.error === 'NOT_LOGGED_IN' ? 'Codex: not logged in to chatgpt.com.' : data.error;
+      err.innerHTML = `${msg}<br>${data.needsLogin ? '<button class="btn-primary" id="codexInlineLogin">Login to chatgpt.com</button>' : ''}`;
+      document.getElementById('codexInlineLogin')?.addEventListener('click', () => {
+        chrome.tabs.create({ url: 'https://chatgpt.com' });
+        chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
+      });
+    }
     return;
   }
 
   err.style.display = 'none';
   const windows = data.windows || [];
-  const main = windows.filter(w => w.key !== 'code_review');
-  circles.innerHTML = main.map((w, i) => ringHtml(`cx${i}`, windowLabel(w))).join('');
-  main.forEach((w, i) => {
-    updateCircularProgress(`cx${i}C`, `cx${i}P`, `cx${i}T`, w.utilization || 0, w.resets_at, w.window_ms);
-    document.getElementById(`cx${i}R`).textContent = formatTimeRemaining(w.resets_at);
-  });
+  const main = windows.filter(w => w.key !== 'code_review')
+    .sort((a, b) => (b.window_ms || 0) - (a.window_ms || 0))[0]; // fenetre la plus longue
+  if (main) {
+    slot.innerHTML = ringHtml('cx0', windowLabel(main));
+    slot.style.display = 'block';
+    updateCircularProgress('cx0C', 'cx0P', main.utilization || 0);
+    document.getElementById('cx0R').textContent = formatTimeRemaining(main.resets_at);
+  }
 
   const rows = [];
-  const review = windows.find(w => w.key === 'code_review');
-  if (review) rows.push(extraRow('Code review', review.utilization, review.resets_at));
+  windows.filter(w => w !== main).forEach(w => {
+    rows.push(extraRow(w.key === 'code_review' ? 'Code review' : 'Codex ' + windowLabel(w), w.utilization, w.resets_at));
+  });
   if (data.credits && (data.credits.has_credits || data.credits.unlimited)) {
     rows.push(`<div class="info-row"><span class="info-label">Credits</span><span class="info-value">${data.credits.unlimited ? 'Unlimited' : data.credits.balance}</span></div>`);
   }
   if (data.limit_reached) {
-    rows.push('<div class="info-row"><span class="info-label" style="color:#ef4444">Limit reached</span></div>');
+    rows.push('<div class="info-row"><span class="info-label" style="color:#ef4444">Codex limit reached</span></div>');
   }
-  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">Plan</span><span class="info-value">${data.plan}</span></div>`);
-  if (data.email) rows.push(`<div class="info-row"><span class="info-label">Account</span><span class="info-value">${data.email}</span></div>`);
+  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">Codex plan</span><span class="info-value">${data.plan}</span></div>`);
   info.innerHTML = rows.join('');
   info.style.display = rows.length ? 'block' : 'none';
-
-  const shortest = [...main].sort((a, b) => (a.window_ms || 1e12) - (b.window_ms || 1e12))[0];
-  setDot('dotCodex', shortest ? shortest.utilization : null);
-}
-
-function switchProvider(provider) {
-  currentProvider = provider;
-  document.getElementById('tabClaude')?.classList.toggle('active', provider === 'claude');
-  document.getElementById('tabCodex')?.classList.toggle('active', provider === 'codex');
-  document.getElementById('claudePanel').style.display = provider === 'claude' ? 'block' : 'none';
-  document.getElementById('codexPanel').style.display = provider === 'codex' ? 'block' : 'none';
-  chrome.storage.local.set({ lastProvider: provider });
 }
 
 // Affiche les deux fournisseurs ; l'erreur d'un seul ne masque pas l'autre
 function renderAll(res) {
   const { claude, codex, codexOff } = res;
-  document.getElementById('tabCodex').style.display = codexOff ? 'none' : 'flex';
-  if (codexOff && currentProvider === 'codex') switchProvider('claude');
   if (claude && !claude.error && claude.five_hour) {
     updateUI(claude);
   } else if (claude && claude.error && (codexOff || !codex || codex.error)) {
@@ -383,10 +321,13 @@ function renderAll(res) {
       const extrasElem = document.getElementById('claudeExtras');
       extrasElem.innerHTML = `<div style="color:#fca5a5;font-size:12px;padding:6px 0">Claude: ${claude.error === 'NOT_LOGGED_IN' ? 'not logged in to claude.ai' : claude.error}</div>`;
       extrasElem.style.display = 'block';
-      setDot('dotClaude', null);
     }
   }
-  if (!codexOff) renderCodex(codex);
+  if (codexOff) {
+    ['codexSlot', 'codexInfo', 'codexError'].forEach(i => { document.getElementById(i).style.display = 'none'; });
+  } else {
+    renderCodex(codex);
+  }
 }
 
 // Parse JSON input and extract tokens
@@ -494,7 +435,6 @@ async function init() {
   const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider']);
   const badgeSel = document.getElementById('badgeProvider');
   if (badgeSel) badgeSel.value = result.badgeProvider || 'auto';
-  if (result.lastProvider) switchProvider(result.lastProvider);
 
   // Check if configured (either has tokens or using cookie mode)
   const hasTokens = result.refreshToken || result.accessToken || result.token;
@@ -838,10 +778,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tabCookie')?.addEventListener('click', () => switchAuthTab('cookie'));
   document.getElementById('tabToken')?.addEventListener('click', () => switchAuthTab('token'));
 
-  // Provider tabs
-  document.getElementById('tabClaude')?.addEventListener('click', () => switchProvider('claude'));
-  document.getElementById('tabCodex')?.addEventListener('click', () => switchProvider('codex'));
-
   // Codex settings
   document.getElementById('codexLoginBtn')?.addEventListener('click', () => {
     chrome.tabs.create({ url: 'https://chatgpt.com' });
@@ -851,7 +787,6 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ action: 'connectCodex' }, (r) => {
       closeModal();
       refresh();
-      switchProvider('codex');
       if (r && !r.success) showToast(r.error || 'Codex connection failed');
     });
   });
@@ -869,12 +804,11 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ action: 'setCodexTokens', ...codexParsed }, (r) => {
       closeModal();
       refresh();
-      switchProvider('codex');
       if (r && !r.success) showToast(r.error || 'Codex token rejected');
     });
   });
   document.getElementById('codexDisable')?.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); switchProvider('claude'); refresh(); });
+    chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); refresh(); });
   });
   document.getElementById('badgeProvider')?.addEventListener('change', (e) => {
     chrome.runtime.sendMessage({ action: 'setBadgeProvider', provider: e.target.value });

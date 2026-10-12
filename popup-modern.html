@@ -124,20 +124,20 @@
     .circles-container {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 14px;
-      gap: 12px;
+      margin-bottom: 4px;
+      gap: 6px;
     }
 
     .circle-card { flex: 1; text-align: center; }
 
     .circle-wrapper {
       position: relative;
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 8px;
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 6px;
     }
 
-    .circle-svg { transform: rotate(-90deg); }
+    .circle-svg { transform: rotate(-90deg); width: 84px; height: 84px; }
     .circle-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
     .circle-bg-inner { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
 
@@ -169,7 +169,7 @@
       text-align: center;
     }
 
-    .circle-percent { font-size: 22px; font-weight: 800; line-height: 1; }
+    .circle-percent { font-size: 19px; font-weight: 800; line-height: 1; }
     .circle-percent.low { color: #22c55e; }
     .circle-percent.medium { color: #f59e0b; }
     .circle-percent.high { color: #ef4444; }
@@ -613,7 +613,7 @@
       height: 14px;
     }
 
-    /* Provider tabs */
+    /* (ancien) Provider tabs */
     .provider-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
     .provider-tab {
       flex: 1; padding: 8px 10px; border-radius: 10px; cursor: pointer;
@@ -638,6 +638,102 @@
     .badge-select { width: 100%; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); font-size: 12px; font-family: inherit; }
     .section-title { margin: 18px 0 8px; font-size: 12px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.04em; }
     .codex-credentials { width: 100%; min-height: 70px; }
+
+    /* ===== Finition v5 ===== */
+    body {
+      width: 400px;
+      background:
+        radial-gradient(120% 60% at 50% -10%, rgba(245,158,11,0.14), transparent 60%),
+        radial-gradient(80% 50% at 100% 100%, rgba(16,185,129,0.07), transparent 60%),
+        #0b0f14;
+    }
+    .header {
+      background: linear-gradient(120deg, #b45309 0%, #d97706 45%, #f59e0b 100%);
+      box-shadow: 0 6px 24px rgba(217,119,6,0.35);
+      position: relative;
+    }
+    .header::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(60% 120% at 85% -20%, rgba(255,255,255,0.28), transparent 60%);
+      pointer-events: none;
+    }
+    .logo {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+      letter-spacing: 0.5px;
+    }
+    .title h1 { letter-spacing: 0.2px; font-size: 15px; }
+    .content { padding: 18px 14px 12px; }
+
+    .circles-container { gap: 8px; margin-bottom: 12px; }
+    .gauge-card {
+      min-width: 0;
+      padding: 12px 6px 10px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .gauge-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(245,158,11,0.45);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.45), 0 0 0 1px rgba(245,158,11,0.15);
+    }
+    .gauge-head {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: 10px; font-weight: 700; color: #e2e8f0; letter-spacing: .02em;
+      margin-bottom: 8px; white-space: nowrap;
+    }
+    .pdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .pdot.claude { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .pdot.codex { background: #34d399; box-shadow: 0 0 8px #34d399; }
+
+    .circle-wrapper { width: 92px; height: 92px; margin: 0 auto 8px; }
+    .circle-svg { width: 92px; height: 92px; }
+    .circle-bg { stroke: rgba(255,255,255,0.07); stroke-width: 9; }
+    .circle-progress { stroke-width: 9; transition: stroke-dashoffset 1s cubic-bezier(.22,1,.36,1), stroke .3s; }
+    .circle-progress.low { stroke: url(#gLow); filter: drop-shadow(0 0 5px rgba(34,197,94,0.55)); }
+    .circle-progress.medium { stroke: url(#gMed); filter: drop-shadow(0 0 5px rgba(249,115,22,0.55)); }
+    .circle-progress.high { stroke: url(#gHigh); filter: drop-shadow(0 0 6px rgba(239,68,68,0.65)); }
+    .circle-percent { font-size: 21px; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+    .circle-percent.low { color: #86efac; }
+    .circle-percent.medium { color: #fdba74; }
+    .circle-percent.high { color: #fda4af; }
+
+    .gauge-window {
+      font-size: 10px; font-weight: 700; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px;
+    }
+    .reset-time {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 999px;
+      background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.22);
+      font-size: 10px;
+    }
+    .reset-time, .reset-time span { color: #fbbf24; font-weight: 700; }
+
+    .info-card {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 8px 12px; margin-bottom: 8px;
+    }
+    .info-row { padding: 6px 0; font-size: 11.5px; }
+    .info-row + .info-row, .extra-row + .info-row, .info-row + .extra-row { border-top: 1px solid rgba(255,255,255,0.05); }
+    .extra-row .bar { height: 7px; border-radius: 4px; }
+    .extra-row .bar > i.low { background: linear-gradient(90deg, #4ade80, #16a34a); }
+    .extra-row .bar > i.medium { background: linear-gradient(90deg, #fcd34d, #f97316); }
+    .extra-row .bar > i.high { background: linear-gradient(90deg, #fb7185, #dc2626); }
+    .panel-error { margin-bottom: 8px; }
+
+    .footer { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .gauge-card { animation: rise .45s ease both; }
+    .gauge-card:nth-child(2) { animation-delay: .07s; }
+    .gauge-card:nth-child(3) { animation-delay: .14s; }
+    @media (prefers-reduced-motion: reduce) { .gauge-card, .circle-progress { animation: none; transition: none; } }
   </style>
 </head>
 <body>
@@ -699,66 +795,50 @@
 
     <!-- Usage View -->
     <div id="usageView" style="display:none;">
-      <div class="provider-tabs" id="providerTabs">
-        <button class="provider-tab active" id="tabClaude" data-provider="claude"><span class="dot" id="dotClaude"></span>Claude Code</button>
-        <button class="provider-tab" id="tabCodex" data-provider="codex"><span class="dot" id="dotCodex"></span>Codex</button>
-      </div>
-
-      <div id="claudePanel">
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <linearGradient id="gLow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#16a34a"/></linearGradient>
+          <linearGradient id="gMed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+          <linearGradient id="gHigh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
+        </defs>
+      </svg>
       <div class="circles-container">
-        <div class="circle-card">
+        <div class="circle-card gauge-card">
+          <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
-            <svg class="circle-svg" width="100" height="100">
-              <!-- Outer ring background -->
+            <svg class="circle-svg" viewBox="0 0 100 100">
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
-              <!-- Inner ring background -->
-              <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
-              <!-- Inner ring progress (time elapsed) -->
-              <circle class="circle-progress-time" id="circleTime5h" cx="50" cy="50" r="34"
-                      stroke-dasharray="213.63" stroke-dashoffset="0"/>
-              <!-- Outer ring progress (usage) -->
               <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42"
-                      stroke-dasharray="263.89" stroke-dashoffset="0"/>
+                      stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent5h">--%</div>
-              <div class="circle-label" data-i18n="hours5">5 Hours</div>
             </div>
           </div>
-          <div class="reset-time"><span id="reset5h">--</span></div>
+          <div class="gauge-window"><span data-i18n="hours5">5 Hours</span></div>
+          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset5h">--</span></div>
         </div>
-
-        <div class="circle-card">
+        <div class="circle-card gauge-card">
+          <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
-            <svg class="circle-svg" width="100" height="100">
-              <!-- Outer ring background -->
+            <svg class="circle-svg" viewBox="0 0 100 100">
               <circle class="circle-bg" cx="50" cy="50" r="42"/>
-              <!-- Inner ring background -->
-              <circle class="circle-bg-inner" cx="50" cy="50" r="34"/>
-              <!-- Inner ring progress (time elapsed) -->
-              <circle class="circle-progress-time" id="circleTime7d" cx="50" cy="50" r="34"
-                      stroke-dasharray="213.63" stroke-dashoffset="0"/>
-              <!-- Outer ring progress (usage) -->
               <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42"
-                      stroke-dasharray="263.89" stroke-dashoffset="0"/>
+                      stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
             </svg>
             <div class="circle-text">
               <div class="circle-percent" id="percent7d">--%</div>
-              <div class="circle-label" data-i18n="days7">7 Days</div>
             </div>
           </div>
-          <div class="reset-time"><span id="reset7d">--</span></div>
+          <div class="gauge-window"><span data-i18n="days7">7 Days</span></div>
+          <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset7d">--</span></div>
         </div>
+        <div class="circle-card gauge-card" id="codexSlot" style="display:none;"></div>
       </div>
 
       <div class="info-card" id="claudeExtras" style="display:none;"></div>
-      </div>
-
-      <div id="codexPanel" style="display:none;">
-        <div class="circles-container" id="codexCircles"></div>
-        <div class="info-card" id="codexInfo"></div>
-        <div class="panel-error" id="codexError" style="display:none;"></div>
-      </div>
+      <div class="info-card" id="codexInfo" style="display:none;"></div>
+      <div class="panel-error" id="codexError" style="display:none;"></div>
 
       <div class="info-card">
         <div class="info-row">
