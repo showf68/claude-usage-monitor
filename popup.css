@@ -338,3 +338,37 @@ option { background: #0f1424; color: #e5e9f2; }
 .pair .g + .g { border-left: 1px solid rgba(255,255,255,.07); }
 body[dir="rtl"] .pair .g + .g { border-left: 0; border-right: 1px solid rgba(255,255,255,.07); }
 .circle-card.duo::before { left: 10%; right: 10%; }
+
+/* ================================================================== v8 : entete compact, cartes cliquables */
+.band { padding: 9px 12px 0; }
+.top { gap: 9px; }
+.mark { width: 30px; height: 30px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.mark svg { width: 19px; height: 19px; }
+.title { display: flex; align-items: center; gap: 8px; }
+.title h1 { font-size: 15px; line-height: 1.1; white-space: nowrap; }
+.plan { margin: 0; padding: 0 7px; font-size: 9.5px; line-height: 16px; }
+.icon-btn { height: 28px; min-width: 28px; border-radius: 9px; }
+.icon-btn svg { width: 13px; height: 13px; }
+.tabs { margin-top: 8px; gap: 2px; }
+.tab { padding: 4px 12px 6px 5px; gap: 7px; font-size: 12px; border-radius: 12px 12px 0 0; }
+.tab .ic { width: 22px; height: 22px; }
+.tab .ic svg { width: 12px; height: 12px; }
+.tab[aria-selected="true"]::before, .tab[aria-selected="true"]::after { width: 12px; height: 12px; }
+.tab[aria-selected="true"]::before { left: -12px; background: radial-gradient(circle at 0 0, transparent 11.5px, var(--surface) 12px); }
+.tab[aria-selected="true"]::after { right: -12px; background: radial-gradient(circle at 100% 0, transparent 11.5px, var(--surface) 12px); }
+.pane { padding-top: 12px; }
+#paneSettings { max-height: 440px; }
+
+/* cartes de jauge : lien vers la page d'usage du fournisseur */
+[data-href] { cursor: pointer; }
+[data-href]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.gauge-head::after {
+  content: '\2197'; margin-left: 2px; font-size: 11px; line-height: 1; color: var(--gold);
+  opacity: 0; transform: translate(-3px, 3px); transition: opacity .2s, transform .25s var(--ease);
+}
+.circle-card:hover .gauge-head::after, .circle-card:focus-visible .gauge-head::after { opacity: .9; transform: none; }
+
+/* pied : puces icones seules */
+.chip.ic-only { width: 26px; padding: 0; justify-content: center; }
+.chip.ic-only svg { width: 13px; height: 13px; }
+.footer { margin-top: 8px; padding: 8px 0 10px; }

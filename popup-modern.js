@@ -825,6 +825,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (r && !r.success) showToast(r.error || 'Codex token rejected');
     });
   });
+  // Cartes de jauge : ouvrent la page d'usage du fournisseur dans un nouvel onglet
+  document.querySelectorAll('[data-href]').forEach(card => {
+    const open = () => chrome.tabs.create({ url: card.dataset.href });
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  });
+
   document.getElementById('tabGauges')?.addEventListener('click', () => switchTab('gauges'));
   document.getElementById('tabSettings')?.addEventListener('click', () => switchTab('settings'));
 
