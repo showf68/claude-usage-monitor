@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-5.0-orange)
+![Version](https://img.shields.io/badge/version-5.1-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
