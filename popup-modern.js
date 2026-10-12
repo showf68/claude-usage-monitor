@@ -65,7 +65,7 @@ function applyTranslations() {
 
 // Get translation
 function t(key) {
-  return translations[key] || key;
+  return translations[key] || '';
 }
 
 // Change language
@@ -265,10 +265,10 @@ function renderCodex(data) {
     info.style.display = 'none';
     err.style.display = 'block';
     if (!data) {
-      err.innerHTML = 'Codex not connected.<br><button class="btn-primary" id="codexInlineConnect">Connect Codex</button>';
+      err.innerHTML = `${t('codexNotConnected') || 'Codex not connected.'}<br><button class="btn-primary" id="codexInlineConnect">${t('codexConnect') || 'Connect Codex'}</button>`;
       document.getElementById('codexInlineConnect')?.addEventListener('click', openModal);
     } else {
-      const msg = data.error === 'NOT_LOGGED_IN' ? 'Codex: not logged in to chatgpt.com.' : data.error;
+      const msg = data.error === 'NOT_LOGGED_IN' ? (t('codexNotLogged') || 'Codex: not logged in to chatgpt.com.') : data.error;
       err.innerHTML = `${msg}<br>${data.needsLogin ? '<button class="btn-primary" id="codexInlineLogin">Login to chatgpt.com</button>' : ''}`;
       document.getElementById('codexInlineLogin')?.addEventListener('click', () => {
         chrome.tabs.create({ url: 'https://chatgpt.com' });
@@ -294,12 +294,12 @@ function renderCodex(data) {
     rows.push(extraRow(w.key === 'code_review' ? 'Code review' : 'Codex ' + windowLabel(w), w.utilization, w.resets_at));
   });
   if (data.credits && (data.credits.has_credits || data.credits.unlimited)) {
-    rows.push(`<div class="info-row"><span class="info-label">Credits</span><span class="info-value">${data.credits.unlimited ? 'Unlimited' : data.credits.balance}</span></div>`);
+    rows.push(`<div class="info-row"><span class="info-label">${t('credits') || 'Credits'}</span><span class="info-value">${data.credits.unlimited ? 'Unlimited' : data.credits.balance}</span></div>`);
   }
   if (data.limit_reached) {
     rows.push('<div class="info-row"><span class="info-label" style="color:#ef4444">Codex limit reached</span></div>');
   }
-  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">Codex plan</span><span class="info-value">${data.plan}</span></div>`);
+  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">${t('plan') || 'Plan'}</span><span class="info-value">${data.plan}</span></div>`);
   info.innerHTML = rows.join('');
   info.style.display = rows.length ? 'block' : 'none';
 }
@@ -430,8 +430,7 @@ async function init() {
   await loadAuthMode();
 
   const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider']);
-  const badgeSel = document.getElementById('badgeProvider');
-  if (badgeSel) badgeSel.value = result.badgeProvider || 'auto';
+  setBadgeChoice(result.badgeProvider || 'auto');
 
   // Check if configured (either has tokens or using cookie mode)
   const hasTokens = result.refreshToken || result.accessToken || result.token;
@@ -497,7 +496,7 @@ function checkCodexStatus() {
   chrome.runtime.sendMessage({ action: 'checkCodexSession' }, (r) => {
     if (chrome.runtime.lastError) return;
     el.className = r?.valid ? 'cookie-status success' : 'cookie-status error';
-    el.innerHTML = `<span>${r?.valid ? 'Codex session found (' + r.source + ')' : 'No chatgpt.com session'}</span>`;
+    el.innerHTML = `<span>${r?.valid ? (t('codexSessionFound') || 'Codex session found') : (t('codexNoSession') || 'No chatgpt.com session')}</span>`;
   });
 }
 
@@ -522,6 +521,10 @@ function openModal() {
 
 function closeModal() {
   switchTab('gauges');
+}
+
+function setBadgeChoice(v) {
+  document.querySelectorAll('.badge-opt').forEach(b => b.classList.toggle('active', b.dataset.badge === v));
 }
 
 function setUpdated(ts) {
@@ -828,9 +831,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('codexDisable')?.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); refresh(); });
   });
-  document.getElementById('badgeProvider')?.addEventListener('change', (e) => {
-    chrome.runtime.sendMessage({ action: 'setBadgeProvider', provider: e.target.value });
-  });
+  document.querySelectorAll('.badge-opt').forEach(btn => btn.addEventListener('click', () => {
+    setBadgeChoice(btn.dataset.badge);
+    chrome.runtime.sendMessage({ action: 'setBadgeProvider', provider: btn.dataset.badge });
+  }));
 
   // Cookie connect button
   document.getElementById('cookieConnect')?.addEventListener('click', connectWithCookies);
@@ -846,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
     option.addEventListener('click', (e) => {
       e.stopPropagation();
       const lang = option.dataset.lang;
-      changeLanguage(lang);
+      changeLanguage(lang).then(() => chrome.storage.local.get(['lastUpdate']).then(r => { if (r.lastUpdate) setUpdated(r.lastUpdate); }));
       document.getElementById('langDropdown').classList.remove('show');
     });
   });

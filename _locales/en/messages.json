@@ -117,7 +117,7 @@
     "message": "Toolbar badge"
   },
   "badgeAuto": {
-    "message": "Highest of Claude / Codex"
+    "message": "Highest"
   },
   "badgeClaude": {
     "message": "Claude Code only"
@@ -145,5 +145,23 @@
   },
   "connecting": {
     "message": "Connecting..."
+  },
+  "sectionPrefs": {
+    "message": "Preferences"
+  },
+  "codexSessionFound": {
+    "message": "Codex session found"
+  },
+  "codexNoSession": {
+    "message": "No chatgpt.com session"
+  },
+  "codexNotConnected": {
+    "message": "Codex not connected."
+  },
+  "codexNotLogged": {
+    "message": "Codex: not logged in to chatgpt.com."
+  },
+  "credits": {
+    "message": "Credits"
   }
 }

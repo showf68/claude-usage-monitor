@@ -114,10 +114,10 @@
     "message": "Infos"
   },
   "badgeLabel": {
-    "message": "Badge de la barre"
+    "message": "Badge de l’icône"
   },
   "badgeAuto": {
-    "message": "Le plus haut Claude / Codex"
+    "message": "Le plus haut"
   },
   "badgeClaude": {
     "message": "Claude Code seul"
@@ -157,5 +157,23 @@
   },
   "manualMode": {
     "message": "Manuel (jeton)"
+  },
+  "sectionPrefs": {
+    "message": "Préférences"
+  },
+  "codexSessionFound": {
+    "message": "Session Codex trouvée"
+  },
+  "codexNoSession": {
+    "message": "Aucune session chatgpt.com"
+  },
+  "codexNotConnected": {
+    "message": "Codex non connecté."
+  },
+  "codexNotLogged": {
+    "message": "Codex : non connecté à chatgpt.com."
+  },
+  "credits": {
+    "message": "Crédits"
   }
 }

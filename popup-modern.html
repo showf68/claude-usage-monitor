@@ -76,7 +76,7 @@
 
     <div id="usageView" style="display:none;">
       <div class="circles-container">
-        <div class="circle-card">
+        <div class="circle-card is-claude">
           <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
             <svg class="circle-svg" viewBox="0 0 100 100">
@@ -89,7 +89,7 @@
           <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset5h">--</span></div>
         </div>
 
-        <div class="circle-card">
+        <div class="circle-card is-claude">
           <div class="gauge-head"><i class="pdot claude"></i>Claude Code</div>
           <div class="circle-wrapper">
             <svg class="circle-svg" viewBox="0 0 100 100">
@@ -102,7 +102,7 @@
           <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset7d">--</span></div>
         </div>
 
-        <div class="circle-card" id="codexSlot" style="display:none;"></div>
+        <div class="circle-card is-codex" id="codexSlot" style="display:none;"></div>
       </div>
 
       <div class="extras" id="claudeExtras" style="display:none;"></div>
@@ -125,21 +125,28 @@
   <!-- Onglet 2 : reglages et infos -->
   <main class="pane" id="paneSettings" role="tabpanel" hidden>
     <section class="section">
-      <div class="section-head"><span data-i18n="sectionInfo">Info</span></div>
-      <div class="info-row"><span class="info-label" data-i18n="lastUpdated">Last Updated</span><span class="info-value" id="infoUpdate">--</span></div>
-      <div class="info-row"><span class="info-label" data-i18n="badgeLabel">Toolbar badge</span>
-        <span class="info-value" style="width:60%">
-          <select id="badgeProvider">
-            <option value="auto" data-i18n="badgeAuto">Highest of Claude / Codex</option>
-            <option value="claude" data-i18n="badgeClaude">Claude Code only</option>
-            <option value="codex" data-i18n="badgeCodex">Codex only</option>
-          </select>
-        </span>
+      <div class="section-head">
+        <span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
+        <span data-i18n="sectionPrefs">Preferences</span>
+      </div>
+      <div class="field-label" data-i18n="language">Language</div>
+      <div class="chip-grid">
+        <button class="lang-option lchip" data-lang="fr"><b>FR</b><span>Français</span></button>
+        <button class="lang-option lchip" data-lang="en"><b>EN</b><span>English</span></button>
+        <button class="lang-option lchip" data-lang="he"><b>HE</b><span>עברית</span></button>
+        <button class="lang-option lchip" data-lang="es"><b>ES</b><span>Español</span></button>
+        <button class="lang-option lchip" data-lang="zh"><b>ZH</b><span>中文</span></button>
+      </div>
+      <div class="field-label" style="margin-top:12px;" data-i18n="badgeLabel">Toolbar badge</div>
+      <div class="seg" id="badgeSeg">
+        <button class="auth-tab badge-opt" data-badge="auto"><i class="pdot both"></i><span data-i18n="badgeAuto">Highest</span></button>
+        <button class="auth-tab badge-opt" data-badge="claude"><i class="pdot claude"></i>Claude</button>
+        <button class="auth-tab badge-opt" data-badge="codex"><i class="pdot codex"></i>Codex</button>
       </div>
     </section>
 
     <section class="section">
-      <div class="section-head"><i class="pdot claude"></i><span class="grow">Claude Code</span></div>
+      <div class="section-head"><span class="sh-ic claude"><svg viewBox="0 0 24 24"><path d="M12 3l2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4z"/></svg></span><span class="grow">Claude Code</span></div>
       <div class="seg">
         <button class="auth-tab active" id="tabCookie" data-mode="cookie">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -168,7 +175,7 @@
     </section>
 
     <section class="section">
-      <div class="section-head"><i class="pdot codex"></i><span class="grow">Codex</span><button class="btn-ghost" id="codexDisable" data-i18n="codexDisable">Disable</button></div>
+      <div class="section-head"><span class="sh-ic codex"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span><span class="grow">Codex</span><button class="btn-ghost" id="codexDisable" data-i18n="codexDisable">Disable</button></div>
       <div id="codexInfo" style="display:none;margin-bottom:8px;"></div>
       <div class="cookie-status checking" id="codexStatus"><span>...</span></div>
       <div class="two">

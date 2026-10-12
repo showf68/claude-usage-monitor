@@ -6,7 +6,8 @@
 /* Fenetre : bandeau ambre avec onglets horizontaux, l'onglet choisi devient une languette
    qui se fond dans le volet (meme dessin que Vmail Plus, couche horizontale). */
 :root {
-  --surface: #11151f; --card: #171c28; --card2: #1d2331; --line: rgba(255, 255, 255, .08);
+  color-scheme: dark;
+  --surface: #0d1120; --card: #141a2b; --card2: #1a2135; --line: rgba(255, 255, 255, .08);
   --ink: #f3f5fa; --fg: #dfe3ec; --muted: #9aa3b8; --faint: #6b7489;
   --a1: #f59e0b; --a2: #ea580c; --a3: #9a3412; --a4: #431407; --gold: #fde68a;
   --codex1: #a78bfa; --codex2: #22d3ee;
@@ -228,7 +229,7 @@ select {
 .adv { margin-top: 9px; }
 .adv summary { cursor: pointer; list-style: none; font-size: 11px; font-weight: 600; color: var(--muted); padding: 2px 0; }
 .adv summary::-webkit-details-marker { display: none; }
-.adv summary::before { content: 'B8'; display: inline-block; margin-right: 6px; transition: transform .2s; }
+.adv summary::before { content: '▸'; display: inline-block; margin-right: 6px; transition: transform .2s; }
 .adv[open] summary::before { transform: rotate(90deg); }
 .adv[open] summary { margin-bottom: 6px; color: var(--fg); }
 #paneSettings { max-height: 430px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent; }
@@ -263,3 +264,68 @@ body[dir="rtl"] .info-value { text-align: left; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ================================================================== Finition v7 */
+body { background: radial-gradient(120% 60% at 50% 100%, rgba(124, 58, 237, .10), transparent 60%), var(--surface); }
+.band {
+  background:
+    radial-gradient(70% 160% at 105% -10%, rgba(253, 230, 138, .45), transparent 55%),
+    radial-gradient(50% 120% at -5% 120%, rgba(190, 18, 60, .45), transparent 60%),
+    linear-gradient(118deg, #2a0e05 0%, #7c2d12 30%, #c2410c 62%, #f59e0b 100%);
+}
+.mark { background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.06)); }
+.title h1 { background: linear-gradient(90deg, #fff 30%, #fde68a); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+
+/* Cartes de jauge teintees par fournisseur, liseré en haut */
+.circle-card { position: relative; overflow: hidden; border-color: rgba(255,255,255,.07); }
+.circle-card::before { content: ''; position: absolute; left: 18%; right: 18%; top: 0; height: 2px; border-radius: 0 0 3px 3px; }
+.circle-card.is-claude { background: radial-gradient(120% 70% at 50% 0%, rgba(249,115,22,.14), transparent 65%), linear-gradient(180deg, var(--card2), var(--card)); }
+.circle-card.is-claude::before { background: linear-gradient(90deg, transparent, #f97316, transparent); }
+.circle-card.is-codex { background: radial-gradient(120% 70% at 50% 0%, rgba(139,92,246,.18), transparent 65%), linear-gradient(180deg, var(--card2), var(--card)); }
+.circle-card.is-codex::before { background: linear-gradient(90deg, transparent, #a78bfa, #22d3ee, transparent); }
+.circle-card.is-codex:hover { border-color: rgba(167,139,250,.45); }
+.circle-bg { stroke: rgba(255,255,255,.06); }
+.gauge-window { color: #a9b2c7; }
+
+/* Sections */
+.section { background: linear-gradient(180deg, var(--card2), var(--card)); border-color: rgba(255,255,255,.07); box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+.section-head { gap: 9px; }
+.sh-ic {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 9px; color: #fff;
+  background: linear-gradient(135deg, #64748b, #334155); box-shadow: 0 3px 8px rgba(0,0,0,.3);
+}
+.sh-ic svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sh-ic.claude { background: linear-gradient(135deg, #fbbf24, #ea580c); box-shadow: 0 3px 10px rgba(234,88,12,.4); }
+.sh-ic.codex { background: linear-gradient(135deg, #8b5cf6, #06b6d4); box-shadow: 0 3px 10px rgba(139,92,246,.4); }
+.field-label { text-transform: uppercase; letter-spacing: .08em; font-size: 10px; color: var(--faint); margin-bottom: 6px; }
+
+/* Langue : grille de puces */
+.chip-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.lchip {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border-radius: 10px; cursor: pointer;
+  background: rgba(0,0,0,.25); border: 1px solid var(--line); color: var(--muted);
+  transition: border-color .2s, background .2s, color .2s, transform .2s var(--ease);
+}
+.lchip b { font: 600 13px/1.1 var(--title); color: var(--fg); }
+.lchip span { font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lchip:hover { border-color: rgba(245,158,11,.4); transform: translateY(-1px); }
+.lchip.active { background: linear-gradient(160deg, rgba(245,158,11,.22), rgba(234,88,12,.12)); border-color: rgba(245,158,11,.6); color: var(--gold); }
+.lchip.active b { color: #fff; }
+
+/* Selecteur segmente */
+.seg { background: rgba(0,0,0,.32); }
+.auth-tab { color: #aab3c7; transition: background .2s, color .2s; }
+.auth-tab:hover:not(.active) { color: var(--ink); background: rgba(255,255,255,.05); }
+.auth-tab .pdot { width: 7px; height: 7px; }
+.pdot.both { background: conic-gradient(#f97316 0 50%, #a78bfa 50% 100%); box-shadow: 0 0 6px rgba(249,115,22,.6); }
+.auth-tab.active .pdot { box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+
+/* Menu de langue du bandeau : opaque et contraste */
+.lang-dropdown { background: #0b0f1c; border-color: rgba(245,158,11,.4); }
+.lang-option { color: #e5e9f2; }
+option { background: #0f1424; color: #e5e9f2; }
+
+/* Statuts plus doux */
+.cookie-status { border-radius: 11px; }
+.btn-secondary { background: rgba(255,255,255,.045); }
+.footer { border-top-color: rgba(255,255,255,.06); }
