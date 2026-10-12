@@ -361,7 +361,29 @@ async function refreshBadge(results) {
   }
   updateBadge(shown <= 99 ? `${shown}` : '99', colorFor(shown));
   for (const p of Object.keys(values)) {
-    if (values[p] !== null) await checkAlerts(p, values[p]);
+    if (values[p] !== null) {
+      await checkAlerts(p, values[p]);
+      await checkReset(p, values[p]);
+    }
+  }
+}
+
+// Remise a zero : on etait haut (>= 70 %), on repart bas (<= 10 %) -> la fenetre vient de se renouveler
+async function checkReset(provider, used) {
+  const key = `lastUsed_${provider}`;
+  const r = await chrome.storage.local.get([key, 'resetAlerts', 'alertsEnabled']);
+  const prev = typeof r[key] === 'number' ? r[key] : null;
+  await chrome.storage.local.set({ [key]: used });
+  if (r.alertsEnabled === false || r.resetAlerts === false) return;
+  if (prev !== null && prev >= 70 && used <= 10) {
+    const windowName = provider === 'claude' ? '5-hour' : 'weekly';
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: `${PROVIDERS[provider].name} is back`,
+      message: `Your ${windowName} quota just reset. You're at ${used}%.`,
+      priority: 1
+    });
   }
 }
 

@@ -157,5 +157,8 @@
   },
   "disabled": {
     "message": "Desactivado"
+  },
+  "resetAlertLabel": {
+    "message": "Avisarme cuando se renueve un límite"
   }
 }

@@ -184,5 +184,8 @@
   },
   "disabled": {
     "message": "Disabled"
+  },
+  "resetAlertLabel": {
+    "message": "Tell me when a limit resets"
   }
 }

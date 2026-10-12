@@ -157,5 +157,8 @@
   },
   "disabled": {
     "message": "已停用"
+  },
+  "resetAlertLabel": {
+    "message": "额度重置时通知我"
   }
 }

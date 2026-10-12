@@ -450,3 +450,6 @@ body[dir="rtl"] .conn[open] > summary .chev { transform: scaleX(-1) rotate(90deg
 .conn-body .seg { margin-top: 8px; }
 .conn-body > .cookie-status:first-child, .conn-body > #codexInfo + .cookie-status { margin-top: 8px; }
 .conn-body > .btn-ghost { display: block; margin: 10px auto 0; }
+
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--fg); transition: opacity .2s; }
+.opt-row.off { opacity: .4; pointer-events: none; }

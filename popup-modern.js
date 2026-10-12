@@ -558,11 +558,13 @@ function closeModal() {
 const DEFAULT_THRESHOLDS = [70, 80, 90, 95];
 
 async function loadAlertPrefs() {
-  const r = await chrome.storage.local.get(['alertsEnabled', 'alertThresholds']);
+  const r = await chrome.storage.local.get(['alertsEnabled', 'alertThresholds', 'resetAlerts']);
   const on = r.alertsEnabled !== false;
   const thr = Array.isArray(r.alertThresholds) && r.alertThresholds.length ? r.alertThresholds : DEFAULT_THRESHOLDS;
   document.getElementById('alertsEnabled').checked = on;
+  document.getElementById('resetAlerts').checked = r.resetAlerts !== false;
   document.getElementById('thrRow').classList.toggle('off', !on);
+  document.querySelector('.opt-row').classList.toggle('off', !on);
   document.querySelectorAll('.thr-chip').forEach(b => b.classList.toggle('active', thr.includes(Number(b.dataset.thr))));
 }
 
@@ -570,7 +572,8 @@ function saveAlertPrefs() {
   const on = document.getElementById('alertsEnabled').checked;
   const thr = [...document.querySelectorAll('.thr-chip.active')].map(b => Number(b.dataset.thr));
   document.getElementById('thrRow').classList.toggle('off', !on);
-  chrome.storage.local.set({ alertsEnabled: on, alertThresholds: thr.length ? thr : DEFAULT_THRESHOLDS });
+  document.querySelector('.opt-row').classList.toggle('off', !on);
+  chrome.storage.local.set({ alertsEnabled: on, alertThresholds: thr.length ? thr : DEFAULT_THRESHOLDS, resetAlerts: document.getElementById('resetAlerts').checked });
 }
 
 function setBadgeChoice(v) {
@@ -883,6 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('alertsEnabled')?.addEventListener('change', saveAlertPrefs);
+  document.getElementById('resetAlerts')?.addEventListener('change', saveAlertPrefs);
   document.querySelectorAll('.thr-chip').forEach(b => b.addEventListener('click', () => {
     const active = document.querySelectorAll('.thr-chip.active');
     if (b.classList.contains('active') && active.length === 1) return; // au moins un seuil
