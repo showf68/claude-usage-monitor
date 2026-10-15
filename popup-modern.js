@@ -1,8 +1,7 @@
-// AI Usage Monitor (Claude Code + Codex) - Popup Script v5.0
+// AI Usage Monitor (Claude Code + Codex) - Popup Script v6.0 (une ligne)
 // Multi-language support with browser detection
 // Cookie and Token auth modes
 
-const circumference = 2 * Math.PI * 42; // radius = 42
 let lastError = null;
 let parsedTokens = null;
 let currentLang = 'en';
@@ -102,22 +101,20 @@ async function initLanguage() {
   applyTranslations();
 }
 
+// ==================== AFFICHAGE : UNE LIGNE DE JAUGES ====================
+
+const RING_R = 18;
+const RING_C = 2 * Math.PI * RING_R;
+const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+const PROVIDERS = {
+  claude: { name: 'Claude Code', href: 'https://claude.ai/new#settings/usage' },
+  codex: { name: 'Codex', href: 'https://chatgpt.com/settings/usage?tab=overview' }
+};
+
 function getColorClass(used) {
   if (used < 50) return 'low';
   if (used < 80) return 'medium';
   return 'high';
-}
-
-function updateCircularProgress(circleId, percentId, used) {
-  const circle = document.getElementById(circleId);
-  const percentElem = document.getElementById(percentId);
-  if (!circle || !percentElem) return;
-
-  circle.style.strokeDashoffset = circumference - (Math.min(100, used) / 100) * circumference;
-  const colorClass = getColorClass(used);
-  circle.setAttribute('class', `circle-progress ${colorClass}`);
-  percentElem.className = `circle-percent ${colorClass}`;
-  percentElem.textContent = `${Math.round(used)}%`;
 }
 
 function formatTimeRemaining(resetAt) {
@@ -144,11 +141,11 @@ function formatTimeAgo(timestamp) {
   return rtf.format(-minutes, 'minute');
 }
 
-// View management
+// Les trois vues se partagent la meme ligne : jauges, configuration, erreur
 function showView(viewName) {
   ['setupView', 'usageView', 'errorView'].forEach(v => {
     const elem = document.getElementById(v);
-    if (elem) elem.style.display = v === viewName ? 'block' : 'none';
+    if (elem) elem.style.display = v === viewName ? 'flex' : 'none';
   });
 }
 
@@ -166,142 +163,143 @@ function showError(errorMsg, needsLogin = false) {
       errorElem.removeAttribute('data-i18n');
       errorElem.textContent = errorMsg || 'Unknown error';
     }
+    errorElem.title = errorElem.textContent; // message complet au survol (la ligne le tronque)
   }
 
   // Show/hide login button
   if (loginBtn) {
-    loginBtn.style.display = (errorMsg === 'NOT_LOGGED_IN' || needsLogin) ? 'block' : 'none';
+    loginBtn.style.display = (errorMsg === 'NOT_LOGGED_IN' || needsLogin) ? 'inline-flex' : 'none';
   }
 
   showView('errorView');
 }
 
-function updateUI(data) {
-  if (!data) {
-    showError('No data received from API');
-    return;
-  }
-
-  if (data.error) {
-    showError(data.error, data.needsLogin);
-    return;
-  }
-
-  if (!data.five_hour) {
-    showError('Invalid API response: missing five_hour data');
-    return;
-  }
-
-  showView('usageView');
-
-  // 5-hour window
-  const used5h = data.five_hour.utilization || 0;
-  const reset5h = data.five_hour.resets_at || data.five_hour.reset_at;
-  updateCircularProgress('circle5h', 'percent5h', used5h);
-  document.getElementById('reset5h').textContent = formatTimeRemaining(reset5h);
-
-  // 7-day window
-  const used7d = data.seven_day?.utilization || 0;
-  const reset7d = data.seven_day?.resets_at || data.seven_day?.reset_at;
-  updateCircularProgress('circle7d', 'percent7d', used7d);
-  document.getElementById('reset7d').textContent = formatTimeRemaining(reset7d);
-
-  // Extras : fenetres par modele, usage supplementaire
-  const extras = [];
-  if (data.seven_day_sonnet) extras.push(extraRow('Sonnet 7d', data.seven_day_sonnet.utilization, data.seven_day_sonnet.resets_at));
-  if (data.seven_day_opus) extras.push(extraRow('Opus 7d', data.seven_day_opus.utilization, data.seven_day_opus.resets_at));
-  if (data.extra_usage?.is_enabled && data.extra_usage.utilization != null) {
-    extras.push(extraRow('Extra usage', data.extra_usage.utilization, null));
-  }
-  const extrasElem = document.getElementById('claudeExtras');
-  extrasElem.innerHTML = extras.join('');
-  extrasElem.style.display = extras.length ? 'block' : 'none';
-
-  const planElem = document.getElementById('plan');
-  if (data.plan && planElem) {
-    planElem.textContent = data.plan;
-    planElem.style.display = 'inline-block';
-  }
-
+// Fenetre -> etiquette courte (5h, 7d)
+function shortWindow(ms) {
+  const h = Math.round((ms || 0) / 3600000);
+  if (!h) return '·';
+  return h <= 48 ? `${h}h` : `${Math.round(h / 24)}d`;
 }
-
-function extraRow(label, used, resetAt) {
-  const u = Math.max(0, Math.min(100, used || 0));
-  const reset = resetAt ? ` <span style="color:#64748b">${formatTimeRemaining(resetAt)}</span>` : '';
-  return `<div class="extra-row"><span>${label}</span><span class="bar"><i class="${getColorClass(u)}" style="width:${u}%"></i></span><span>${Math.round(u)}%${reset}</span></div>`;
-}
-
-// ==================== CODEX ====================
 
 function windowLabel(w) {
   const h = Math.round((w.window_ms || 0) / 3600000);
-  if (h === 5) return t('hours5');
-  if (h === 168) return t('days7');
+  if (h === 5) return t('hours5') || '5 hours';
+  if (h === 168) return t('days7') || '7 days';
   if (!h) return 'Window';
   if (h % 24 === 0) return `${h / 24} ${h === 24 ? 'Day' : 'Days'}`;
   return `${h} Hours`;
 }
 
-function ringHtml(id, label) {
-  return `<div class="gauge-head"><i class="pdot codex"></i>Codex</div>
-    <div class="circle-wrapper">
-      <svg class="circle-svg" viewBox="0 0 100 100">
-        <circle class="circle-bg" cx="50" cy="50" r="42"/>
-        <circle class="circle-progress low" id="${id}C" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
-      </svg>
-      <div class="circle-text"><div class="circle-percent" id="${id}P">--%</div></div>
-    </div>
-    <div class="gauge-window">${label}</div>
-    <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="${id}R">--</span></div>`;
+function tip(head, win, used, resetAt) {
+  return `${head}\n${win} · ${Math.round(used)}%` + (resetAt ? `\n↻ ${formatTimeRemaining(resetAt)}` : '');
 }
 
-function renderCodex(data) {
-  const slot = document.getElementById('codexSlot');
-  const info = document.getElementById('codexInfo');
-  const err = document.getElementById('codexError');
+// Une cellule = anneau (pourcentage au centre) + libelle + temps avant remise a zero
+function cellEl(c) {
+  const el = document.createElement(c.warn ? 'button' : 'div');
+  el.className = `cell ${c.provider}${c.sub ? ' sub' : ''}${c.warn ? ' warn' : ''}`;
+  el.title = c.tip;
+  el.setAttribute('aria-label', c.tip.replace(/\n/g, ', '));
+  if (!c.warn) { el.setAttribute('role', 'link'); el.tabIndex = 0; }
 
-  if (!data || data.error) {
-    slot.style.display = 'none';
-    info.style.display = 'none';
-    err.style.display = 'block';
-    if (!data) {
-      err.innerHTML = `${t('codexNotConnected') || 'Codex not connected.'}<br><button class="btn-primary" id="codexInlineConnect">${t('codexConnect') || 'Connect Codex'}</button>`;
-      document.getElementById('codexInlineConnect')?.addEventListener('click', openModal);
-    } else {
-      const msg = data.error === 'NOT_LOGGED_IN' ? (t('codexNotLogged') || 'Codex: not logged in to chatgpt.com.') : data.error;
-      err.innerHTML = `${msg}<br>${data.needsLogin ? '<button class="btn-primary" id="codexInlineLogin">Login to chatgpt.com</button>' : ''}`;
-      document.getElementById('codexInlineLogin')?.addEventListener('click', () => {
-        chrome.tabs.create({ url: 'https://chatgpt.com' });
-        chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
-      });
+  const pctText = c.warn ? '!' : `${Math.round(c.used)}%`;
+  const colorClass = c.warn ? '' : getColorClass(c.used);
+  el.innerHTML =
+    `<span class="ring"><svg class="ring-svg" viewBox="0 0 44 44" aria-hidden="true">` +
+    `<circle class="trk" cx="22" cy="22" r="${RING_R}"/>` +
+    `<circle class="arc ${colorClass}" cx="22" cy="22" r="${RING_R}" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}"/>` +
+    `</svg><span class="pct${pctText.length > 3 ? ' tight' : ''}"></span></span>` +
+    `<span class="txt"><b class="lbl">${c.first ? `<i class="pdot ${c.provider}"></i>` : ''}<span class="l"></span></b><span class="rst"></span></span>`;
+  el.querySelector('.pct').textContent = pctText;
+  el.querySelector('.l').textContent = c.label;
+  const rst = el.querySelector('.rst');
+  if (c.resetAt && !c.sub) {
+    rst.insertAdjacentHTML('beforeend', CLOCK);
+    rst.appendChild(document.createTextNode(formatTimeRemaining(c.resetAt)));
+  } else if (c.note) {
+    rst.textContent = c.note;
+  } else {
+    rst.style.display = 'none';
+  }
+
+  const go = c.onClick || (() => chrome.tabs.create({ url: c.href }));
+  el.addEventListener('click', go);
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+
+  if (!c.warn) {
+    const arc = el.querySelector('.arc');
+    const target = RING_C * (1 - Math.min(100, Math.max(0, c.used)) / 100);
+    requestAnimationFrame(() => requestAnimationFrame(() => { arc.style.strokeDashoffset = target; }));
+  }
+  return el;
+}
+
+function paint(cells) {
+  const host = document.getElementById('usageView');
+  host.replaceChildren();
+  // Beaucoup de jauges (Opus, extra, plusieurs fenetres Codex) : les secondaires ne gardent que l'anneau, le detail reste au survol
+  host.classList.toggle('dense', cells.length > 5);
+  let prev = null;
+  cells.forEach(c => {
+    if (prev && prev !== c.provider) {
+      const sep = document.createElement('i');
+      sep.className = 'vsep';
+      host.appendChild(sep);
     }
-    return;
-  }
-
-  err.style.display = 'none';
-  const windows = data.windows || [];
-  const main = windows.filter(w => w.key !== 'code_review')
-    .sort((a, b) => (b.window_ms || 0) - (a.window_ms || 0))[0]; // fenetre la plus longue
-  if (main) {
-    slot.innerHTML = ringHtml('cx0', windowLabel(main));
-    slot.style.display = 'block';
-    updateCircularProgress('cx0C', 'cx0P', main.utilization || 0);
-    document.getElementById('cx0R').textContent = formatTimeRemaining(main.resets_at);
-  }
-
-  const rows = [];
-  windows.filter(w => w !== main).forEach(w => {
-    rows.push(extraRow(w.key === 'code_review' ? 'Code review' : 'Codex ' + windowLabel(w), w.utilization, w.resets_at));
+    c.first = prev !== c.provider; // la pastille de couleur ne marque que le debut de chaque groupe
+    host.appendChild(cellEl(c));
+    prev = c.provider;
   });
-  if (data.credits && (data.credits.has_credits || data.credits.unlimited)) {
-    rows.push(`<div class="info-row"><span class="info-label">${t('credits') || 'Credits'}</span><span class="info-value">${data.credits.unlimited ? 'Unlimited' : data.credits.balance}</span></div>`);
+  showView('usageView');
+}
+
+function claudeCells(d) {
+  const P = PROVIDERS.claude;
+  const head = P.name + (d.plan ? ' · ' + d.plan : '');
+  const row = (key, label, win, sub) => {
+    const w = d[key];
+    if (!w) return null;
+    const used = w.utilization || 0;
+    const resetAt = w.resets_at || w.reset_at || null;
+    return { provider: 'claude', href: P.href, label, used, resetAt, sub, tip: tip(head, win, used, resetAt) };
+  };
+  const cells = [
+    row('five_hour', '5h', t('hours5') || '5 hours', false),
+    row('seven_day', '7d', t('days7') || '7 days', false),
+    row('seven_day_sonnet', 'Sonnet 7d', 'Sonnet 7d', true),
+    row('seven_day_opus', 'Opus 7d', 'Opus 7d', true)
+  ];
+  if (d.extra_usage?.is_enabled && d.extra_usage.utilization != null) {
+    const u = d.extra_usage.utilization;
+    cells.push({ provider: 'claude', href: P.href, label: 'Extra', used: u, resetAt: null, sub: true, tip: tip(head, 'Extra usage', u, null) });
   }
-  if (data.limit_reached) {
-    rows.push('<div class="info-row"><span class="info-label" style="color:#ef4444">Codex limit reached</span></div>');
-  }
-  if (data.plan) rows.push(`<div class="info-row"><span class="info-label">${t('plan') || 'Plan'}</span><span class="info-value">${data.plan}</span></div>`);
-  info.innerHTML = rows.join('');
-  info.style.display = rows.length ? 'block' : 'none';
+  return cells.filter(Boolean);
+}
+
+function codexCells(d) {
+  const P = PROVIDERS.codex;
+  const head = P.name + (d.plan ? ' · ' + d.plan : '') + (d.limit_reached ? ' · limit reached' : '');
+  const byLength = (a, b) => (b.window_ms || 0) - (a.window_ms || 0);
+  const ws = d.windows || [];
+  const main = ws.filter(w => w.key !== 'code_review').sort(byLength)[0]; // fenetre la plus longue
+  const ordered = [main, ...ws.filter(w => w !== main && w.key !== 'code_review').sort(byLength), ...ws.filter(w => w.key === 'code_review')].filter(Boolean);
+  return ordered.map(w => {
+    const review = w.key === 'code_review';
+    let tp = tip(head, review ? 'Code review' : windowLabel(w), w.utilization || 0, w.resets_at);
+    if (w === main && d.credits && (d.credits.has_credits || d.credits.unlimited)) {
+      tp += `\n${t('credits') || 'Credits'}: ${d.credits.unlimited ? 'Unlimited' : d.credits.balance}`;
+    }
+    return {
+      provider: 'codex', href: P.href, label: review ? 'Review' : shortWindow(w.window_ms),
+      used: w.utilization || 0, resetAt: w.resets_at, sub: w !== main, tip: tp
+    };
+  });
+}
+
+function warnCell(provider, msg, onClick) {
+  const P = PROVIDERS[provider];
+  const note = msg === 'NOT_LOGGED_IN' ? (t('notConnected') || 'Not connected') : (msg.length > 26 ? msg.slice(0, 25) + '…' : msg);
+  return { provider, warn: true, label: P.name, note, tip: `${P.name}\n${msg === 'NOT_LOGGED_IN' ? (t('notConnected') || 'Not connected') : msg}`, onClick };
 }
 
 // Etat des connexions (pastilles du volet Reglages)
@@ -333,28 +331,55 @@ function updateConnStates(res) {
   }
 }
 
-// Affiche les deux fournisseurs ; l'erreur d'un seul ne masque pas l'autre
+// Affiche les deux fournisseurs sur la meme ligne ; l'erreur d'un seul ne masque pas l'autre
 function renderAll(res) {
   const { claude, codex, codexOff } = res;
   updateConnStates(res);
-  if (claude && !claude.error && claude.five_hour) {
-    updateUI(claude);
-  } else if (claude && claude.error && (codexOff || !codex || codex.error)) {
+  const claudeOk = !!(claude && !claude.error && claude.five_hour);
+  const codexOk = !!(codex && !codex.error && codex.windows && codex.windows.length);
+
+  // Rien d'exploitable : un message sur la ligne, avec les boutons de connexion
+  if (claude && claude.error && (codexOff || !codex || codex.error)) {
     showError(claude.error, claude.needsLogin);
     return;
-  } else {
-    showView('usageView');
-    if (claude && claude.error) {
-      const extrasElem = document.getElementById('claudeExtras');
-      extrasElem.innerHTML = `<div style="color:#fca5a5;font-size:12px;padding:6px 0">Claude: ${claude.error === 'NOT_LOGGED_IN' ? 'not logged in to claude.ai' : claude.error}</div>`;
-      extrasElem.style.display = 'block';
+  }
+
+  const cells = [];
+  if (claudeOk) {
+    cells.push(...claudeCells(claude));
+  } else if (claude && claude.error) {
+    cells.push(warnCell('claude', claude.error, () => {
+      if (claude.needsLogin || claude.error === 'NOT_LOGGED_IN') {
+        chrome.tabs.create({ url: 'https://claude.ai' });
+        startLoginCheck();
+      } else {
+        openModal();
+      }
+    }));
+  }
+  if (!codexOff) {
+    if (codexOk) {
+      cells.push(...codexCells(codex));
+    } else if (!codex) {
+      cells.push(warnCell('codex', t('codexNotConnected') || 'Not connected', openModal));
+    } else {
+      cells.push(warnCell('codex', codex.error || 'Error', () => {
+        if (codex.needsLogin) {
+          chrome.tabs.create({ url: 'https://chatgpt.com' });
+          chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: 'codex' });
+        } else {
+          openModal();
+        }
+      }));
     }
   }
-  if (codexOff) {
-    ['codexSlot', 'codexInfo', 'codexError'].forEach(i => { document.getElementById(i).style.display = 'none'; });
-  } else {
-    renderCodex(codex);
-  }
+  paint(cells);
+}
+
+// Appelee apres un enregistrement de jeton / une connexion par cookie : on relit Codex puis on redessine toute la ligne
+async function updateUI(data) {
+  const { codexUsage, codexDisabled } = await chrome.storage.local.get(['codexUsage', 'codexDisabled']);
+  renderAll({ claude: data, codex: codexUsage, codexOff: !!codexDisabled });
 }
 
 // Parse JSON input and extract tokens
@@ -531,12 +556,10 @@ function checkCodexStatus() {
   });
 }
 
-// Onglets horizontaux : jauges (defaut) / reglages et infos
+// Reglages : le bouton de la ligne deplie / replie le volet situe dessous
 function switchTab(name) {
   const settings = name === 'settings';
-  document.getElementById('tabGauges').setAttribute('aria-selected', String(!settings));
-  document.getElementById('tabSettings').setAttribute('aria-selected', String(settings));
-  document.getElementById('paneGauges').hidden = settings;
+  document.getElementById('tabSettings').setAttribute('aria-pressed', String(settings));
   document.getElementById('paneSettings').hidden = !settings;
   if (settings) {
     checkCodexStatus();
@@ -582,9 +605,13 @@ function setBadgeChoice(v) {
 
 function setUpdated(ts) {
   const txt = formatTimeAgo(ts);
-  document.getElementById('lastUpdate').textContent = txt;
-  const info = document.getElementById('infoUpdate');
-  if (info) info.textContent = new Date(ts).toLocaleTimeString();
+  const lu = document.getElementById('lastUpdate');
+  if (lu) lu.textContent = txt;
+  const st = document.getElementById('status');
+  if (st) {
+    st.title = `${t('lastUpdated') || 'Last updated'} · ${txt}`;
+    st.classList.toggle('stale', Date.now() - ts > 5 * 60000);
+  }
 }
 
 // Non-blocking toast (replaces alert)
@@ -894,8 +921,9 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAlertPrefs();
   }));
 
-  document.getElementById('tabGauges')?.addEventListener('click', () => switchTab('gauges'));
-  document.getElementById('tabSettings')?.addEventListener('click', () => switchTab('settings'));
+  document.getElementById('tabSettings')?.addEventListener('click', () => {
+    switchTab(document.getElementById('paneSettings').hidden ? 'settings' : 'gauges');
+  });
 
   document.getElementById('codexDisable')?.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'disableCodex' }, () => { closeModal(); refresh(); });

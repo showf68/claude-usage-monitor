@@ -13,104 +13,46 @@
     </defs>
   </svg>
 
-  <!-- Bandeau + onglets -->
-  <header class="band">
-    <div class="top">
-      <div class="mark">
-        <svg viewBox="0 0 48 48" width="26" height="26" fill="none" stroke-linecap="round">
-          <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.3)" stroke-width="4.5"/>
-          <path d="M24 5a19 19 0 0 1 17.3 11.2" stroke="#fff" stroke-width="4.5"/>
-          <circle cx="24" cy="24" r="9.5" stroke="rgba(255,255,255,0.3)" stroke-width="4.5"/>
-          <path d="M24 14.5a9.5 9.5 0 0 1 9.1 6.8" stroke="#fde68a" stroke-width="4.5"/>
-        </svg>
+  <!-- UNE ligne : repere | jauges (ou message) | actualiser, reglages -->
+  <header class="line">
+    <span class="brand" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none" stroke-linecap="round">
+        <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.16)" stroke-width="4.5"/>
+        <path d="M24 5a19 19 0 0 1 17.3 11.2" stroke="#f59e0b" stroke-width="4.5"/>
+        <circle cx="24" cy="24" r="9.5" stroke="rgba(255,255,255,0.16)" stroke-width="4.5"/>
+        <path d="M24 14.5a9.5 9.5 0 0 1 9.1 6.8" stroke="#fde68a" stroke-width="4.5"/>
+      </svg>
+    </span>
+
+    <div class="views">
+      <div class="cells" id="usageView" style="display:none;"></div>
+
+      <div class="msg" id="setupView" style="display:none;">
+        <span class="msg-t"><span data-i18n="configuration">Configuration</span></span>
+        <button class="btn-primary btn-sm" id="setupLoginBtn">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
+        <button class="btn-secondary btn-sm" id="setupSettingsBtn">⚙️ <span data-i18n="configureManually">Configure with JSON</span></button>
       </div>
-      <div class="title">
-        <h1>AI Usage</h1>
+
+      <div class="msg" id="errorView" style="display:none;">
+        <span class="msg-t err"><span data-i18n="connectionError">Connection Error</span><span class="em" id="errorMessage">Unknown error</span></span>
+        <button id="loginBtn" class="btn-primary btn-sm" style="display:none;">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
+        <button class="btn-secondary btn-sm" id="retryBtn" data-i18n="retry">Retry</button>
+        <button class="btn-secondary btn-sm" id="reconfigureBtn" data-i18n="reconfigure">Reconfigure</button>
       </div>
-      <nav class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tabGauges" aria-selected="true" aria-controls="paneGauges">
-          <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M12 12l6-6"/></svg></span>
-          <span data-i18n="tabGauges">Monitor</span>
-        </button>
-        <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="paneSettings">
-          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
-          <span data-i18n="tabSettings">Settings</span>
-        </button>
-      </nav>
-      <div class="actions">
-        <button class="icon-btn" id="refreshBtn" title="Refresh">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 0 1-15.4 6.4L3 16M3 12a9 9 0 0 1 15.4-6.4L21 8"/>
-            <path d="M21 3v5h-5M3 21v-5h5"/>
-          </svg>
-        </button>
-      </div>
+    </div>
+
+    <div class="tools">
+      <span class="status" id="status"><i class="live"></i><span class="sr" id="lastUpdate">--</span></span>
+      <button class="icon-btn" id="refreshBtn" title="Refresh" aria-label="Refresh">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>
+      </button>
+      <button class="icon-btn" id="tabSettings" title="Settings" aria-label="Settings" aria-pressed="false" aria-controls="paneSettings">
+        <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
     </div>
   </header>
 
-  <!-- Onglet 1 : jauges -->
-  <main class="pane" id="paneGauges" role="tabpanel">
-    <div class="state" id="setupView" style="display:none;">
-      <h2 data-i18n="configuration">Configuration</h2>
-      <p data-i18n="chooseMethod">Choose your authentication method:</p>
-      <button class="btn-primary" id="setupLoginBtn">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
-      <div class="hint" data-i18n="cookieMode">Recommended - Uses browser cookies</div>
-      <button class="btn-secondary" id="setupSettingsBtn">⚙️ <span data-i18n="configureManually">Configure with JSON</span></button>
-      <div class="hint" data-i18n="jsonMode">Advanced - Paste .credentials.json</div>
-    </div>
-
-    <div id="usageView" style="display:none;">
-      <div class="circles-container">
-        <div class="circle-card is-claude duo" data-href="https://claude.ai/new#settings/usage" role="link" tabindex="0" title="claude.ai · Settings › Usage">
-          <div class="gauge-head"><i class="pdot claude"></i>Claude Code<span class="plan" id="plan" style="display:none;"></span></div>
-          <div class="pair">
-            <div class="g">
-              <div class="circle-wrapper">
-              <svg class="circle-svg" viewBox="0 0 100 100">
-                <circle class="circle-bg" cx="50" cy="50" r="42"/>
-                <circle class="circle-progress low" id="circle5h" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
-              </svg>
-              <div class="circle-text"><div class="circle-percent" id="percent5h">--%</div></div>
-            </div>
-            <div class="gauge-window" data-i18n="hours5">5 Hours</div>
-            <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset5h">--</span></div>
-            </div>
-            <div class="g">
-              <div class="circle-wrapper">
-              <svg class="circle-svg" viewBox="0 0 100 100">
-                <circle class="circle-bg" cx="50" cy="50" r="42"/>
-                <circle class="circle-progress low" id="circle7d" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
-              </svg>
-              <div class="circle-text"><div class="circle-percent" id="percent7d">--%</div></div>
-            </div>
-            <div class="gauge-window" data-i18n="days7">7 Days</div>
-            <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="reset7d">--</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="circle-card is-codex" id="codexSlot" data-href="https://chatgpt.com/settings/usage?tab=overview" role="link" tabindex="0" title="chatgpt.com · Settings › Usage" style="display:none;"></div>
-      </div>
-
-      <div class="extras" id="claudeExtras" style="display:none;"></div>
-      <div class="notice" id="codexError" style="display:none;"></div>
-    </div>
-
-    <div id="errorView" style="display:none;">
-      <div class="error-box">
-        <div class="error-title" data-i18n="connectionError">Connection Error</div>
-        <div class="error-message" id="errorMessage">Unknown error</div>
-        <button id="loginBtn" class="btn-primary" style="display:none;margin-bottom:8px;">🔗 <span data-i18n="loginToClaude">Login to Claude.ai</span></button>
-        <div class="row-btns">
-          <button class="btn-secondary" id="retryBtn" data-i18n="retry">Retry</button>
-          <button class="btn-secondary" id="reconfigureBtn" data-i18n="reconfigure">Reconfigure</button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Onglet 2 : reglages et infos -->
-  <main class="pane" id="paneSettings" role="tabpanel" hidden>
+  <main class="pane" id="paneSettings" hidden>
     <section class="section">
       <div class="section-head">
         <span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>
@@ -210,10 +152,8 @@
         </div>
       </details>
     </section>
-  </main>
 
-  <footer class="footer">
-    <div class="status-chip"><i class="live"></i><span data-i18n="lastUpdated">Last Updated</span><b id="lastUpdate">--</b></div>
+    <footer class="footer">
     <div class="chips">
       <a class="chip ic-only" href="https://github.com/anthropics/claude-code/releases" target="_blank" rel="noopener" title="Claude Code · releases">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>
@@ -226,7 +166,8 @@
       </a>
       <span class="chip ver">v5.1</span>
     </div>
-  </footer>
+    </footer>
+  </main>
 
   <script src="popup-modern.js"></script>
 </body>

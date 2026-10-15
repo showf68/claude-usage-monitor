@@ -27,3 +27,8 @@ dist/*.zip
 
 # Private keys
 *.pem
+
+# apercu local (dev/preview.py)
+dev/out/
+dev/harness.html
+__pycache__/
