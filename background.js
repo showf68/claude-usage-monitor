@@ -1,4 +1,7 @@
-// AI Usage Monitor (Claude Code + Codex) - Background Service Worker v5.0
+// AI Usage Monitor (Claude Code + Codex, + Gemini et Grok en option) - Background Service Worker v5.2
+
+// Gemini et Grok : analyseurs et lecture reseau dans extra-providers.js (permissions d'acces OPTIONNELLES, demandees par le popup)
+importScripts('extra-providers.js');
 
 const API_URL = 'https://api.anthropic.com/api/oauth/usage';
 const CLAUDE_AI_API = 'https://claude.ai/api';
@@ -6,9 +9,12 @@ const CODEX_USAGE_URL = 'https://chatgpt.com/backend-api/wham/usage';
 const CODEX_SESSION_URL = 'https://chatgpt.com/api/auth/session';
 
 const PROVIDERS = {
-  claude: { name: 'Claude Code', cacheKey: 'usage' },
-  codex: { name: 'Codex', cacheKey: 'codexUsage' }
+  claude: { name: 'Claude Code', cacheKey: 'usage', resetWindow: '5-hour' },
+  codex: { name: 'Codex', cacheKey: 'codexUsage', resetWindow: 'weekly' },
+  gemini: { name: 'Gemini', cacheKey: 'geminiUsage', resetWindow: 'current' },
+  grok: { name: 'Grok', cacheKey: 'grokUsage', resetWindow: 'query' }
 };
+const EXTRA_IDS = ['gemini', 'grok'];
 
 let loginCheckInterval = null;
 
@@ -333,7 +339,12 @@ function colorFor(used) {
 function mainUsage(provider, data) {
   if (!data || data.error) return null;
   if (provider === 'claude') return Math.round(data.five_hour?.utilization || 0);
-  const ws = (data.windows || []).filter(w => w.key !== 'code_review');
+  // Gemini : l'« utilisation actuelle » (sa fenetre n'a pas de duree annoncee) passe avant l'hebdomadaire
+  if (provider === 'gemini') {
+    const cur = (data.windows || []).find(w => w.key === 'gemini_current') || (data.windows || [])[0];
+    return cur ? Math.round(cur.utilization || 0) : null;
+  }
+  const ws = (data.windows || []).filter(w => w.key !== 'code_review' && w.key !== 'grok_high' && w.key !== 'grok_low');
   if (!ws.length) return null;
   ws.sort((a, b) => (a.window_ms || 1e12) - (b.window_ms || 1e12));
   return Math.round(ws[0].utilization || 0);
@@ -344,15 +355,18 @@ async function refreshBadge(results) {
   const mode = badgeProvider || 'auto';
   const values = {
     claude: mainUsage('claude', results.claude),
-    codex: mainUsage('codex', results.codex)
+    codex: mainUsage('codex', results.codex),
+    gemini: mainUsage('gemini', results.gemini),
+    grok: mainUsage('grok', results.grok)
   };
 
   let shown = null;
-  if (mode === 'claude' || mode === 'codex') shown = values[mode];
+  if (mode !== 'auto' && mode in values) shown = values[mode];
   else shown = Math.max(...Object.values(values).filter(v => v !== null), -1);
   if (shown === -1) shown = null;
 
   if (shown === null) {
+    // Gemini / Grok : une erreur d'un outil OPTIONNEL ne doit pas allumer « ERR » sur la barre si les outils principaux vont bien
     const errs = [results.claude, results.codex].filter(r => r && r.error);
     if (errs.some(e => e.needsConfig)) updateBadge('CFG', '#eab308');
     else if (errs.length) updateBadge('ERR', '#ef4444');
@@ -376,7 +390,7 @@ async function checkReset(provider, used) {
   await chrome.storage.local.set({ [key]: used });
   if (r.alertsEnabled === false || r.resetAlerts === false) return;
   if (prev !== null && prev >= 70 && used <= 10) {
-    const windowName = provider === 'claude' ? '5-hour' : 'weekly';
+    const windowName = PROVIDERS[provider].resetWindow;
     chrome.notifications.create({
       type: 'basic',
       iconUrl: 'icons/icon128.png',
@@ -428,14 +442,17 @@ async function isCodexEnabled() {
   return !codexDisabled && (codexEnabled !== false);
 }
 
-// Recupere les deux fournisseurs en parallele
-async function fetchAll() {
+// Recupere les fournisseurs en parallele ; Gemini et Grok seulement s'ils sont actives ET que l'acces au site a ete accorde.
+// `force` (bouton actualiser) contourne l'intervalle de 3 minutes des outils optionnels.
+async function fetchAll(force = false) {
   const codexOn = await isCodexEnabled();
-  const [c, x] = await Promise.all([
+  const extraOn = await Promise.all(EXTRA_IDS.map(isExtraEnabled));
+  const [c, x, g, k] = await Promise.all([
     fetchClaude(),
-    codexOn ? fetchCodex() : Promise.resolve(null)
+    codexOn ? fetchCodex() : Promise.resolve(null),
+    ...EXTRA_IDS.map((id, i) => (extraOn[i] ? fetchExtraCached(id, force) : Promise.resolve(null)))
   ]);
-  const results = { claude: c, codex: x };
+  const results = { claude: c, codex: x, gemini: g, grok: k };
   await refreshBadge(results);
   return results;
 }
@@ -464,8 +481,35 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case 'refresh':
-      fetchAll().then(sendResponse);
+      fetchAll(true).then(sendResponse);
       return true;
+
+    // Gemini / Grok : l'autorisation d'acces au site vient d'etre accordee par le popup -> on active et on lit tout de suite
+    case 'enableExtra': {
+      const id = message.provider;
+      if (!EXTRA[id]) { sendResponse({ success: false, error: 'Unknown provider' }); return true; }
+      chrome.storage.local.set({ [EXTRA[id].enabledKey]: true })
+        .then(() => fetchExtraCached(id, true))
+        .then(async (data) => {
+          const st = await chrome.storage.local.get(['usage', 'codexUsage', 'geminiUsage', 'grokUsage']);
+          await refreshBadge({ claude: st.usage, codex: st.codexUsage, gemini: st.geminiUsage, grok: st.grokUsage });
+          sendResponse(data.error ? { success: false, error: data.error, needsLogin: !!data.needsLogin } : { success: true, data });
+        });
+      return true;
+    }
+
+    case 'disableExtra': {
+      const id = message.provider;
+      if (!EXTRA[id]) { sendResponse({ success: false, error: 'Unknown provider' }); return true; }
+      delete extraLastFetch[id];
+      chrome.storage.local.set({ [EXTRA[id].enabledKey]: false })
+        .then(() => chrome.storage.local.remove([EXTRA[id].storeKey, EXTRA[id].timeKey]))
+        .then(() => chrome.storage.local.get(['badgeProvider']))
+        .then(({ badgeProvider }) => (badgeProvider === id ? chrome.storage.local.set({ badgeProvider: 'auto' }) : null))
+        .then(() => fetchAll(true))
+        .then(() => sendResponse({ success: true }));
+      return true;
+    }
 
     case 'checkCookies':
       checkCookieSession().then(sendResponse);
@@ -516,8 +560,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'setBadgeProvider':
       chrome.storage.local.set({ badgeProvider: message.provider }).then(async () => {
-        const st = await chrome.storage.local.get(['usage', 'codexUsage']);
-        await refreshBadge({ claude: st.usage, codex: st.codexUsage });
+        const st = await chrome.storage.local.get(['usage', 'codexUsage', 'geminiUsage', 'grokUsage']);
+        await refreshBadge({ claude: st.usage, codex: st.codexUsage, gemini: st.geminiUsage, grok: st.grokUsage });
         sendResponse({ success: true });
       });
       return true;
@@ -533,9 +577,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return;
         }
         const results = await fetchAll();
-        const ok = message.provider === 'codex'
-          ? results.codex && !results.codex.error
-          : results.claude && !results.claude.error;
+        const r = results[message.provider] || results.claude;
+        const ok = r && !r.error;
         if (ok) {
           clearInterval(loginCheckInterval);
           loginCheckInterval = null;

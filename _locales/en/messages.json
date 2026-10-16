@@ -187,5 +187,29 @@
   },
   "resetAlertLabel": {
     "message": "Tell me when a limit resets"
+  },
+  "sectionExtra": {
+    "message": "Optional tools"
+  },
+  "extraGeminiHint": {
+    "message": "Reads your Gemini “Usage limits” page. Chrome will ask for access to gemini.google.com; you must be signed in there."
+  },
+  "extraGrokHint": {
+    "message": "Experimental: reads the query counter on grok.com. Not verified on every account."
+  },
+  "permissionDenied": {
+    "message": "Access to the site was not granted."
+  },
+  "geminiNow": {
+    "message": "Now"
+  },
+  "geminiCurrent": {
+    "message": "Current usage"
+  },
+  "noAccess": {
+    "message": "No access"
+  },
+  "unavailable": {
+    "message": "Unavailable"
   }
 }

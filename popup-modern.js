@@ -1,4 +1,4 @@
-// AI Usage Monitor (Claude Code + Codex) - Popup Script v6.0 (une ligne)
+// AI Usage Monitor (Claude Code + Codex, + Gemini et Grok en option) - Popup Script v6.0 (une ligne)
 // Multi-language support with browser detection
 // Cookie and Token auth modes
 
@@ -108,8 +108,11 @@ const RING_C = 2 * Math.PI * RING_R;
 const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 const PROVIDERS = {
   claude: { name: 'Claude Code', href: 'https://claude.ai/new#settings/usage' },
-  codex: { name: 'Codex', href: 'https://chatgpt.com/settings/usage?tab=overview' }
+  codex: { name: 'Codex', href: 'https://chatgpt.com/settings/usage?tab=overview' },
+  gemini: { name: 'Gemini', href: 'https://gemini.google.com/usage', login: 'https://gemini.google.com/app', origin: 'https://gemini.google.com' },
+  grok: { name: 'Grok', href: 'https://grok.com/', login: 'https://grok.com/sign-in', origin: 'https://grok.com' }
 };
+const EXTRA_IDS = ['gemini', 'grok'];
 
 function getColorClass(used) {
   if (used < 50) return 'low';
@@ -197,7 +200,7 @@ function tip(head, win, used, resetAt) {
 // Une cellule = anneau (pourcentage au centre) + libelle + temps avant remise a zero
 function cellEl(c) {
   const el = document.createElement(c.warn ? 'button' : 'div');
-  el.className = `cell ${c.provider}${c.sub ? ' sub' : ''}${c.warn ? ' warn' : ''}`;
+  el.className = `cell ${c.provider}${c.sub ? ' sub' : ''}${c.warn ? ' warn' : ''}${c.first ? ' first' : ''}`;
   el.title = c.tip;
   el.setAttribute('aria-label', c.tip.replace(/\n/g, ', '));
   if (!c.warn) { el.setAttribute('role', 'link'); el.tabIndex = 0; }
@@ -234,6 +237,18 @@ function cellEl(c) {
   return el;
 }
 
+// Beaucoup d'outils : on serre la ligne par paliers (temps des cellules secondaires, anneaux plus petits, repere) jusqu'a ce qu'elle tienne
+function fit(host) {
+  const line = host.closest('.line');
+  for (const level of ['', 'tight', 'tiny', 'micro']) {
+    host.classList.toggle('tight', level !== '');
+    host.classList.toggle('tiny', level === 'tiny' || level === 'micro');
+    line?.classList.toggle('micro', level === 'micro');   // dernier recours : le repere et le point d'etat s'effacent
+    const room = host.parentElement.clientWidth;           // a relire a chaque palier : masquer le repere agrandit la place
+    if (host.scrollWidth <= room + 1) return;
+  }
+}
+
 function paint(cells) {
   const host = document.getElementById('usageView');
   host.replaceChildren();
@@ -251,6 +266,9 @@ function paint(cells) {
     prev = c.provider;
   });
   showView('usageView');
+  fit(host);
+  // Les polices se chargent apres le premier calcul : les largeurs changent, on reverifie
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fit(host));
 }
 
 function claudeCells(d) {
@@ -296,9 +314,36 @@ function codexCells(d) {
   });
 }
 
-function warnCell(provider, msg, onClick) {
+// Gemini : « utilisation actuelle » (fenetre sans duree annoncee) puis hebdomadaire
+function geminiCells(d) {
+  const P = PROVIDERS.gemini;
+  const head = P.name + (d.plan ? ' · ' + d.plan : '');
+  return (d.windows || []).map((w, i) => {
+    const current = w.key === 'gemini_current';
+    return {
+      provider: 'gemini', href: P.href, label: current ? (t('geminiNow') || 'Now') : '7d',
+      used: w.utilization || 0, resetAt: w.resets_at, sub: i > 0,
+      tip: tip(head, current ? (t('geminiCurrent') || 'Current usage') : (t('days7') || '7 days'), w.utilization || 0, w.resets_at)
+    };
+  });
+}
+
+// Grok : requetes sur la fenetre renvoyee par le service (+ modes d'effort si presents)
+function grokCells(d) {
+  const P = PROVIDERS.grok;
+  const ws = d.windows || [];
+  const main = ws.find(w => w.key === 'grok_queries') || ws[0];
+  const ordered = [main, ...ws.filter(w => w !== main)].filter(Boolean);
+  return ordered.map(w => {
+    const label = w.key === 'grok_high' ? 'High' : w.key === 'grok_low' ? 'Low' : shortWindow(w.window_ms);
+    const win = w.key === 'grok_high' ? 'High effort' : w.key === 'grok_low' ? 'Low effort' : windowLabel(w);
+    return { provider: 'grok', href: P.href, label, used: w.utilization || 0, resetAt: w.resets_at, sub: w !== main, tip: tip(P.name, win, w.utilization || 0, w.resets_at) };
+  });
+}
+
+function warnCell(provider, msg, onClick, shortNote) {
   const P = PROVIDERS[provider];
-  const note = msg === 'NOT_LOGGED_IN' ? (t('notConnected') || 'Not connected') : (msg.length > 26 ? msg.slice(0, 25) + '…' : msg);
+  const note = shortNote || (msg === 'NOT_LOGGED_IN' ? (t('notConnected') || 'Not connected') : (msg.length > 26 ? msg.slice(0, 25) + '…' : msg));
   return { provider, warn: true, label: P.name, note, tip: `${P.name}\n${msg === 'NOT_LOGGED_IN' ? (t('notConnected') || 'Not connected') : msg}`, onClick };
 }
 
@@ -310,8 +355,22 @@ function setConnState(id, kind, text) {
   el.textContent = text;
 }
 
+function updateExtraConnState(id, data) {
+  const nc = t('notConnected') || 'Not connected';
+  if (data === undefined) return;              // pas de nouvelle info : on laisse l'etat affiche
+  if (data === null) {
+    setConnState(`${id}ConnState`, 'off', t('disabled') || 'Disabled');
+  } else if (!data.error && data.windows) {
+    setConnState(`${id}ConnState`, 'ok', `${t('connected') || 'Connected'}${data.plan ? ' · ' + data.plan : ''}`);
+  } else {
+    setConnState(`${id}ConnState`, 'bad', data.error === 'NOT_LOGGED_IN' ? nc : (data.error || 'Error'));
+  }
+}
+
 function updateConnStates(res) {
   const { claude, codex, codexOff } = res;
+  updateExtraConnState('gemini', res.gemini);
+  updateExtraConnState('grok', res.grok);
   const src = (x) => (x && x._source === 'token' ? (t('manualMode') || 'Token') : (t('autoMode') || 'Cookie'));
   const short = (s) => s.replace(/\s*\(.*\)\s*/, '').trim();
   const nc = t('notConnected') || 'Not connected';
@@ -337,9 +396,12 @@ function renderAll(res) {
   updateConnStates(res);
   const claudeOk = !!(claude && !claude.error && claude.five_hour);
   const codexOk = !!(codex && !codex.error && codex.windows && codex.windows.length);
+  // Outils optionnels : seulement s'ils sont actives (donnee non nulle)
+  const extraData = { gemini: res.gemini, grok: res.grok };
+  const extraAny = EXTRA_IDS.some(id => extraData[id] && !extraData[id].error);
 
   // Rien d'exploitable : un message sur la ligne, avec les boutons de connexion
-  if (claude && claude.error && (codexOff || !codex || codex.error)) {
+  if (claude && claude.error && (codexOff || !codex || codex.error) && !extraAny) {
     showError(claude.error, claude.needsLogin);
     return;
   }
@@ -373,13 +435,35 @@ function renderAll(res) {
       }));
     }
   }
+  const extraBuilders = { gemini: geminiCells, grok: grokCells };
+  for (const id of EXTRA_IDS) {
+    const d = extraData[id];
+    if (!d) continue;
+    if (!d.error && d.windows && d.windows.length) {
+      cells.push(...extraBuilders[id](d));
+    } else {
+      const short = d.needsPermission ? (t('noAccess') || 'No access')
+        : (d.needsLogin || d.error === 'NOT_LOGGED_IN') ? (t('notConnected') || 'Not connected') : (t('unavailable') || 'Unavailable');
+      cells.push(warnCell(id, d.needsPermission ? (t('permissionDenied') || 'Access not granted') : (d.error || 'Error'), () => {
+        if (d.needsLogin || d.error === 'NOT_LOGGED_IN') {
+          chrome.tabs.create({ url: PROVIDERS[id].login });
+          chrome.runtime.sendMessage({ action: 'startLoginCheck', provider: id });
+        } else {
+          switchTab('settings');
+        }
+      }, short));
+    }
+  }
   paint(cells);
 }
 
 // Appelee apres un enregistrement de jeton / une connexion par cookie : on relit Codex puis on redessine toute la ligne
 async function updateUI(data) {
-  const { codexUsage, codexDisabled } = await chrome.storage.local.get(['codexUsage', 'codexDisabled']);
-  renderAll({ claude: data, codex: codexUsage, codexOff: !!codexDisabled });
+  const st = await chrome.storage.local.get(['codexUsage', 'codexDisabled', 'geminiUsage', 'geminiEnabled', 'grokUsage', 'grokEnabled']);
+  renderAll({
+    claude: data, codex: st.codexUsage, codexOff: !!st.codexDisabled,
+    gemini: st.geminiEnabled ? st.geminiUsage : null, grok: st.grokEnabled ? st.grokUsage : null
+  });
 }
 
 // Parse JSON input and extract tokens
@@ -484,9 +568,11 @@ async function init() {
   // Load saved auth mode
   await loadAuthMode();
 
-  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider']);
+  const result = await chrome.storage.local.get(['refreshToken', 'accessToken', 'token', 'usage', 'lastUpdate', 'lastError', 'authMode', 'codexUsage', 'codexDisabled', 'lastProvider', 'badgeProvider',
+    'geminiUsage', 'geminiEnabled', 'grokUsage', 'grokEnabled']);
   setBadgeChoice(result.badgeProvider || 'auto');
   loadAlertPrefs();
+  loadExtras(result);
 
   // Check if configured (either has tokens or using cookie mode)
   const hasTokens = result.refreshToken || result.accessToken || result.token;
@@ -498,7 +584,10 @@ async function init() {
   }
 
   if (result.usage || result.codexUsage) {
-    renderAll({ claude: result.usage, codex: result.codexUsage, codexOff: !!result.codexDisabled });
+    renderAll({
+      claude: result.usage, codex: result.codexUsage, codexOff: !!result.codexDisabled,
+      gemini: result.geminiEnabled ? result.geminiUsage : null, grok: result.grokEnabled ? result.grokUsage : null
+    });
     if (result.lastUpdate) {
       setUpdated(result.lastUpdate);
     }
@@ -530,7 +619,7 @@ function refresh() {
     }
 
     chrome.storage.local.get(['codexDisabled']).then(({ codexDisabled }) => {
-      renderAll({ claude: response.claude, codex: response.codex, codexOff: !!codexDisabled });
+      renderAll({ claude: response.claude, codex: response.codex, codexOff: !!codexDisabled, gemini: response.gemini, grok: response.grok });
       setUpdated(Date.now());
     });
   });
@@ -575,6 +664,52 @@ function openModal() {
 
 function closeModal() {
   switchTab('gauges');
+}
+
+// Outils optionnels (Gemini, Grok) : l'acces au site est demande a l'activation et rendu a la desactivation
+function loadExtras(stored) {
+  for (const id of EXTRA_IDS) {
+    const on = !!stored[`${id}Enabled`];
+    const box = document.getElementById(`${id}Enabled`);
+    if (box) box.checked = on;
+    const opt = document.querySelector(`.badge-opt[data-badge="${id}"]`);
+    if (opt) opt.hidden = !on;
+    if (!on) setConnState(`${id}ConnState`, 'off', t('disabled') || 'Disabled');
+  }
+}
+
+function toggleExtra(id, box) {
+  const origins = [PROVIDERS[id].origin + '/*'];
+  if (box.checked) {
+    // Doit rester dans le geste de l'utilisateur : la demande d'acces est le premier appel asynchrone
+    chrome.permissions.request({ origins }, (granted) => {
+      if (!granted) {
+        box.checked = false;
+        showToast(t('permissionDenied') || 'Access to the site was not granted.');
+        return;
+      }
+      setConnState(`${id}ConnState`, 'checking', '...');
+      chrome.runtime.sendMessage({ action: 'enableExtra', provider: id }, (r) => {
+        const opt = document.querySelector(`.badge-opt[data-badge="${id}"]`);
+        if (opt) opt.hidden = false;
+        if (r && r.success) {
+          updateExtraConnState(id, r.data);
+        } else {
+          updateExtraConnState(id, { error: (r && r.needsLogin) ? 'NOT_LOGGED_IN' : ((r && r.error) || 'Error'), needsLogin: !!(r && r.needsLogin) });
+          if (r && r.needsLogin) chrome.tabs.create({ url: PROVIDERS[id].login });
+        }
+        refresh();
+      });
+    });
+  } else {
+    chrome.runtime.sendMessage({ action: 'disableExtra', provider: id }, () => {
+      chrome.permissions.remove({ origins }, () => {});
+      const opt = document.querySelector(`.badge-opt[data-badge="${id}"]`);
+      if (opt) { opt.hidden = true; if (opt.classList.contains('active')) setBadgeChoice('auto'); }
+      setConnState(`${id}ConnState`, 'off', t('disabled') || 'Disabled');
+      refresh();
+    });
+  }
 }
 
 // Alertes : interrupteur + seuils, lus par background.js a chaque verification
@@ -912,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
   });
 
+  EXTRA_IDS.forEach(id => document.getElementById(`${id}Enabled`)?.addEventListener('change', (e) => toggleExtra(id, e.target)));
   document.getElementById('alertsEnabled')?.addEventListener('change', saveAlertPrefs);
   document.getElementById('resetAlerts')?.addEventListener('change', saveAlertPrefs);
   document.querySelectorAll('.thr-chip').forEach(b => b.addEventListener('click', () => {

@@ -160,5 +160,29 @@
   },
   "resetAlertLabel": {
     "message": "התראה כשמכסה מתאפסת"
+  },
+  "sectionExtra": {
+    "message": "כלים אופציונליים"
+  },
+  "extraGeminiHint": {
+    "message": "קורא את דף ״מגבלות שימוש״ של Gemini. Chrome יבקש גישה ל־gemini.google.com, ויש להיות מחובר שם."
+  },
+  "extraGrokHint": {
+    "message": "ניסיוני: קורא את מונה הבקשות ב־grok.com. לא אומת בכל החשבונות."
+  },
+  "permissionDenied": {
+    "message": "לא ניתנה גישה לאתר."
+  },
+  "geminiNow": {
+    "message": "עכשיו"
+  },
+  "geminiCurrent": {
+    "message": "שימוש נוכחי"
+  },
+  "noAccess": {
+    "message": "אין גישה"
+  },
+  "unavailable": {
+    "message": "לא זמין"
   }
 }

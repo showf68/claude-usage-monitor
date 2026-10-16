@@ -12,7 +12,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-5.1-orange)
+![Version](https://img.shields.io/badge/version-5.2-orange)
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-brightgreen)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -28,6 +28,16 @@
 </div>
 
 ---
+
+## What's new in 5.2
+
+- **Gemini and Grok, as options** (Settings → *Optional tools*, off by default). Chrome asks for access to `gemini.google.com` / `grok.com` only when you switch one on, so nothing changes for existing users.
+  - **Gemini** reads your *Usage limits* page: the **current** gauge and the **weekly** one, with your plan (Plus / Pro / Ultra). The format was checked against a real account on 16 Oct 2026.
+  - **Grok** is **experimental**: it reads the query counter on grok.com. It could not be checked against a real account; when the counter is missing the popup says *Unavailable*, never a made-up 0 %.
+- **One-line popup**: all gauges on a single clean line, settings fold out below. With three or four tools the line tightens itself (smaller secondary rings, then no countdown on secondary gauges) so it always fits.
+- Alerts, reset notices and the toolbar badge work for Gemini and Grok too.
+
+![Four tools](docs/images/screenshot-extras.png)
 
 ## What's new in 5.0
 

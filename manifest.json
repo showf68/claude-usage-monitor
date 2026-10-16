@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "5.1",
+  "version": "5.2",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": [
@@ -16,6 +16,10 @@
     "https://console.anthropic.com/*",
     "https://claude.ai/*",
     "https://chatgpt.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://gemini.google.com/*",
+    "https://grok.com/*"
   ],
   "action": {
     "default_popup": "popup-modern.html",

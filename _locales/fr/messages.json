@@ -196,5 +196,29 @@
   },
   "resetAlertLabel": {
     "message": "Me prévenir quand une limite se renouvelle"
+  },
+  "sectionExtra": {
+    "message": "Outils optionnels"
+  },
+  "extraGeminiHint": {
+    "message": "Lit la page « Limites d’utilisation » de Gemini. Chrome demande l’accès à gemini.google.com ; vous devez y être connecté."
+  },
+  "extraGrokHint": {
+    "message": "Expérimental : lit le compteur de requêtes de grok.com. Non vérifié sur tous les comptes."
+  },
+  "permissionDenied": {
+    "message": "L’accès au site n’a pas été accordé."
+  },
+  "geminiNow": {
+    "message": "Actuel"
+  },
+  "geminiCurrent": {
+    "message": "Utilisation actuelle"
+  },
+  "noAccess": {
+    "message": "Pas d’accès"
+  },
+  "unavailable": {
+    "message": "Indisponible"
   }
 }

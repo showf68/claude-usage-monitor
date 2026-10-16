@@ -22,6 +22,8 @@ button, select, textarea { font: inherit; color: inherit; }
 .pdot { width: 8px; height: 8px; border-radius: 50%; }
 .pdot.claude { background: linear-gradient(135deg, var(--a1), var(--a2)); box-shadow: 0 0 8px rgba(249, 115, 22, .9); }
 .pdot.codex { background: linear-gradient(135deg, var(--codex1), var(--codex2)); box-shadow: 0 0 8px rgba(139, 92, 246, .9); }
+.pdot.gemini { background: linear-gradient(135deg, #60a5fa, #a78bfa); box-shadow: 0 0 8px rgba(96, 165, 250, .9); }
+.pdot.grok { background: linear-gradient(135deg, #f1f5f9, #94a3b8); box-shadow: 0 0 8px rgba(226, 232, 240, .75); }
 /* Boutons */
 .btn-primary, .btn-secondary {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
@@ -127,6 +129,14 @@ body[dir="rtl"] .info-value { text-align: left; }
 .sh-ic svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .sh-ic.claude { background: linear-gradient(135deg, #fbbf24, #ea580c); box-shadow: 0 3px 10px rgba(234,88,12,.4); }
 .sh-ic.codex { background: linear-gradient(135deg, #8b5cf6, #06b6d4); box-shadow: 0 3px 10px rgba(139,92,246,.4); }
+.sh-ic.gemini { background: linear-gradient(135deg, #4285f4, #9b72cb); box-shadow: 0 3px 10px rgba(66,133,244,.4); }
+.sh-ic.grok { background: linear-gradient(135deg, #64748b, #1e293b); box-shadow: 0 3px 10px rgba(100,116,139,.4); }
+
+/* Outils optionnels (Gemini, Grok) : une ligne = icone, nom + etat, interrupteur ; l'aide en dessous */
+.extra-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.extra-hint { margin: 4px 0 0 36px; font-size: 10.5px; line-height: 1.35; color: var(--faint); }
+body[dir="rtl"] .extra-hint { margin: 4px 36px 0 0; }
+.badge-opt[hidden] { display: none; }
 .field-label { text-transform: uppercase; letter-spacing: .08em; font-size: 10px; color: var(--faint); margin-bottom: 6px; }
 
 /* Langue : grille de puces */
@@ -266,6 +276,17 @@ body {
 .cell.sub .lbl { font-weight: 500; color: var(--fg); }
 .cells.dense .cell.sub .txt { display: none; }
 .cells.dense .cell.sub { padding-right: 7px; }
+/* Ligne chargee (3-4 outils) : paliers appliques par fit() */
+.cells.tight .cell { gap: 6px; padding: 6px 8px 6px 5px; }
+.cells.tight .cell:not(.first):not(.warn) .rst { display: none; }
+.cells.tight .vsep { margin: 0 3px; }
+.cells.tiny .cell { gap: 5px; padding: 5px 6px 5px 4px; }
+.cells.tiny .ring { width: 36px; height: 36px; }
+.cells.tiny .cell.sub .ring { width: 28px; height: 28px; }
+.cells.tiny .pct { font-size: 10.5px; }
+.cells.tiny .lbl { font-size: 12px; }
+.cells.tiny .cell.sub .txt { display: none; }
+.line.micro .brand, .line.micro .status { display: none; }
 .cell.warn .trk { stroke: rgba(251, 191, 36, .32); }
 .cell.warn .pct { color: var(--gold); font-size: 15px; }
 

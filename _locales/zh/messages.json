@@ -160,5 +160,29 @@
   },
   "resetAlertLabel": {
     "message": "额度重置时通知我"
+  },
+  "sectionExtra": {
+    "message": "可选工具"
+  },
+  "extraGeminiHint": {
+    "message": "读取 Gemini 的“使用限额”页面。Chrome 会请求访问 gemini.google.com 的权限，且需已在该网站登录。"
+  },
+  "extraGrokHint": {
+    "message": "实验性功能：读取 grok.com 的请求计数，尚未在所有账号上验证。"
+  },
+  "permissionDenied": {
+    "message": "未授予该网站的访问权限。"
+  },
+  "geminiNow": {
+    "message": "当前"
+  },
+  "geminiCurrent": {
+    "message": "当前用量"
+  },
+  "noAccess": {
+    "message": "无权限"
+  },
+  "unavailable": {
+    "message": "不可用"
   }
 }

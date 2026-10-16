@@ -6,6 +6,7 @@ avec une fausse API `chrome.*` et des donnees de test, puis photographie la fene
   python dev/preview.py                 # toutes les scenes -> dev/out/*.png + planche dev/out/sheet.png
   python dev/preview.py ok high         # certaines scenes
 Scenes : ok high claude-only extra legacy expired both-error setup he settings
+         extras extras-effort extras-warn he-extras settings-extras   (Gemini et Grok actives)
 """
 import functools, http.server, io, json, os, re, subprocess, sys, threading, time
 
@@ -16,7 +17,8 @@ OUT = os.path.join(ROOT, "dev", "out")
 CHROME = os.environ.get("CHROME", r"C:\Program Files\Google\Chrome\Application\chrome.exe")
 PORT = 8123
 
-SCENES = ["ok", "high", "claude-only", "extra", "legacy", "expired", "both-error", "setup", "he", "settings"]
+SCENES = ["ok", "high", "claude-only", "extra", "legacy", "expired", "both-error", "setup", "he", "settings",
+          "extras", "extras-effort", "extras-warn", "he-extras", "settings-extras", "settings-extras-bottom"]
 
 STUB = r"""
 <script>
@@ -42,7 +44,25 @@ STUB = r"""
   if (scene === 'setup') { claude = undefined; codex = undefined; authMode = undefined; }
   if (scene === 'he') { lang = 'he'; }
 
-  const store = { usage: claude, codexUsage: codex, codexDisabled, language: lang, authMode, lastUpdate: now - 120000, badgeProvider: 'auto', alertsEnabled: true, resetAlerts: true };
+  // Gemini / Grok (options) : actives dans les scenes « extras* »
+  let gemini = null, grok = null, geminiEnabled = false, grokEnabled = false;
+  if (scene.indexOf('extras') === 0 || scene === 'he-extras' || scene === 'settings-extras' || scene === 'settings-extras-bottom') {
+    geminiEnabled = grokEnabled = true;
+    gemini = { windows: [{ key: 'gemini_current', utilization: 18, window_ms: 0, resets_at: iso(150) },
+                         { key: 'gemini_weekly', utilization: 44, window_ms: 604800000, resets_at: iso(4920) }], plan: 'Plus', _source: 'cookie' };
+    grok = { windows: [{ key: 'grok_queries', utilization: 35, window_ms: 7200000, resets_at: null }], plan: null, _source: 'cookie' };
+    if (scene === 'extras-effort') {
+      grok.windows.push({ key: 'grok_high', utilization: 75, window_ms: 7200000, resets_at: null }, { key: 'grok_low', utilization: 10, window_ms: 7200000, resets_at: null });
+    }
+    if (scene === 'extras-warn') {
+      gemini = { error: 'NOT_LOGGED_IN', needsLogin: true };
+      grok = { error: 'Grok: quota counter unavailable' };
+    }
+  }
+  if (scene === 'he-extras') { lang = 'he'; }
+
+  const store = { usage: claude, codexUsage: codex, codexDisabled, language: lang, authMode, lastUpdate: now - 120000, badgeProvider: 'auto', alertsEnabled: true, resetAlerts: true,
+                  geminiUsage: gemini || undefined, geminiEnabled, grokUsage: grok || undefined, grokEnabled };
   const pick = (keys) => { const out = {}; (Array.isArray(keys) ? keys : keys ? [keys] : Object.keys(store)).forEach(k => { if (store[k] !== undefined) out[k] = store[k]; }); return out; };
 
   const msgs = {};
@@ -53,15 +73,17 @@ STUB = r"""
       set: () => Promise.resolve(), remove: (k, cb) => { if (cb) cb(); return Promise.resolve(); } } },
     runtime: {
       getURL: (p) => '/' + p, lastError: undefined,
-      sendMessage: (m, cb) => { const r = m.action === 'refresh' ? { claude, codex } : m.action === 'checkCookies' ? { valid: !!(claude && !claude.error), organizations: [{ name: 'Personal' }] } : {}; if (cb) setTimeout(() => cb(r), 30); }
+      sendMessage: (m, cb) => { const r = m.action === 'refresh' ? { claude, codex, gemini: geminiEnabled ? gemini : null, grok: grokEnabled ? grok : null } : m.action === 'checkCookies' ? { valid: !!(claude && !claude.error), organizations: [{ name: 'Personal' }] } : {}; if (cb) setTimeout(() => cb(r), 30); }
     },
     i18n: { getMessage: (k) => (msgs[lang] && msgs[lang][k] && msgs[lang][k].message) || (msgs.en[k] && msgs.en[k].message) || '' },
-    tabs: { create: () => {} }
+    tabs: { create: () => {} },
+    permissions: { request: (o, cb) => cb && cb(true), remove: (o, cb) => cb && cb(true), contains: () => Promise.resolve(true) }
   };
 
   window.addEventListener('load', () => {
     setTimeout(() => {
       if (q.get('settings') === '1') document.getElementById('tabSettings').click();
+      if (q.get('scroll') === '1') { const d = document.querySelector('.footer') || document.body; d.scrollIntoView({ block: 'end' }); }
       setTimeout(() => { document.title = document.body.offsetWidth + 'x' + document.body.offsetHeight; }, 1500);
     }, 400);
   });
@@ -104,13 +126,15 @@ def measure(url):
 
 
 def shoot(scene):
-    settings = "&settings=1" if scene == "settings" else ""
+    settings = "&settings=1" if scene in ("settings", "settings-extras", "settings-extras-bottom") else ""
+    if scene == "settings-extras-bottom":
+        settings += "&scroll=1"
     s = "ok" if scene == "settings" else scene
     url = "http://127.0.0.1:%d/dev/harness.html?s=%s%s" % (PORT, s, settings)
     w, h = measure(url)
     png = os.path.join(OUT, scene + ".png")
     # Fenetre un peu plus haute que le popup (une fenetre de 64 px sans marge rend parfois une page vide), puis recadrage exact
-    if scene == "he":
+    if scene in ("he", "he-extras"):
         # Chrome ancre un <body dir=rtl> a droite de la fenetre : on photographie large puis on recadre sur la largeur du popup
         chrome("--window-size=1000,%d" % (h + 40), "--virtual-time-budget=6000", "--screenshot=" + png, url)
         im = Image.open(png)
