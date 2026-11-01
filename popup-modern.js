@@ -287,6 +287,12 @@ function claudeCells(d) {
     row('seven_day_sonnet', 'Sonnet 7d', 'Sonnet 7d', true),
     row('seven_day_opus', 'Opus 7d', 'Opus 7d', true)
   ];
+  // Limites hebdomadaires propres a un modele (ex. Fable) : `limits[]`, kind `weekly_scoped`
+  for (const l of d.limits || []) {
+    const name = l && l.kind === 'weekly_scoped' && l.scope?.model?.display_name;
+    if (!name || l.percent == null || d['seven_day_' + String(name).toLowerCase()]) continue;
+    cells.push({ provider: 'claude', href: P.href, label: name + ' 7d', used: l.percent, resetAt: l.resets_at || null, sub: true, tip: tip(head, name + ' 7d', l.percent, l.resets_at || null) });
+  }
   if (d.extra_usage?.is_enabled && d.extra_usage.utilization != null) {
     const u = d.extra_usage.utilization;
     cells.push({ provider: 'claude', href: P.href, label: 'Extra', used: u, resetAt: null, sub: true, tip: tip(head, 'Extra usage', u, null) });
@@ -374,7 +380,7 @@ function updateConnStates(res) {
   const src = (x) => (x && x._source === 'token' ? (t('manualMode') || 'Token') : (t('autoMode') || 'Cookie'));
   const short = (s) => s.replace(/\s*\(.*\)\s*/, '').trim();
   const nc = t('notConnected') || 'Not connected';
-  if (claude && !claude.error && claude.five_hour) {
+  if (claude && !claude.error && (claude.five_hour || claude.seven_day)) {
     setConnState('claudeConnState', 'ok', `${t('connected') || 'Connected'} · ${short(src(claude))}${claude.plan ? ' · ' + claude.plan : ''}`);
   } else {
     setConnState('claudeConnState', 'bad', nc);
@@ -394,7 +400,7 @@ function updateConnStates(res) {
 function renderAll(res) {
   const { claude, codex, codexOff } = res;
   updateConnStates(res);
-  const claudeOk = !!(claude && !claude.error && claude.five_hour);
+  const claudeOk = !!(claude && !claude.error && (claude.five_hour || claude.seven_day));
   const codexOk = !!(codex && !codex.error && codex.windows && codex.windows.length);
   // Outils optionnels : seulement s'ils sont actives (donnee non nulle)
   const extraData = { gemini: res.gemini, grok: res.grok };

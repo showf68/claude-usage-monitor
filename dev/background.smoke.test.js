@@ -17,6 +17,7 @@ function makeEnv(opts = {}) {
   const notifications = [];
   const perms = new Set(opts.perms || []);
   const state = { geminiLoggedIn: opts.geminiLoggedIn !== false, grok: opts.grok || 'ok' };
+  const claudeBody = opts.noFiveHour ? { five_hour: null, seven_day: { utilization: 69, resets_at: '2026-11-05T08:00:00+00:00' }, limits: [] } : { five_hour: { utilization: 37, resets_at: new Date(Date.now() + 3e6).toISOString() }, seven_day: { utilization: 20, resets_at: null } };
   let onMessage = null;
 
   const store = (o) => ({
@@ -36,7 +37,7 @@ function makeEnv(opts = {}) {
   const fakeFetch = async (url, init = {}) => {
     calls.push(url);
     if (url.startsWith('https://claude.ai/api/organizations') && !url.includes('/usage') && !url.includes('/rate_limit')) return resp(200, [{ uuid: 'u1', billing_type: 'stripe' }], url);
-    if (url.includes('/organizations/u1/usage')) return resp(200, { five_hour: { utilization: 37, resets_at: new Date(Date.now() + 3e6).toISOString() }, seven_day: { utilization: 20, resets_at: null } }, url);
+    if (url.includes('/organizations/u1/usage')) return resp(200, claudeBody, url);
     if (url.startsWith('https://chatgpt.com/api/auth/session')) return resp(200, {}, url);
     if (url === 'https://gemini.google.com/usage') {
       return state.geminiLoggedIn ? resp(200, GEMINI_HTML, url) : resp(200, '<html>sign in</html>', 'https://accounts.google.com/signin');
@@ -113,6 +114,15 @@ async function test(name, fn) { await fn(); n++; console.log('ok  ' + name); }
     await e.send({ action: 'refresh' });
     assert.strictEqual(count(), before + 1, 'appel force par le bouton');
     assert.strictEqual(e.calls.filter(u => u === 'https://gemini.google.com/usage').length, 1, 'la page (800 Ko) n est telechargee qu une fois');
+  });
+
+  await test("Claude sans fenetre de 5 h (five_hour: null, nov. 2026) : la fenetre de 7 j suffit, badge = 69", async () => {
+    const e = makeEnv({ noFiveHour: true });
+    await tick();
+    const r = await e.ctx.fetchAll(true);
+    assert.ok(r.claude && !r.claude.error, 'pas d erreur : ' + JSON.stringify(r.claude));
+    assert.strictEqual(r.claude.seven_day.utilization, 69);
+    assert.strictEqual(e.badge.text, '69');
   });
 
   await test('Gemini deconnecte : NOT_LOGGED_IN (redirection vers accounts.google.com), pas de faux 0 %', async () => {

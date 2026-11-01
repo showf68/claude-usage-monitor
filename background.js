@@ -117,6 +117,12 @@ async function checkCookieSession() {
   }
 }
 
+// Depuis nov. 2026 Anthropic a retire la fenetre de 5 h (`five_hour: null`) : seule la fenetre de 7 j reste.
+// Une reponse est exploitable des qu'une fenetre porte une utilisation.
+function hasClaudeUsage(d) {
+  return !!(d && ((d.five_hour && d.five_hour.utilization != null) || (d.seven_day && d.seven_day.utilization != null)));
+}
+
 async function fetchUsageWithCookies() {
   try {
     const orgsResponse = await fetch(`${CLAUDE_AI_API}/organizations`, {
@@ -147,7 +153,7 @@ async function fetchUsageWithCookies() {
         lastStatus = r.status;
         if (!r.ok) continue;
         const data = await r.json();
-        if (data && data.five_hour) {
+        if (hasClaudeUsage(data)) {
           data.plan = data.plan || planLabel(org.billing_type || org.subscription_type || org.rate_limit_tier);
           data._source = 'cookie';
           return data;
@@ -204,8 +210,8 @@ async function fetchUsageToken() {
     }
 
     const data = await response.json();
-    if (!data.five_hour) {
-      const errorMsg = 'Invalid API response: missing five_hour data. Response: ' + JSON.stringify(data).substring(0, 100);
+    if (!hasClaudeUsage(data)) {
+      const errorMsg = 'Invalid API response: missing usage windows. Response: ' + JSON.stringify(data).substring(0, 100);
       await chrome.storage.local.set({ lastError: errorMsg });
       return { error: errorMsg };
     }
@@ -338,7 +344,7 @@ function colorFor(used) {
 // Valeur "principale" par fournisseur : fenetre la plus courte (Claude 5h, Codex fenetre la plus petite)
 function mainUsage(provider, data) {
   if (!data || data.error) return null;
-  if (provider === 'claude') return Math.round(data.five_hour?.utilization || 0);
+  if (provider === 'claude') return Math.round((data.five_hour || data.seven_day)?.utilization || 0);
   // Gemini : l'« utilisation actuelle » (sa fenetre n'a pas de duree annoncee) passe avant l'hebdomadaire
   if (provider === 'gemini') {
     const cur = (data.windows || []).find(w => w.key === 'gemini_current') || (data.windows || [])[0];
@@ -462,7 +468,7 @@ async function fetchAll(force = false) {
   const st = await chrome.storage.local.get(['authMode', 'refreshToken']);
   if (!st.authMode) {
     const cookieData = await fetchUsageWithCookies();
-    if (cookieData && !cookieData.error && cookieData.five_hour) {
+    if (cookieData && !cookieData.error && hasClaudeUsage(cookieData)) {
       await chrome.storage.local.set({ authMode: 'cookie' });
     } else if (st.refreshToken) {
       await chrome.storage.local.set({ authMode: 'token' });
