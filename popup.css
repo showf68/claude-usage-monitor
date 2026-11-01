@@ -286,6 +286,16 @@ body {
 .cells.tiny .pct { font-size: 10.5px; }
 .cells.tiny .lbl { font-size: 12px; }
 .cells.tiny .cell.sub .txt { display: none; }
+.cells.roomy { gap: 6px; }
+.cells.roomy .cell { gap: 14px; padding: 10px 20px 10px 12px; border-radius: 18px; }
+.cells.roomy .ring { width: 68px; height: 68px; }
+.cells.roomy .pct { font-size: 17px; letter-spacing: -.4px; }
+.cells.roomy .lbl { font-size: 17px; gap: 8px; }
+.cells.roomy .pdot { width: 10px; height: 10px; }
+.cells.roomy .rst { font-size: 13px; gap: 5px; }
+.cells.roomy .rst svg { width: 12px; height: 12px; }
+.cells.roomy .txt { gap: 7px; }
+.cells.roomy .vsep { height: 44px; margin: 0 10px; }
 .line.micro .brand, .line.micro .status { display: none; }
 .cell.warn .trk { stroke: rgba(251, 191, 36, .32); }
 .cell.warn .pct { color: var(--gold); font-size: 15px; }

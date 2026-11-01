@@ -18,7 +18,7 @@ CHROME = os.environ.get("CHROME", r"C:\Program Files\Google\Chrome\Application\c
 PORT = 8123
 
 SCENES = ["ok", "high", "claude-only", "extra", "legacy", "expired", "both-error", "setup", "he", "settings",
-          "extras", "extras-effort", "extras-warn", "he-extras", "settings-extras", "settings-extras-bottom"]
+          "extras", "extras-effort", "extras-warn", "he-extras", "settings-extras", "settings-extras-bottom", "nov"]
 
 STUB = r"""
 <script>
@@ -34,6 +34,7 @@ STUB = r"""
   let codex = { windows: [win('primary_window', 71, 168, 5 * 1440 - 60), win('code_review', 5, 168, 5 * 1440 - 60)], plan: 'Plus', _source: 'cookie' };
   let codexDisabled = false, lang = 'en', authMode = 'cookie';
 
+  if (scene === 'nov') { claude = { five_hour: null, seven_day: { utilization: 70, resets_at: iso(3 * 1440 + 14 * 60) }, limits: [{ kind: 'weekly_all', percent: 70 }, { kind: 'weekly_scoped', percent: 0, scope: { model: { display_name: 'Fable' } } }], plan: 'Max 20x', _source: 'token' }; codex.windows = [win('primary_window', 20, 168, 6 * 1440 + 14 * 60)]; }
   if (scene === 'high') { claude.five_hour.utilization = 88; claude.seven_day.utilization = 97; delete claude.seven_day_sonnet; codex.windows[0].utilization = 100; }
   if (scene === 'claude-only') { codexDisabled = true; codex = undefined; delete claude.seven_day_sonnet; }
   if (scene === 'extra') { claude.seven_day_opus = { utilization: 71, resets_at: iso(2000) }; claude.extra_usage = { is_enabled: true, utilization: 24 };

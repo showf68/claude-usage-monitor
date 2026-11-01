@@ -254,6 +254,8 @@ function paint(cells) {
   host.replaceChildren();
   // Beaucoup de jauges (Opus, extra, plusieurs fenetres Codex) : les secondaires ne gardent que l'anneau, le detail reste au survol
   host.classList.toggle('dense', cells.length > 5);
+  // Peu de jauges (ex. depuis nov. 2026 : Claude 7 j + Codex 7 j) : on garde le meme dessin, en plus grand
+  host.classList.toggle('roomy', cells.length <= 2);
   let prev = null;
   cells.forEach(c => {
     if (prev && prev !== c.provider) {
@@ -287,12 +289,6 @@ function claudeCells(d) {
     row('seven_day_sonnet', 'Sonnet 7d', 'Sonnet 7d', true),
     row('seven_day_opus', 'Opus 7d', 'Opus 7d', true)
   ];
-  // Limites hebdomadaires propres a un modele (ex. Fable) : `limits[]`, kind `weekly_scoped`
-  for (const l of d.limits || []) {
-    const name = l && l.kind === 'weekly_scoped' && l.scope?.model?.display_name;
-    if (!name || l.percent == null || d['seven_day_' + String(name).toLowerCase()]) continue;
-    cells.push({ provider: 'claude', href: P.href, label: name + ' 7d', used: l.percent, resetAt: l.resets_at || null, sub: true, tip: tip(head, name + ' 7d', l.percent, l.resets_at || null) });
-  }
   if (d.extra_usage?.is_enabled && d.extra_usage.utilization != null) {
     const u = d.extra_usage.utilization;
     cells.push({ provider: 'claude', href: P.href, label: 'Extra', used: u, resetAt: null, sub: true, tip: tip(head, 'Extra usage', u, null) });
