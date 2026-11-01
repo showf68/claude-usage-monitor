@@ -105,10 +105,10 @@
     "message": "Avancé - Coller .credentials.json"
   },
   "tabGauges": {
-    "message": "Suivi"
+    "message": "Jauges"
   },
   "tabSettings": {
-    "message": "Réglages"
+    "message": "Réglages & infos"
   },
   "sectionInfo": {
     "message": "Infos"
@@ -175,50 +175,5 @@
   },
   "credits": {
     "message": "Crédits"
-  },
-  "sectionAlerts": {
-    "message": "Alertes"
-  },
-  "alertsHint": {
-    "message": "Me prévenir quand l’usage atteint"
-  },
-  "sectionConn": {
-    "message": "Connexions"
-  },
-  "connected": {
-    "message": "Connecté"
-  },
-  "notConnected": {
-    "message": "Non connecté"
-  },
-  "disabled": {
-    "message": "Désactivé"
-  },
-  "resetAlertLabel": {
-    "message": "Me prévenir quand une limite se renouvelle"
-  },
-  "sectionExtra": {
-    "message": "Outils optionnels"
-  },
-  "extraGeminiHint": {
-    "message": "Lit la page « Limites d’utilisation » de Gemini. Chrome demande l’accès à gemini.google.com ; vous devez y être connecté."
-  },
-  "extraGrokHint": {
-    "message": "Expérimental : lit le compteur de requêtes de grok.com. Non vérifié sur tous les comptes."
-  },
-  "permissionDenied": {
-    "message": "L’accès au site n’a pas été accordé."
-  },
-  "geminiNow": {
-    "message": "Actuel"
-  },
-  "geminiCurrent": {
-    "message": "Utilisation actuelle"
-  },
-  "noAccess": {
-    "message": "Pas d’accès"
-  },
-  "unavailable": {
-    "message": "Indisponible"
   }
 }

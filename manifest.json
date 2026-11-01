@@ -17,10 +17,6 @@
     "https://claude.ai/*",
     "https://chatgpt.com/*"
   ],
-  "optional_host_permissions": [
-    "https://gemini.google.com/*",
-    "https://grok.com/*"
-  ],
   "action": {
     "default_popup": "popup-modern.html",
     "default_icon": {

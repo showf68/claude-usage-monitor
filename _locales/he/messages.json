@@ -87,10 +87,10 @@
     "message": "הדבק את כל תוכן קובץ ה-JSON"
   },
   "tabGauges": {
-    "message": "מעקב"
+    "message": "מחוונים"
   },
   "tabSettings": {
-    "message": "הגדרות"
+    "message": "הגדרות ומידע"
   },
   "sectionPrefs": {
     "message": "העדפות"
@@ -139,50 +139,5 @@
   },
   "connectWithCookie": {
     "message": "התחברות"
-  },
-  "sectionAlerts": {
-    "message": "התראות"
-  },
-  "alertsHint": {
-    "message": "התראה כשהשימוש מגיע ל־"
-  },
-  "sectionConn": {
-    "message": "חיבורים"
-  },
-  "connected": {
-    "message": "מחובר"
-  },
-  "notConnected": {
-    "message": "לא מחובר"
-  },
-  "disabled": {
-    "message": "מושבת"
-  },
-  "resetAlertLabel": {
-    "message": "התראה כשמכסה מתאפסת"
-  },
-  "sectionExtra": {
-    "message": "כלים אופציונליים"
-  },
-  "extraGeminiHint": {
-    "message": "קורא את דף ״מגבלות שימוש״ של Gemini. Chrome יבקש גישה ל־gemini.google.com, ויש להיות מחובר שם."
-  },
-  "extraGrokHint": {
-    "message": "ניסיוני: קורא את מונה הבקשות ב־grok.com. לא אומת בכל החשבונות."
-  },
-  "permissionDenied": {
-    "message": "לא ניתנה גישה לאתר."
-  },
-  "geminiNow": {
-    "message": "עכשיו"
-  },
-  "geminiCurrent": {
-    "message": "שימוש נוכחי"
-  },
-  "noAccess": {
-    "message": "אין גישה"
-  },
-  "unavailable": {
-    "message": "לא זמין"
   }
 }

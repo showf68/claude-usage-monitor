@@ -87,10 +87,10 @@
     "message": "粘贴完整的 JSON 文件内容"
   },
   "tabGauges": {
-    "message": "监控"
+    "message": "用量"
   },
   "tabSettings": {
-    "message": "设置"
+    "message": "设置与信息"
   },
   "sectionPrefs": {
     "message": "偏好设置"
@@ -139,50 +139,5 @@
   },
   "connectWithCookie": {
     "message": "连接会话"
-  },
-  "sectionAlerts": {
-    "message": "提醒"
-  },
-  "alertsHint": {
-    "message": "用量达到以下比例时通知我"
-  },
-  "sectionConn": {
-    "message": "连接"
-  },
-  "connected": {
-    "message": "已连接"
-  },
-  "notConnected": {
-    "message": "未连接"
-  },
-  "disabled": {
-    "message": "已停用"
-  },
-  "resetAlertLabel": {
-    "message": "额度重置时通知我"
-  },
-  "sectionExtra": {
-    "message": "可选工具"
-  },
-  "extraGeminiHint": {
-    "message": "读取 Gemini 的“使用限额”页面。Chrome 会请求访问 gemini.google.com 的权限，且需已在该网站登录。"
-  },
-  "extraGrokHint": {
-    "message": "实验性功能：读取 grok.com 的请求计数，尚未在所有账号上验证。"
-  },
-  "permissionDenied": {
-    "message": "未授予该网站的访问权限。"
-  },
-  "geminiNow": {
-    "message": "当前"
-  },
-  "geminiCurrent": {
-    "message": "当前用量"
-  },
-  "noAccess": {
-    "message": "无权限"
-  },
-  "unavailable": {
-    "message": "不可用"
   }
 }

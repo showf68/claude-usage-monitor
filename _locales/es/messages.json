@@ -87,10 +87,10 @@
     "message": "Pega el contenido JSON completo"
   },
   "tabGauges": {
-    "message": "Monitor"
+    "message": "Indicadores"
   },
   "tabSettings": {
-    "message": "Ajustes"
+    "message": "Ajustes e info"
   },
   "sectionPrefs": {
     "message": "Preferencias"
@@ -139,50 +139,5 @@
   },
   "connectWithCookie": {
     "message": "Conectar sesión"
-  },
-  "sectionAlerts": {
-    "message": "Alertas"
-  },
-  "alertsHint": {
-    "message": "Avisarme cuando el uso llegue a"
-  },
-  "sectionConn": {
-    "message": "Conexiones"
-  },
-  "connected": {
-    "message": "Conectado"
-  },
-  "notConnected": {
-    "message": "No conectado"
-  },
-  "disabled": {
-    "message": "Desactivado"
-  },
-  "resetAlertLabel": {
-    "message": "Avisarme cuando se renueve un límite"
-  },
-  "sectionExtra": {
-    "message": "Herramientas opcionales"
-  },
-  "extraGeminiHint": {
-    "message": "Lee la página «Límites de uso» de Gemini. Chrome pedirá acceso a gemini.google.com; debes haber iniciado sesión allí."
-  },
-  "extraGrokHint": {
-    "message": "Experimental: lee el contador de consultas de grok.com. No verificado en todas las cuentas."
-  },
-  "permissionDenied": {
-    "message": "No se concedió el acceso al sitio."
-  },
-  "geminiNow": {
-    "message": "Ahora"
-  },
-  "geminiCurrent": {
-    "message": "Uso actual"
-  },
-  "noAccess": {
-    "message": "Sin acceso"
-  },
-  "unavailable": {
-    "message": "No disponible"
   }
 }
