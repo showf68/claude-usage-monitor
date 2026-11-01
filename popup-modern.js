@@ -255,10 +255,8 @@ function ringHtml(id, label) {
         <circle class="circle-bg" cx="50" cy="50" r="42"/>
         <circle class="circle-progress low" id="${id}C" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
       </svg>
-      <div class="circle-text"><div class="circle-percent" id="${id}P">--%</div></div>
-    </div>
-    <div class="gauge-window">${label}</div>
-    <div class="reset-time"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="${id}R">--</span></div>`;
+      <div class="circle-text"><div class="circle-percent" id="${id}P">--%</div><div class="reset-time" id="${id}R">--</div></div>
+    </div>`;
 }
 
 function renderCodex(data) {

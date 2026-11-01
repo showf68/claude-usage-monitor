@@ -118,24 +118,21 @@ button, select, textarea { font: inherit; color: inherit; }
 .pdot { width: 8px; height: 8px; border-radius: 50%; }
 .pdot.claude { background: linear-gradient(135deg, var(--a1), var(--a2)); box-shadow: 0 0 8px rgba(249, 115, 22, .9); }
 .pdot.codex { background: linear-gradient(135deg, var(--codex1), var(--codex2)); box-shadow: 0 0 8px rgba(139, 92, 246, .9); }
-.circle-wrapper { position: relative; width: 90px; height: 90px; margin: 0 auto 8px; }
+.circle-wrapper { position: relative; width: 90px; height: 90px; margin: 0 auto 2px; }
+.circle-card:not(.duo) .gauge-window { display: none; }
 .circle-svg { width: 90px; height: 90px; transform: rotate(-90deg); }
 .circle-bg { fill: none; stroke: rgba(255, 255, 255, .07); stroke-width: 9; }
 .circle-progress { fill: none; stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 1.1s var(--ease); }
 .circle-progress.low { stroke: url(#gLow); filter: drop-shadow(0 0 5px rgba(34, 197, 94, .6)); }
 .circle-progress.medium { stroke: url(#gMed); filter: drop-shadow(0 0 5px rgba(249, 115, 22, .6)); }
 .circle-progress.high { stroke: url(#gHigh); filter: drop-shadow(0 0 6px rgba(244, 63, 94, .7)); }
-.circle-text { position: absolute; inset: 0; display: grid; place-items: center; }
+.circle-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .circle-percent { font: 600 21px/1 var(--title); font-variant-numeric: tabular-nums; }
 .circle-percent.low { color: #bbf7d0; }
 .circle-percent.medium { color: #fed7aa; }
 .circle-percent.high { color: #fecdd3; }
 .gauge-window { margin-bottom: 7px; font-size: 9.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.reset-time {
-  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px;
-  background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .28);
-  color: var(--gold); font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums;
-}
+.reset-time { color: var(--gold); font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
 .reset-time svg { flex: none; }
 
 /* Barres secondaires (Sonnet, Opus, code review) */
